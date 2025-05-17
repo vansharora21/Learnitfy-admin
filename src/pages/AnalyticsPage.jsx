@@ -25,6 +25,7 @@ const AnalyticsPage = () => {
 				</div>
 
 				<AIPoweredInsights />
+				<h1>checking</h1>
 			</main>
 		</div>
 	);
