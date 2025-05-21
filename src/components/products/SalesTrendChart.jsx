@@ -19,7 +19,7 @@ const SalesTrendChart = () => {
 			transition={{ delay: 0.3 }}
 		>
 			<h2 className='text-xl font-semibold text-gray-100 mb-4'>Sales Trend</h2>
-			<div style={{ width: "100%", height: 300 }}>
+			{/* <div style={{ width: "100%", height: 300 }}>
 				<ResponsiveContainer>
 					<LineChart data={salesData}>
 						<CartesianGrid strokeDasharray='3 3' stroke='#374151' />
@@ -36,7 +36,7 @@ const SalesTrendChart = () => {
 						<Line type='monotone' dataKey='sales' stroke='#8B5CF6' strokeWidth={2} />
 					</LineChart>
 				</ResponsiveContainer>
-			</div>
+			</div> */}
 		</motion.div>
 	);
 };

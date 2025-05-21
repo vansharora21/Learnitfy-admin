@@ -28,7 +28,7 @@ const UsersPage = () => {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 1 }}
 				>
-					<StatCard
+					{/* <StatCard
 						name='Total Users'
 						icon={UsersIcon}
 						value={userStats.totalUsers.toLocaleString()}
@@ -41,17 +41,17 @@ const UsersPage = () => {
 						value={userStats.activeUsers.toLocaleString()}
 						color='#F59E0B'
 					/>
-					<StatCard name='Churn Rate' icon={UserX} value={userStats.churnRate} color='#EF4444' />
+					<StatCard name='Churn Rate' icon={UserX} value={userStats.churnRate} color='#EF4444' /> */}
 				</motion.div>
 
 				<UsersTable />
 
 				{/* USER CHARTS */}
-				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
+				{/* <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
 					<UserGrowthChart />
 					<UserActivityHeatmap />
 					<UserDemographicsChart />
-				</div>
+				</div> */}
 			</main>
 		</div>
 	);
