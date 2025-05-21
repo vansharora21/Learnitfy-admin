@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BarChart2, ShoppingBag, Users, Zap, Plus, Edit, Trash2, Search } from "lucide-react";
 import { motion } from "framer-motion";
-
+import { CategoryContext } from './CategoryContext';
 import Header from "../components/common/Header";
 import StatCard from "../components/common/StatCard";
 
@@ -16,6 +16,11 @@ const OverviewPage = () => {
     const { name, value, files } = e.target;
     if (name === "image" && files.length > 0) {
       const file = files[0];
+      const validTypes = ["image/png", "image/jpeg", "image/jpg"];
+      if (!validTypes.includes(file.type)) {
+        alert("Please upload a valid image file (PNG, JPEG, JPG).");
+        return;
+      }
       const imageUrl = URL.createObjectURL(file);
       setFormData((prev) => ({ ...prev, image: imageUrl }));
     } else {
@@ -62,7 +67,7 @@ const OverviewPage = () => {
 
   return (
     <div className="flex-1 overflow-auto relative z-10">
-      <Header title="Overview" />
+      <Header title="Courses" />
 
       <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
         {/* STATS */}
@@ -123,7 +128,7 @@ const OverviewPage = () => {
             <input
               type="file"
               name="image"
-              accept="image/*"
+              accept="image/png, image/jpeg, image/jpg"
               onChange={handleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
             />

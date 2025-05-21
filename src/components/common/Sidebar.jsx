@@ -7,7 +7,8 @@ const SIDEBAR_ITEMS = [
 	{ name: "Courses",icon: BarChart2,color: "#6366f1",href: "/"},
 	{ name: "Course categories", icon: Newspaper , color: "#8B5CF6", href: "/products" },
 	{ name: "Enrollments ", icon: ArchiveRestore , color: "#EC4899", href: "/users" },
-	{ name: "Queries", icon: MessageCircleQuestion, color: "#10B981", href: "/sales" }
+	{ name: "Queries", icon: MessageCircleQuestion, color: "#10B981", href: "/sales" },
+
 ];
 
 const Sidebar = () => {
