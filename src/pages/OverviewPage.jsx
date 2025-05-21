@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { BarChart2, ShoppingBag, Users, Zap, Plus, Edit, Trash2, Search } from "lucide-react";
 import { motion } from "framer-motion";
-import { CategoryContext } from './CategoryContext';
+
 import Header from "../components/common/Header";
-import StatCard from "../components/common/StatCard";
+
 
 const OverviewPage = () => {
   const [showForm, setShowForm] = useState(false);
