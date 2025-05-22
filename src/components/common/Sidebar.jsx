@@ -1,13 +1,16 @@
-import { BarChart2, MessageCircleQuestion , Menu, Settings, Newspaper, ShoppingCart, TrendingUp, ArchiveRestore  } from "lucide-react";
+import { BookMarked , MessageCircleQuestion , Menu,Dock ,  Newspaper, ArchiveRestore  } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
-	{ name: "Courses",icon: BarChart2,color: "#6366f1",href: "/"},
-	{ name: "Course categories", icon: Newspaper , color: "#8B5CF6", href: "/products" },
-	{ name: "Enrollments ", icon: ArchiveRestore , color: "#EC4899", href: "/users" },
-	{ name: "Queries", icon: MessageCircleQuestion, color: "#10B981", href: "/sales" },
+	{ name: "Courses",icon: BookMarked ,color: "#6366f1",href: "/"},
+	{ name: "Course categories", icon: Newspaper , color: "#8B5CF6", href: "/Cocat" },
+	// { name: "Course Description", icon: Dock , color: "#F97316", href: "/desc" },
+	{ name: "Enrollments ", icon: ArchiveRestore , color: "#EC4899", href: "/Enroll" },
+	{ name: "Queries", icon: MessageCircleQuestion, color: "#10B981", href: "/Queries" },
+	{ name: "Brochure Emails ", icon: Dock , color: "#F97316", href: "/Emails" }
+
 
 ];
 
