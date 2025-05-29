@@ -4,7 +4,7 @@ import OverviewPage from "./pages/Courses";
 // import CourseDesc from "./pages/CourseDescription";
 import CourseCategories from "./pages/CoursesCategories";
 import Enrollments from "./pages/Enrollments";
-import SalesPage from "./pages/Queries";
+import Queries from "./pages/Queries";
 import Emails from "./pages/BorcEmail";
 
 
@@ -23,7 +23,7 @@ function App() {
 				<Route path='/' element={<OverviewPage />} />
 				<Route path='/Cocat' element={<CourseCategories />} />
 				<Route path='/Enroll' element={<Enrollments />} />
-				<Route path='/Queries' element={<SalesPage />} />
+				<Route path='/Queries' element={<Queries />} />
 				<Route path='/Emails' element={<Emails/>}/>
 		        {/* <Route path='/desc' element={<CourseDesc/>}/> */}
 				{/* <Route path='/orders' element={<OrdersPage />} /> */}
