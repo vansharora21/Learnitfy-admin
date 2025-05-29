@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {  Plus, Edit, Trash2, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
-
+import axios from "axios";
+// import { ADD_CATEGORY } from '../../constants/index'
 
 const OverviewPage = () => {
   const [showForm, setShowForm] = useState(false);
@@ -10,6 +11,9 @@ const OverviewPage = () => {
   const [formData, setFormData] = useState({ name: "", image: "", description: "" });
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // const BASE_URL = "http://15.206.186.17:4000/api/admin";
+
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -63,6 +67,28 @@ const OverviewPage = () => {
   const filteredCategories = categories.filter((cat) =>
     cat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const addCategoryAPI = async () => {
+    try {
+      const response = await axios.post("http://15.206.189.17:4000/api/admin/addCategory", {
+        categoryName: formData.name,
+        description: formData.description,
+        logo: "jdcjdkjcdjcjdc.jpg"
+      }, {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        }
+      });
+  
+      console.log("Category added:", response.data);
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
+  };
+  
+      // addCategory(); // Call the function
+
 
   return (
     <div className="flex-1 overflow-auto relative z-10">
@@ -137,6 +163,7 @@ const OverviewPage = () => {
               rows="3"
             />
             <button
+              onClick={addCategoryAPI}
               type="submit"
               className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
             >
