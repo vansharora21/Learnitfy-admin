@@ -9,6 +9,7 @@ import Emails from "./pages/BorcEmail";
 
 
 function App() {
+	console.log("i m here!");
 	return (
 		<div className='flex h-screen bg-gray-900 text-gray-100 overflow-hidden'>
 			{/* BG */}
