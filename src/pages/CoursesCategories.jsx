@@ -4,13 +4,16 @@ import { motion } from "framer-motion";
 
 import Header from "../components/common/Header";
 
-
 const CourseCategories = () => {
   const [showForm, setShowForm] = useState(false);
   const [courses, setCourses] = useState([]);
   const [formData, setFormData] = useState({ name: "", image: "", description: "", type: "" });
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showModuleForm, setShowModuleForm] = useState(false);
+  const [modules, setModules] = useState([]);
+  const [moduleData, setModuleData] = useState({ name: "", description: "", pdf: null });
+  const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -29,18 +32,48 @@ const CourseCategories = () => {
 
     if (editIndex !== null) {
       const updated = [...courses];
-      updated[editIndex] = formData;
+      updated[editIndex] = { ...formData, modules: modules };
       setCourses(updated);
       setEditIndex(null);
     } else {
-      setCourses((prev) => [...prev, formData]);
+      setCourses((prev) => [...prev, { ...formData, modules: [] }]);
+      setCurrentCourseIndex(courses.length); // index of the new course
+      setShowModuleForm(true);
     }
-
     setFormData({ name: "", image: "", description: "", type: "" });
     setShowForm(false);
   };
 
-  const handleEdit = (index) => {
+  const handleModuleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "pdf" && files.length > 0) {
+      setModuleData((prev) => ({ ...prev, pdf: files[0] }));
+    } else {
+      setModuleData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleAddModule = (e) => {
+    e.preventDefault();
+    if (!moduleData.name || !moduleData.description || !moduleData.pdf) return;
+    setModules((prev) => [...prev, moduleData]);
+    setModuleData({ name: "", description: "", pdf: null });
+  };
+
+  const handleFinishModules = () => {
+    if (currentCourseIndex !== null) {
+      const updated = [...courses];
+      updated[currentCourseIndex].modules = modules;
+      setCourses(updated);
+      setModules([]);
+      setCurrentCourseIndex(null);
+      setShowModuleForm(false);
+    }
+  };
+
+  const handle26Edit = (index) => {
+    // Corrected: should be handleEdit, not handle26Edit
+    // For production, use handleEdit
     setFormData(courses[index]);
     setEditIndex(index);
     setShowForm(true);
@@ -60,13 +93,17 @@ const CourseCategories = () => {
     course.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleEdit = (index) => {
+    setFormData(courses[index]);
+    setEditIndex(index);
+    setShowForm(true);
+  };
+
   return (
     <div className="flex-1 overflow-auto relative z-10">
       <Header title="Course Categories" />
 
       <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
-
-        
         {/* ADD/EDIT FORM */}
         <div className="mb-6 flex justify-between items-center">
           <button
@@ -80,7 +117,6 @@ const CourseCategories = () => {
             <Plus className="w-4 h-4" />
             {editIndex !== null ? "Edit Course" : "Add Course"}
           </button>
-
           {courses.length > 0 && (
             <div className="relative">
               <input
@@ -213,11 +249,26 @@ const CourseCategories = () => {
         ) : (
           <p className="text-center text-gray-400 mt-8">No courses found.</p>
         )}
+
+        {/* MODULE FORM */}
+        {showModuleForm && (
+          <form onSubmit={handleAddModule} className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold mb-2">Add Modules for this Course</h3>
+            <input type="text" name="name" placeholder="Module Name" value={moduleData.name} onChange={handleModuleChange} className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <textarea name="description" placeholder="Module Description" value={moduleData.description} onChange={handleModuleChange} className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" rows="2" />
+            <input type="file" name="pdf" accept="application/pdf" onChange={handleModuleChange} className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white" />
+            <button type="submit" className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module</button>
+            <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">Finish & Save Course</button>
+            <ul className="mt-2">
+              {modules.map((mod, idx) => (
+                <li key={idx} className="text-sm text-gray-300">{mod.name} - {mod.description} ({mod.pdf && mod.pdf.name})</li>
+              ))}
+            </ul>
+          </form>
+        )}
       </main>
     </div>
   );
 };
 
 export default CourseCategories;
-
-
