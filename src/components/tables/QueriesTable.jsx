@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronDown, ChevronUp,Trash,Pencil } from "lucide-react";
 
-const QueriesTable = () => {
+const 	QueriesTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [userData, setUserData] = useState([]);
 	const [filteredUsers, setFilteredUsers] = useState([]);

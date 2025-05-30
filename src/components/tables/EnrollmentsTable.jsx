@@ -10,14 +10,17 @@
 		const [loading, setLoading] = useState(true);
 		const [error, setError] = useState(null);
 
+		const API = import.meta.env.VITE_BASE_URL_API
+
 		useEffect(() => {
 			const fetchresponse = async () => {
 				try {
-					const res = await axios.get('http://15.206.189.17:4000/api/user/contact/users');
+					const res = await axios.get(`${API}user/contact/users`);
 					const QuriesData = res.data.data.contacts;
 					setEnrollments(QuriesData);
 					setFilteredUsers(QuriesData);
 					setLoading(false);
+					console.log(setEnrollments)
 				} catch (err) {
 					setError(err.message || 'Failed to fetch data');
 					setLoading(false);

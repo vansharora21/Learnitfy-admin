@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 import { motion } from "framer-motion";
 
 import Header from "../components/common/Header";
+import axios from "axios";
 
 const CourseCategories = () => {
   const [showForm, setShowForm] = useState(false);
@@ -14,6 +15,11 @@ const CourseCategories = () => {
   const [modules, setModules] = useState([]);
   const [moduleData, setModuleData] = useState({ name: "", description: "", pdf: null });
   const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
+  const [categoryData, setCategoryData] = useState([])
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(true);
+
+  const API = import.meta.env.VITE_BASE_URL_API
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -99,6 +105,24 @@ const CourseCategories = () => {
     setShowForm(true);
   };
 
+  useEffect(() => {
+    const AddCategoriesName = async () => {
+      try {
+        setLoading(true)
+        const res = await axios.get(`${API}admin/get/category`);
+        const CategoryData = res.data.data;
+        setCategoryData(CategoryData);
+        console.log(CategoryData)
+        setLoading(false);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch data');
+        setLoading(false);
+        console.log("error-=--------", err.message)
+      }
+    };
+    AddCategoriesName();
+  }, []);
+
   return (
     <div className="flex-1 overflow-auto relative z-10">
       <Header title="Course Categories" />
@@ -138,18 +162,24 @@ const CourseCategories = () => {
             className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
           >
             <select
+              placeholder="select course category"
               name="type"
               value={formData.type}
               onChange={handleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="">Select Course Type</option>
-              <option value="Frontend">Frontend</option>
-              <option value="Backend">Backend</option>
-              <option value="Full Stack">Full Stack</option>
-              <option value="Data Science">Data Science</option>
-            </select>
+              
+              {categoryData.map((catData, id, index) => {
+              return (
+                <>
+                  <option className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">select course category</option>
+                  <option key={id}>{catData.categoryName}</option>
+                </>
+              )
+            })}
 
+            </select>
+            
             <input
               type="text"
               name="name"

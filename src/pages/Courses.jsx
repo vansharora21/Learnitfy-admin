@@ -12,9 +12,6 @@ const OverviewPage = () => {
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // const BASE_URL = "http://15.206.186.17:4000/api/admin";
-
-
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image" && files.length > 0) {
@@ -67,10 +64,13 @@ const OverviewPage = () => {
   const filteredCategories = categories.filter((cat) =>
     cat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const API = import.meta.env.VITE_BASE_URL_API
 
   const addCategoryAPI = async () => {
     try {
-      const response = await axios.post("http://15.206.189.17:4000/api/admin/addCategory", {
+      // const response = await axios.post("http://15.206.189.17:4000/api/admin/addCategory", {
+      const response = await axios.post(`${API}admin/addCategory`, {
+
         categoryName: formData.name,
         description: formData.description,
         logo: "jdcjdkjcdjcjdc.jpg"
@@ -87,7 +87,6 @@ const OverviewPage = () => {
     }
   };
   
-      // addCategory(); // Call the function
 
 
   return (

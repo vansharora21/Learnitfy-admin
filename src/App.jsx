@@ -1,15 +1,14 @@
 import { Route, Routes } from "react-router-dom";
 import Sidebar from "./components/common/Sidebar";
-import OverviewPage from "./pages/Courses";
+import Categories from "./pages/Courses";
 // import CourseDesc from "./pages/CourseDescription";
-import CourseCategories from "./pages/CoursesCategories";
+import Courses from "./pages/CoursesCategories";
 import Enrollments from "./pages/Enrollments";
 import Queries from "./pages/Queries";
 import Emails from "./pages/BorcEmail";
 
-
 function App() {
-	console.log("i m here!");
+
 	return (
 		<div className='flex h-screen bg-gray-900 text-gray-100 overflow-hidden'>
 			{/* BG */}
@@ -20,8 +19,8 @@ function App() {
 
 			<Sidebar />
 			<Routes>
-				<Route path='/' element={<OverviewPage />} />
-				<Route path='/Cocat' element={<CourseCategories />} />
+				<Route path='/' element={<Categories />} />
+				<Route path='/Cocat' element={<Courses />} />
 				<Route path='/Enroll' element={<Enrollments />} />
 				<Route path='/Queries' element={<Queries />} />
 				<Route path='/Emails' element={<Emails/>}/>
