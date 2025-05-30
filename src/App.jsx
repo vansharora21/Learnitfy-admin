@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import Sidebar from "./components/common/Sidebar";
-import Categories from "./pages/Courses";
+import Categories from "./pages/Categories";
 // import CourseDesc from "./pages/CourseDescription";
 import Courses from "./pages/CoursesCategories";
 import Enrollments from "./pages/Enrollments";
