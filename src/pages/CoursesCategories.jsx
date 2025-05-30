@@ -21,6 +21,24 @@ const CourseCategories = () => {
 
   const API = import.meta.env.VITE_BASE_URL_API
 
+    useEffect(() => {
+    const AddCategoriesName = async () => {
+      try {
+        setLoading(true)
+        const res = await axios.get(`${API}admin/get/category`);
+        const CategoryData = res.data.data;
+        setCategoryData(CategoryData);
+        console.log(CategoryData)
+        setLoading(false);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch data');
+        setLoading(false);
+        console.log("error---------", err.message)
+      }
+    };
+    AddCategoriesName();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image" && files.length > 0) {
@@ -105,23 +123,7 @@ const CourseCategories = () => {
     setShowForm(true);
   };
 
-  useEffect(() => {
-    const AddCategoriesName = async () => {
-      try {
-        setLoading(true)
-        const res = await axios.get(`${API}admin/get/category`);
-        const CategoryData = res.data.data;
-        setCategoryData(CategoryData);
-        console.log(CategoryData)
-        setLoading(false);
-      } catch (err) {
-        setError(err.message || 'Failed to fetch data');
-        setLoading(false);
-        console.log("error-=--------", err.message)
-      }
-    };
-    AddCategoriesName();
-  }, []);
+
 
   return (
     <div className="flex-1 overflow-auto relative z-10">
@@ -172,8 +174,10 @@ const CourseCategories = () => {
               {categoryData.map((catData, id, index) => {
               return (
                 <>
-                  <option className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">select course category</option>
-                  <option key={id}>{catData.categoryName}</option>
+                <option value="" disabled hidden>
+                  Select course category
+                </option>
+                <option key={id}>{catData.categoryName}</option>
                 </>
               )
             })}

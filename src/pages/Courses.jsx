@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {  Plus, Edit, Trash2, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
@@ -68,9 +68,7 @@ const OverviewPage = () => {
 
   const addCategoryAPI = async () => {
     try {
-      // const response = await axios.post("http://15.206.189.17:4000/api/admin/addCategory", {
       const response = await axios.post(`${API}admin/addCategory`, {
-
         categoryName: formData.name,
         description: formData.description,
         logo: "jdcjdkjcdjcjdc.jpg"
@@ -198,7 +196,7 @@ const OverviewPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-                  {filteredCategories.map((cat, index) => (
+                  {filteredCategories.map((cat,   index) => (
                     <motion.tr
                       key={index}
                       initial={{ opacity: 0 }}

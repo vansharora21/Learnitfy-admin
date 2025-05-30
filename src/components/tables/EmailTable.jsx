@@ -9,6 +9,7 @@ const EmailTable = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
+	// user/send/brochure
 	useEffect(() => {
 		const fetchemail = async () => {
 			try {
