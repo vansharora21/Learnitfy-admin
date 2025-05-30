@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 import { motion } from "framer-motion";
-
 import Header from "../components/common/Header";
 import axios from "axios";
+import { ADMIN_GET_CATEGORY } from "../constants";
+
+
+//add : /add/course    
+//update: /update/course     courseId
+//delete: /delete/course
+//get: /get/courses
 
 const CourseCategories = () => {
   const [showForm, setShowForm] = useState(false);
@@ -25,10 +31,10 @@ const CourseCategories = () => {
     const AddCategoriesName = async () => {
       try {
         setLoading(true)
-        const res = await axios.get(`${API}admin/get/category`);
+        const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
         const CategoryData = res.data.data;
         setCategoryData(CategoryData);
-        console.log(CategoryData)
+        console.log("CategoryData--------", CategoryData)
         setLoading(false);
       } catch (err) {
         setError(err.message || 'Failed to fetch data');

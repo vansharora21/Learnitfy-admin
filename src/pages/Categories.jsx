@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
+import { ADMIN__CATEGORY, ADMIN__DELETE_CATEFGORY, ADMIN_GET_CATEGORY} from "../constants";
 
 const OverviewPage = () => {
   const [showForm, setShowForm] = useState(false);
@@ -18,7 +19,7 @@ const OverviewPage = () => {
 
 const addCategoryAPI = async () => {
   try {
-    const response = await axios.post(`${API}admin/addCategory`, {
+    const response = await axios.post(`${API}${ADMIN__CATEGORY}`, {
       categoryName: formData.name,
       description: formData.description,
       logo: "jdcjdkjcdjcjdc.jpg",
@@ -27,7 +28,7 @@ const addCategoryAPI = async () => {
     console.log("Category added:", response.data);
 
     // Re-fetch updated categories
-    const res = await axios.get(`${API}admin/get/category`);
+    const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
     setCourseData(res.data.data);
   } catch (error) {
     console.error("Error adding category:", error.message);
@@ -38,7 +39,7 @@ const addCategoryAPI = async () => {
   useEffect(() => {
     const GetCourseData = async () => {
       try {
-        const response = await axios.get(`${API}admin/get/category`);
+        const response = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
         setCourseData(response.data.data);
         console.log("here is the category data",response.data.data)
       } catch (error) {
@@ -96,7 +97,7 @@ const addCategoryAPI = async () => {
 
   const handleDelete = async (categoryId) => {
     try {
-      const deleteResponse = await axios.delete(`${API}admin/delete/category`, {
+      const deleteResponse = await axios.delete(`${API}${ADMIN__DELETE_CATEFGORY}`, {
         data: { categoryId },
         headers: {
           Accept: "application/json",
