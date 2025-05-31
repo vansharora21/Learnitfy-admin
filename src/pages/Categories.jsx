@@ -120,7 +120,7 @@ const addCategoryAPI = async () => {
 
   return (
     <div className="flex-1 overflow-auto relative z-10">
-      <Header title="Courses" />
+      <Header title="Add your Course Category here" />
 
       <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
         <div className="mb-6 flex justify-between items-center">
