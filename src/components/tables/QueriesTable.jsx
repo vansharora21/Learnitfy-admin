@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronDown, ChevronUp, Trash, Pencil } from "lucide-react";
 import axios from "axios";
 import { USER_CONTACT_USER } from "../../constants";
+// import {} from "../../../"
 
 const QueriesTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
