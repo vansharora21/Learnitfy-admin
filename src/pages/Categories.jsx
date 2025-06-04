@@ -8,12 +8,11 @@ import { ADMIN__CATEGORY, ADMIN__DELETE_CATEFGORY, ADMIN_GET_CATEGORY} from "../
 const OverviewPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [formData, setFormData] = useState({ name: "", image: "", description: "" });
+  const [formData, setFormData] = useState({ name: "", image: [], description: "" });
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [courseData, setCourseData] = useState([]);
   const [loading, setLoading] = useState(true);
-
 
   const API = import.meta.env.VITE_BASE_URL_API;
 
@@ -22,7 +21,7 @@ const addCategoryAPI = async () => {
     const response = await axios.post(`${API}${ADMIN__CATEGORY}`, {
       categoryName: formData.name,
       description: formData.description,
-      logo: "jdcjdkjcdjcjdc.jpg",
+      logo: formData.image[0],
     });
 
     console.log("Category added:", response.data);
