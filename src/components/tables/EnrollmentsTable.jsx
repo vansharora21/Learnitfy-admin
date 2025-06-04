@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Search, Pencil, Trash } from "lucide-react";
-import { USER_CONTACT_USER } from "../../constants";
 
 const EnrollmentsTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
@@ -11,29 +10,28 @@ const EnrollmentsTable = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
-	const API = import.meta.env.VITE_BASE_URL_API
+	const API = import.meta.env.VITE_BASE_URL_API;
 
 	useEffect(() => {
-		const fetchresponse = async () => {
+		const fetchData = async () => {
 			try {
-				const res = await axios.get(`${API}${USER_CONTACT_USER}`);
-				const QuriesData = res.data.data.contacts;
-				setEnrollments(QuriesData);
-				setFilteredUsers(QuriesData);
+				const res = await axios.get(`${API}user/get/enroll`);
+				const enrollData = res.data.enrollUser;
+				setEnrollments(enrollData);
+				setFilteredUsers(enrollData); // Initialize filteredUsers
 				setLoading(false);
-				console.log(setEnrollments)
 			} catch (err) {
 				setError(err.message || 'Failed to fetch data');
 				setLoading(false);
 			}
 		};
-		fetchresponse();
-	}, []);
+		fetchData();
+	}, [API]);
 
 	const handleSearch = (e) => {
 		const term = e.target.value.toLowerCase();
 		setSearchTerm(term);
-		if (term === "") {
+		if (!term) {
 			setFilteredUsers(enrollments);
 			return;
 		}
@@ -41,8 +39,8 @@ const EnrollmentsTable = () => {
 			(user) =>
 				user.name?.toLowerCase().includes(term) ||
 				user.email?.toLowerCase().includes(term) ||
-				user.phone?.toLowerCase().includes(term) ||
-				user.Course?.toLowerCase().includes(term)
+				user.mobile?.toLowerCase().includes(term) ||
+				user.courseName?.toLowerCase().includes(term)
 		);
 		setFilteredUsers(filtered);
 	};
@@ -50,9 +48,10 @@ const EnrollmentsTable = () => {
 	const handleDelete = async (id) => {
 		if (window.confirm("Are you sure you want to delete this enrollment?")) {
 			try {
-				await fetch(`https://api.example.com/enrollments/${id}`, { method: 'DELETE' });
-				setEnrollments(enrollments.filter(user => user._id !== id));
-				setFilteredUsers(filteredUsers.filter(user => user._id !== id));
+				await axios.delete(`${API}enrollments/${id}`);
+				const updatedList = enrollments.filter(user => user._id !== id);
+				setEnrollments(updatedList);
+				setFilteredUsers(updatedList);
 			} catch (err) {
 				alert(`Failed to delete: ${err.message}`);
 			}
@@ -70,7 +69,7 @@ const EnrollmentsTable = () => {
 		);
 	}
 
-	if (error && filteredUsers.length === 0) {
+	if (error) {
 		return (
 			<motion.div className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700' initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
 				<div className="text-red-400 text-center">
@@ -106,7 +105,7 @@ const EnrollmentsTable = () => {
 					<table className='min-w-full divide-y divide-gray-700'>
 						<thead>
 							<tr>
-								{["Name", "Email", "Phone Number", "Course", "Status", "Actions"].map((header) => (
+								{["Name", "Email", "Phone Number", "Course", "Actions"].map((header) => (
 									<th key={header} className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 										{header}
 									</th>
@@ -122,28 +121,23 @@ const EnrollmentsTable = () => {
 												{user.name?.charAt(0)}
 											</div>
 											<div className='ml-4'>
-												<div className='text-sm font-medium text-gray-100'>{user.firstName} {user.lastName}</div>
+												<div className='text-sm font-medium text-gray-100'>{user.name}</div>
 											</div>
 										</div>
 									</td>
 									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{user.email}</td>
 									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>+91-{user.mobile || "Not provided"}</td>
 									<td className='px-6 py-4 whitespace-nowrap text-sm'>
-										<span className='bg-blue-800 text-blue-100 px-2 py-1 rounded text-xs'>{user.Course || "N/A"}</span>
+										<span className='bg-blue-800 text-blue-100 px-2 py-1 rounded text-xs'>{user.courseName || "N/A"}</span>
 									</td>
-									<td className='px-6 py-4 whitespace-nowrap text-sm'>
-										<span className={`px-2 py-1 rounded text-xs ${user.status === "Enrolled" ? "bg-green-800 text-green-100" : "bg-red-800 text-red-100"}`}>
-											{user.status === "Active" ? "Yes" : "No"}
-										</span>
-									</td>
-									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+									{/* <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 										<button className='text-indigo-400 hover:text-indigo-300 mr-3' onClick={() => window.location.href = `/edit-enrollment/${user._id}`}>
 											<Pencil size={18} />
 										</button>
 										<button className='text-red-400 hover:text-red-300' onClick={() => handleDelete(user._id)}>
 											<Trash size={18} />
 										</button>
-									</td>
+									</td> */}
 								</motion.tr>
 							))}
 						</tbody>

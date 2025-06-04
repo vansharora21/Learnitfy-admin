@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronDown, ChevronUp, Trash, Pencil } from "lucide-react";
 import axios from "axios";
 import { USER_CONTACT_USER } from "../../constants";
-// import {} from "../../../"
 
 const QueriesTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
@@ -14,6 +13,8 @@ const QueriesTable = () => {
 	const [expandedId, setExpandedId] = useState(null);
 
 	const API = import.meta.env.VITE_BASE_URL_API;
+
+	console.log("here is the user data ", userData)
 
 	useEffect(() => {
 		const fetchQueriesData = async () => {
@@ -138,7 +139,7 @@ const QueriesTable = () => {
 											</div>
 										</td>
 										<td className="px-6 py-4 text-sm text-gray-300">{user.email}</td>
-										<td className="px-6 py-4 text-sm text-gray-300">{user.phone}</td>
+										<td className="px-6 py-4 text-sm text-gray-300">{user.mobile}</td>
 										<td className="px-6 py-4">
 											<button
 												onClick={() => toggleExpand(user.id)}

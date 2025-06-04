@@ -5,44 +5,61 @@ import Header from "../components/common/Header";
 import axios from "axios";
 import { ADMIN_GET_CATEGORY } from "../constants";
 
-
-//add : /add/course    
-//update: /update/course     courseId
-//delete: /delete/course
-//get: /get/courses
-
 const CourseCategories = () => {
   const [showForm, setShowForm] = useState(false);
   const [courses, setCourses] = useState([]);
-  const [formData, setFormData] = useState({ name: "", image: "", description: "", type: "" });
+  const [formData, setFormData] = useState({
+    categoryName: "",
+    name: "",
+    image: "",
+    description: "",
+    price: "",
+  });
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModuleForm, setShowModuleForm] = useState(false);
   const [modules, setModules] = useState([]);
   const [moduleData, setModuleData] = useState({ name: "", description: "", pdf: null });
   const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
-  const [categoryData, setCategoryData] = useState([])
-  const [error, setError] = useState("")
+  const [categoryData, setCategoryData] = useState([]);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [courseData, setCourseData] = useState([]);
 
-  const API = import.meta.env.VITE_BASE_URL_API
+  const API = import.meta.env.VITE_BASE_URL_API;
 
-    useEffect(() => {
-    const AddCategoriesName = async () => {
+  console.log("hre is the course data:dcsdsc", courseData)
+  const AddCoursesAPI = async () => {
+    try {
+      const response = await axios.post(`${API}admin/add/course`, {
+        categoryName: formData.categoryName,
+        courseName: formData.name,
+        description: formData.description,
+        price: 1000,
+      });
+      const newCourse = response.data.data.categoryName;
+      setCourseData(newCourse.data.data);
+      setCourseData(newCourse);
+
+    } catch (error) {
+      console.error("Error adding course:", error.message);
+    }
+    setCourseData(response);
+    // console.log("reesposee", response)
+  };
+  useEffect(() => {
+    const fetchCategories = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
-        const CategoryData = res.data.data;
-        setCategoryData(CategoryData);
-        console.log("CategoryData--------", CategoryData)
+        setCategoryData(res.data.data);
         setLoading(false);
       } catch (err) {
-        setError(err.message || 'Failed to fetch data');
+        setError(err.message || "Failed to fetch data");
         setLoading(false);
-        console.log("error---------", err.message)
       }
     };
-    AddCategoriesName();
+    fetchCategories();
   }, []);
 
   const handleChange = (e) => {
@@ -58,7 +75,7 @@ const CourseCategories = () => {
 
   const handleAddCourse = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.image || !formData.description || !formData.type) return;
+    if (!formData.name || !formData.image || !formData.description || !formData.categoryName) return;
 
     if (editIndex !== null) {
       const updated = [...courses];
@@ -67,10 +84,11 @@ const CourseCategories = () => {
       setEditIndex(null);
     } else {
       setCourses((prev) => [...prev, { ...formData, modules: [] }]);
-      setCurrentCourseIndex(courses.length); // index of the new course
+      setCurrentCourseIndex(courses.length);
       setShowModuleForm(true);
     }
-    setFormData({ name: "", image: "", description: "", type: "" });
+
+    setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
     setShowForm(false);
   };
 
@@ -101,9 +119,7 @@ const CourseCategories = () => {
     }
   };
 
-  const handle26Edit = (index) => {
-    // Corrected: should be handleEdit, not handle26Edit
-    // For production, use handleEdit
+  const handleEdit = (index) => {
     setFormData(courses[index]);
     setEditIndex(index);
     setShowForm(true);
@@ -114,7 +130,7 @@ const CourseCategories = () => {
     setCourses(updated);
     if (editIndex === index) {
       setEditIndex(null);
-      setFormData({ name: "", image: "", description: "", type: "" });
+      setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
       setShowForm(false);
     }
   };
@@ -123,26 +139,17 @@ const CourseCategories = () => {
     course.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleEdit = (index) => {
-    setFormData(courses[index]);
-    setEditIndex(index);
-    setShowForm(true);
-  };
-
-
-
   return (
     <div className="flex-1 overflow-auto relative z-10">
       <Header title="Course Categories" />
-
       <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
-        {/* ADD/EDIT FORM */}
+
         <div className="mb-6 flex justify-between items-center">
           <button
             onClick={() => {
               setShowForm(!showForm);
               setEditIndex(null);
-              setFormData({ name: "", image: "", description: "", type: "" });
+              setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
             }}
             className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
           >
@@ -163,47 +170,40 @@ const CourseCategories = () => {
           )}
         </div>
 
-        {/* FORM UI */}
         {showForm && (
           <form
             onSubmit={handleAddCourse}
             className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
           >
             <select
-              placeholder="select course category"
-              name="type"
-              value={formData.type}
+              name="categoryName"
+              value={formData.categoryName}
               onChange={handleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
             >
-              
-              {categoryData.map((catData, id, index) => {
-              return (
-                <>
-                <option value="" disabled hidden>
-                  Select course category
-                </option>
-                <option key={id}>{catData.categoryName}</option>
-                </>
-              )
-            })}
-
+              <option value="" disabled>Select course category</option>
+              {categoryData.map((cat, index) => (
+                <option key={index} value={cat.categoryName}>{cat.categoryName}</option>
+              ))}
             </select>
-            
+
             <input
               type="text"
               name="name"
               placeholder="Course Name"
               value={formData.name}
               onChange={handleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+              required
             />
             <input
               type="file"
               name="image"
               accept="image/*"
               onChange={handleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+              className="bg-gray-700 border px-4 py-2 rounded-md text-white"
+              required
             />
             {formData.image && (
               <img
@@ -217,10 +217,12 @@ const CourseCategories = () => {
               placeholder="Description"
               value={formData.description}
               onChange={handleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="bg-gray-700 border px-4 py-2 rounded-md"
               rows="3"
+              required
             />
             <button
+              onClick={AddCoursesAPI}
               type="submit"
               className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
             >
@@ -229,7 +231,6 @@ const CourseCategories = () => {
           </form>
         )}
 
-        {/* COURSES TABLE */}
         {filteredCourses.length > 0 ? (
           <motion.div
             className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
@@ -243,7 +244,7 @@ const CourseCategories = () => {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Image</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Description</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
                   </tr>
@@ -264,7 +265,7 @@ const CourseCategories = () => {
                         />
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-100 font-semibold">{course.name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-300">{course.type}</td>
+                      <td className="px-6 py-4 text-sm text-gray-300">{course.categoryName}</td>
                       <td className="px-6 py-4 text-sm text-gray-300">{course.description}</td>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         <button
@@ -290,13 +291,38 @@ const CourseCategories = () => {
           <p className="text-center text-gray-400 mt-8">No courses found.</p>
         )}
 
-        {/* MODULE FORM */}
         {showModuleForm && (
-          <form onSubmit={handleAddModule} className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700">
+          <form
+            onSubmit={handleAddModule}
+            className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
+          >
             <h3 className="text-lg font-semibold mb-2">Add Modules for this Course</h3>
-            <input type="text" name="name" placeholder="Module Name" value={moduleData.name} onChange={handleModuleChange} className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            <textarea name="description" placeholder="Module Description" value={moduleData.description} onChange={handleModuleChange} className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" rows="2" />
-            <input type="file" name="pdf" accept="application/pdf" onChange={handleModuleChange} className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white" />
+            <input
+              type="text"
+              name="name"
+              placeholder="Module Name"
+              value={moduleData.name}
+              onChange={handleModuleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+              required
+            />
+            <textarea
+              name="description"
+              placeholder="Module Description"
+              value={moduleData.description}
+              onChange={handleModuleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+              rows="2"
+              required
+            />
+            <input
+              type="file"
+              name="pdf"
+              accept="application/pdf"
+              onChange={handleModuleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md text-white"
+              required
+            />
             <button type="submit" className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module</button>
             <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">Finish & Save Course</button>
             <ul className="mt-2">
