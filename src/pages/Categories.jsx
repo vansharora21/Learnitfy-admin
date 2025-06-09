@@ -25,8 +25,6 @@ const addCategoryAPI = async () => {
     });
 
     console.log("Category added:", response.data);
-
-    // Re-fetch updated categories
     const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
     setCourseData(res.data.data);
   } catch (error) {

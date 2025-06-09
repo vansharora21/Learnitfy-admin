@@ -25,10 +25,13 @@ const CourseCategories = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [courseData, setCourseData] = useState([]);
+  const [courseID, setCourseID] = useState("");
+
 
   const API = import.meta.env.VITE_BASE_URL_API;
 
-  console.log("hre is the course data:dcsdsc", courseData)
+  // `${API}/get/courses`
+  
   const AddCoursesAPI = async () => {
     try {
       const response = await axios.post(`${API}admin/add/course`, {
@@ -37,16 +40,16 @@ const CourseCategories = () => {
         description: formData.description,
         price: 1000,
       });
-      const newCourse = response.data.data.categoryName;
-      setCourseData(newCourse.data.data);
-      setCourseData(newCourse);
-
+      console.log("hello",response.data.data.courseId);
+      setCourseData(response.data.data);
+      setCourseID(response.data.data.courseId);
     } catch (error) {
       console.error("Error adding course:", error.message);
     }
-    setCourseData(response);
-    // console.log("reesposee", response)
+    setCourseData(response.data.data);
+    console.log("----------reesposee----------", courseData)
   };
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -108,16 +111,51 @@ const CourseCategories = () => {
     setModuleData({ name: "", description: "", pdf: null });
   };
 
-  const handleFinishModules = () => {
-    if (currentCourseIndex !== null) {
-      const updated = [...courses];
-      updated[currentCourseIndex].modules = modules;
-      setCourses(updated);
-      setModules([]);
-      setCurrentCourseIndex(null);
-      setShowModuleForm(false);
+//   const handleFinishModules = () => {
+//     // if (currentCourseIndex !== null) {
+//     //   const updated = [...courses];
+//     //   updated[currentCourseIndex].modules = modules;
+//     //   setCourses(updated);
+//     //   setModules([]);
+//     //   setCurrentCourseIndex(null);
+//     //   setShowModuleForm(false);
+//     // }
+//     {
+//   "courseId": "CI23513551",
+//   "courseContent": [
+//     {
+//       "moduleTitle": "Introduction to Web Development",
+//       "description": "Overview of web development, HTML basics, and setting up the environment."
+//     },
+//     {
+//       "moduleTitle": "CSS & Styling",
+//       "description": "Learn how to style web pages using CSS, Flexbox, and Grid."
+//     },
+//     {
+//       "moduleTitle": "JavaScript Fundamentals",
+//       "description": "Understand variables, functions, DOM manipulation, and events."
+//     }
+//   ]
+// }
+    const handleFinishModules = async () => {
+    try {
+      const response = await axios.post(`${API}admin/add/content`, {
+        courseId: courseID,
+        courseContent: [{
+              moduleTitle: "Introduction to Web Development Test",
+              description: "Overview of web development, HTML basics, and setting up the environment Test."
+        }]
+      });
+      console.log("here is content response",response);
+      // setCourseData(response.data.data);
+      // setCourseID(response.data.data.courseId);
+    } catch (error) {
+      console.error("Error adding course:", error.message);
     }
+    // setCourseData(response);
+    // console.log("reesposee", response)
   };
+  // };
 
   const handleEdit = (index) => {
     setFormData(courses[index]);
@@ -138,6 +176,12 @@ const CourseCategories = () => {
   const filteredCourses = courses.filter((course) =>
     course.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  useEffect(() => {
+  if (courseID) {
+    console.log("Course ID from useEffect:", courseID);
+  }
+}, [courseID]);
 
   return (
     <div className="flex-1 overflow-auto relative z-10">
