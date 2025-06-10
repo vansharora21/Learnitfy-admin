@@ -180,7 +180,7 @@ const QueriesTable = () => {
 															Query Description:
 														</h4>
 														<p className="text-sm text-gray-400 leading-relaxed">
-															{user.message || "No description provided."}
+															{user.description || "No description provided."}
 														</p>
 													</div>
 												</td>
