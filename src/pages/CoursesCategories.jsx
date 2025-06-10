@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Edit, Trash2, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Flag } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
@@ -19,19 +19,54 @@ const CourseCategories = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModuleForm, setShowModuleForm] = useState(false);
   const [modules, setModules] = useState([]);
-  const [moduleData, setModuleData] = useState({ name: "", description: "", pdf: null });
+  const [moduleData, setModuleData] = useState({
+    name: "",
+    description: "",
+    pdf: null
+  });
   const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [courseData, setCourseData] = useState([]);
   const [courseID, setCourseID] = useState("");
+  const [sendPdf, setSentPdf] = useState(false);
+  const [count, setCount] = useState(0);
+  const [getCourseData, setGetCourseData] = useState([]);
 
+  console.log("hjdshjadsjhasd", getCourseData);
 
   const API = import.meta.env.VITE_BASE_URL_API;
 
-  // `${API}/get/courses`
-  
+  useEffect(() => {
+    const responseGetCourse = async () => {
+      const response = await axios.get(`${API}admin/get/courses`);
+      const course_data = response.data.data.coursesList;
+      setGetCourseData(course_data);
+      // console.log("getCourseDatagetCourseDatagetCourseDatagetCourseDatav", getCourseData)
+    };
+    responseGetCourse();
+  }, [])
+
+  const DeleteCourse = async (courseId) => {
+    try {
+      const deleteResponse = await axios.delete(`${API}admin/delete/course`, {
+        data: {courseId},
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        }
+      });
+
+      const updatedCourseData = getCourseData.filter(course => course.categoryId !== categoryId);
+      setGetCourseData(updatedCourseData);
+      console.log("Remaining courses after deletion:", deleteResponse);
+
+    } catch (error) {
+      console.error("Error adding course:", error.message);
+    }
+  };
+
   const AddCoursesAPI = async () => {
     try {
       const response = await axios.post(`${API}admin/add/course`, {
@@ -40,14 +75,13 @@ const CourseCategories = () => {
         description: formData.description,
         price: 1000,
       });
-      console.log("hello",response.data.data.courseId);
+      // console.log("hello", response.data.data.courseId);
+
       setCourseData(response.data.data);
       setCourseID(response.data.data.courseId);
     } catch (error) {
       console.error("Error adding course:", error.message);
     }
-    setCourseData(response.data.data);
-    console.log("----------reesposee----------", courseData)
   };
 
   useEffect(() => {
@@ -76,24 +110,33 @@ const CourseCategories = () => {
     }
   };
 
-  const handleAddCourse = (e) => {
+  const handleAddCourse = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.image || !formData.description || !formData.categoryName) return;
 
-    if (editIndex !== null) {
-      const updated = [...courses];
-      updated[editIndex] = { ...formData, modules: modules };
-      setCourses(updated);
-      setEditIndex(null);
-    } else {
-      setCourses((prev) => [...prev, { ...formData, modules: [] }]);
-      setCurrentCourseIndex(courses.length);
-      setShowModuleForm(true);
+    try {
+      const response = await axios.post(`${API}admin/add/course`, {
+        categoryName: formData.categoryName,
+        courseName: formData.name,
+        description: formData.description,
+        price: 1000,
+      });
+
+      // console.log("Added Course ID:", response.data.data.courseId);
+      setCourseData(response.data.data);
+      setCourseID(response.data.data.courseId);
+    } catch (error) {
+      console.error("Error adding course:", error.message);
+      setError("Failed to add course");
     }
 
+    setCourses((prev) => [...prev, { ...formData, modules: [] }]);
+    setCurrentCourseIndex(courses.length);
+    setShowModuleForm(true);
     setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
     setShowForm(false);
   };
+
 
   const handleModuleChange = (e) => {
     const { name, value, files } = e.target;
@@ -111,51 +154,10 @@ const CourseCategories = () => {
     setModuleData({ name: "", description: "", pdf: null });
   };
 
-//   const handleFinishModules = () => {
-//     // if (currentCourseIndex !== null) {
-//     //   const updated = [...courses];
-//     //   updated[currentCourseIndex].modules = modules;
-//     //   setCourses(updated);
-//     //   setModules([]);
-//     //   setCurrentCourseIndex(null);
-//     //   setShowModuleForm(false);
-//     // }
-//     {
-//   "courseId": "CI23513551",
-//   "courseContent": [
-//     {
-//       "moduleTitle": "Introduction to Web Development",
-//       "description": "Overview of web development, HTML basics, and setting up the environment."
-//     },
-//     {
-//       "moduleTitle": "CSS & Styling",
-//       "description": "Learn how to style web pages using CSS, Flexbox, and Grid."
-//     },
-//     {
-//       "moduleTitle": "JavaScript Fundamentals",
-//       "description": "Understand variables, functions, DOM manipulation, and events."
-//     }
-//   ]
-// }
-    const handleFinishModules = async () => {
-    try {
-      const response = await axios.post(`${API}admin/add/content`, {
-        courseId: courseID,
-        courseContent: [{
-              moduleTitle: "Introduction to Web Development Test",
-              description: "Overview of web development, HTML basics, and setting up the environment Test."
-        }]
-      });
-      console.log("here is content response",response);
-      // setCourseData(response.data.data);
-      // setCourseID(response.data.data.courseId);
-    } catch (error) {
-      console.error("Error adding course:", error.message);
-    }
-    // setCourseData(response);
-    // console.log("reesposee", response)
+  const handleFinishModules = async () => {
+    setCount(0);
+    setSentPdf(true)
   };
-  // };
 
   const handleEdit = (index) => {
     setFormData(courses[index]);
@@ -163,25 +165,43 @@ const CourseCategories = () => {
     setShowForm(true);
   };
 
-  const handleDelete = (index) => {
-    const updated = courses.filter((_, i) => i !== index);
-    setCourses(updated);
-    if (editIndex === index) {
-      setEditIndex(null);
-      setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
-      setShowForm(false);
-    }
-  };
+  // const handleDelete = (index) => {
+  //   const updated = courses.filter((_, i) => i !== index);
+  //   setCourses(updated);
+  //   if (editIndex === index) {
+  //     setEditIndex(null);
+  //     setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
+  //     setShowForm(false);
+  //   }
+  // };
 
   const filteredCourses = courses.filter((course) =>
     course.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
-  if (courseID) {
-    console.log("Course ID from useEffect:", courseID);
-  }
-}, [courseID]);
+    if (courseID) {
+      // console.log("Course ID from useEffect:", courseID);
+    }
+  }, [courseID]);
+
+  const hadleAddModule = async () => {
+    try {
+      const response = await axios.post(`${API}admin/add/content`, {
+        courseId: courseID,
+        courseContent: [{
+          moduleTitle: moduleData.name,
+          description: moduleData.description
+        }]
+      });
+      setModuleData({ name: "", description: "" });
+      setCount(count + 1);
+      // console.log("here is content response", response);
+    } catch (error) {
+      console.error("Error adding course:", error.message);
+    }
+
+  };
 
   return (
     <div className="flex-1 overflow-auto relative z-10">
@@ -266,16 +286,15 @@ const CourseCategories = () => {
               required
             />
             <button
-              onClick={AddCoursesAPI}
               type="submit"
               className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
             >
               {editIndex !== null ? "Update Course" : "Save Course"}
             </button>
+
+
           </form>
         )}
-
-        {filteredCourses.length > 0 ? (
           <motion.div
             className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
             initial={{ opacity: 0, y: 20 }}
@@ -294,7 +313,7 @@ const CourseCategories = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-                  {filteredCourses.map((course, index) => (
+                  {getCourseData.map((course, index) => (
                     <motion.tr
                       key={index}
                       initial={{ opacity: 0 }}
@@ -308,9 +327,10 @@ const CourseCategories = () => {
                           className="w-12 h-12 object-cover rounded-md"
                         />
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-100 font-semibold">{course.name}</td>
+                      {/* <td className="px-6 py-4 text-sm text-gray-100 font-semibold">{course.name}</td> */}
                       <td className="px-6 py-4 text-sm text-gray-300">{course.categoryName}</td>
                       <td className="px-6 py-4 text-sm text-gray-300">{course.description}</td>
+                      <h5>{course?.courseContent?.moduleTitle}</h5>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         <button
                           onClick={() => handleEdit(index)}
@@ -319,7 +339,7 @@ const CourseCategories = () => {
                           <Edit size={18} />
                         </button>
                         <button
-                          onClick={() => handleDelete(index)}
+                          onClick={() => DeleteCourse(course.courseId)}
                           className="text-red-400 hover:text-red-300"
                         >
                           <Trash2 size={18} />
@@ -331,9 +351,6 @@ const CourseCategories = () => {
               </table>
             </div>
           </motion.div>
-        ) : (
-          <p className="text-center text-gray-400 mt-8">No courses found.</p>
-        )}
 
         {showModuleForm && (
           <form
@@ -359,16 +376,8 @@ const CourseCategories = () => {
               rows="2"
               required
             />
-            <input
-              type="file"
-              name="pdf"
-              accept="application/pdf"
-              onChange={handleModuleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md text-white"
-              required
-            />
-            <button type="submit" className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module</button>
-            <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">Finish & Save Course</button>
+            <button onClick={hadleAddModule} className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module {count}</button>
+            <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">Finish & Save Course </button>
             <ul className="mt-2">
               {modules.map((mod, idx) => (
                 <li key={idx} className="text-sm text-gray-300">{mod.name} - {mod.description} ({mod.pdf && mod.pdf.name})</li>
@@ -376,7 +385,19 @@ const CourseCategories = () => {
             </ul>
           </form>
         )}
+        {sendPdf ? 
+        <div className="">
+        <input
+          type="file"
+          name="pdf"
+          accept="application/pdf"
+          className="bg-gray-700 border px-4 py-2 rounded-md text-white"
+          required
+        />
+        <button onClick={() => setSentPdf(false)}>send pdf</button>
+      </div> : ""}
       </main>
+      
     </div>
   );
 };
