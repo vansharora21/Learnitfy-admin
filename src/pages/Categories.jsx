@@ -11,7 +11,7 @@ const OverviewPage = () => {
   const [formData, setFormData] = useState({ name: "", image: [], description: "" });
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [courseData, setCourseData] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const API = import.meta.env.VITE_BASE_URL_API;
@@ -26,7 +26,7 @@ const addCategoryAPI = async () => {
 
     console.log("Category added:", response.data);
     const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
-    setCourseData(res.data.data);
+    setCategoryData(res.data.data);
   } catch (error) {
     console.error("Error adding category:", error.message);
   }
@@ -34,10 +34,10 @@ const addCategoryAPI = async () => {
 
 
   useEffect(() => {
-    const GetCourseData = async () => {
+    const GetcategoryData = async () => {
       try {
         const response = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
-        setCourseData(response.data.data);
+        setCategoryData(response.data.data);
         console.log("here is the category data",response.data.data)
       } catch (error) {
         console.log(error);
@@ -46,7 +46,7 @@ const addCategoryAPI = async () => {
       }
     };
 
-    GetCourseData();
+    GetcategoryData();
   }, []);
 
 
@@ -102,8 +102,8 @@ const addCategoryAPI = async () => {
         }
       });
 
-      const updatedCourseData = courseData.filter(course => course.categoryId !== categoryId);
-      setCourseData(updatedCourseData);
+      const updatedcategoryData = categoryData.filter(course => course.categoryId !== categoryId);
+      setCategoryData(updatedcategoryData);
       console.log("Remaining courses after deletion:", deleteResponse);
 
     } catch (error) {
@@ -192,7 +192,7 @@ const addCategoryAPI = async () => {
           </form>
         )}
 
-        {courseData.length > 0 ? (
+        {categoryData.length > 0 ? (
           <motion.div
             className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
             initial={{ opacity: 0, y: 20 }}
@@ -201,7 +201,7 @@ const addCategoryAPI = async () => {
           >
             {loading ? (
               <p className="text-center text-gray-400 mt-8">Loading...</p>
-            ) : courseData.length > 0 ? (
+            ) : categoryData.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-700">
                   <thead>
@@ -221,7 +221,7 @@ const addCategoryAPI = async () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-700">
-                    {courseData.map((cat, index) => (
+                    {categoryData.map((cat, index) => (
                       <motion.tr
                         key={index}
                         initial={{ opacity: 0 }}
