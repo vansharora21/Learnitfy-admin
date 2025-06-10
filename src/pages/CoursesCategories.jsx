@@ -165,15 +165,15 @@ const CourseCategories = () => {
     setShowForm(true);
   };
 
-  // const handleDelete = (index) => {
-  //   const updated = courses.filter((_, i) => i !== index);
-  //   setCourses(updated);
-  //   if (editIndex === index) {
-  //     setEditIndex(null);
-  //     setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
-  //     setShowForm(false);
-  //   }
-  // };
+  const handleDelete = (index) => {
+    const updated = courses.filter((_, i) => i !== index);
+    setCourses(updated);
+    if (editIndex === index) {
+      setEditIndex(null);
+      setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
+      setShowForm(false);
+    }
+  };
 
   const filteredCourses = courses.filter((course) =>
     course.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -286,6 +286,7 @@ const CourseCategories = () => {
               required
             />
             <button
+              onClick={AddCoursesAPI}
               type="submit"
               className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
             >
