@@ -8,7 +8,7 @@ import { ADMIN__CATEGORY, ADMIN__DELETE_CATEFGORY, ADMIN_GET_CATEGORY} from "../
 const OverviewPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [formData, setFormData] = useState({ name: "", image: [], description: "" });
+  const [formData, setFormData] = useState({ name: "", image: "", description: "" });
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryData, setCategoryData] = useState([]);
@@ -21,7 +21,7 @@ const addCategoryAPI = async () => {
     const response = await axios.post(`${API}${ADMIN__CATEGORY}`, {
       categoryName: formData.name,
       description: formData.description,
-      logo: formData.image[0],
+      logo: formData.image,
     });
 
     console.log("Category added:", response.data);
@@ -230,7 +230,7 @@ const addCategoryAPI = async () => {
                       >
                         <td className="px-6 py-4">
                           <img
-                            src={cat.image}
+                            src={cat.logo}
                             alt={cat.name}
                             className="w-12 h-12 object-cover rounded-md"
                           />

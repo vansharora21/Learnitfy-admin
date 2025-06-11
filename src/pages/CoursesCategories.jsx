@@ -33,6 +33,7 @@ const CourseCategories = () => {
   const [sendPdf, setSentPdf] = useState(false);
   const [count, setCount] = useState(0);
   const [getCourseData, setGetCourseData] = useState([]);
+  const [broturePdf, setBrochurePdf] = useState(null)
 
   console.log("hjdshjadsjhasd", getCourseData);
 
@@ -48,10 +49,37 @@ const CourseCategories = () => {
     responseGetCourse();
   }, [])
 
+  const handlebroturePDF = (e) => {
+    setBrochurePdf(e.target.files[0])
+  };
+
+ const handleAddBrochurePdf = async (e) => {
+  console.log("here ius the add brocture adsd function")
+    e.preventDefault(); 
+
+    // if (!broturePdf) return;
+
+    const formData = new FormData();
+    formData.append('pdf', broturePdf);
+    formData.append('courseId', courseID);
+
+    try {
+      const response = await axios.post(`${API}admin/upload/pdf`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Brochure upload response:', response);
+      setSentPdf(true); 
+    } catch (error) {
+      console.error('Upload error:', error);
+    }
+  };
+
   const DeleteCourse = async (courseId) => {
     try {
       const deleteResponse = await axios.delete(`${API}admin/delete/course`, {
-        data: {courseId},
+        data: { courseId },
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json"
@@ -296,62 +324,62 @@ const CourseCategories = () => {
 
           </form>
         )}
-          <motion.div
-            className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-700">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Image</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Description</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700">
-                  {getCourseData.map((course, index) => (
-                    <motion.tr
-                      key={index}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <td className="px-6 py-4">
-                        <img
-                          src={course.image}
-                          alt={course.name}
-                          className="w-12 h-12 object-cover rounded-md"
-                        />
-                      </td>
-                      {/* <td className="px-6 py-4 text-sm text-gray-100 font-semibold">{course.name}</td> */}
-                      <td className="px-6 py-4 text-sm text-gray-300">{course.categoryName}</td>
-                      <td className="px-6 py-4 text-sm text-gray-300">{course.description}</td>
-                      <h5>{course?.courseContent?.moduleTitle}</h5>
-                      <td className="px-6 py-4 text-sm text-gray-300">
-                        <button
-                          onClick={() => handleEdit(index)}
-                          className="text-indigo-400 hover:text-indigo-300 mr-2"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          onClick={() => DeleteCourse(course.courseId)}
-                          className="text-red-400 hover:text-red-300"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
+        <motion.div
+          className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Image</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-700">
+                {getCourseData.map((course, index) => (
+                  <motion.tr
+                    key={index}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <td className="px-6 py-4">
+                      <img
+                        src={course.image}
+                        alt={course.name}
+                        className="w-12 h-12 object-cover rounded-md"
+                      />
+                    </td>
+                    {/* <td className="px-6 py-4 text-sm text-gray-100 font-semibold">{course.name}</td> */}
+                    <td className="px-6 py-4 text-sm text-gray-300">{course.categoryName}</td>
+                    <td className="px-6 py-4 text-sm text-gray-300">{course.description}</td>
+                    <h5>{course?.courseContent?.moduleTitle}</h5>
+                    <td className="px-6 py-4 text-sm text-gray-300">
+                      <button
+                        onClick={() => handleEdit(index)}
+                        className="text-indigo-400 hover:text-indigo-300 mr-2"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => DeleteCourse(course.courseId)}
+                        className="text-red-400 hover:text-red-300"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
 
         {showModuleForm && (
           <form
@@ -386,20 +414,25 @@ const CourseCategories = () => {
             </ul>
           </form>
         )}
-        {sendPdf ? 
-        <div className="">
-        <input
-          type="file"
-          name="pdf"
-          accept="application/pdf"
-          className="bg-gray-700 border px-4 py-2 rounded-md text-white"
-          required
-        />
-        <button onClick={() => setSentPdf(false)}>send pdf</button>
-      </div> : ""}
-      </main>
+        {/* {sendPdf ? */}
+          <form 
+            onSubmit={handleAddBrochurePdf}>
+            <input
+              type="file"
+              name="pdf"
+              accept="application/pdf"
+              className="bg-gray-700 border px-4 py-2 rounded-md text-white"
+              onChange={handlebroturePDF}
+              required
+            />
+            <button
+            className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
+            type="submit">send pdf</button>
+        </form>
+         {/* :""} */}
+    </main>
       
-    </div>
+    </div >
   );
 };
 
