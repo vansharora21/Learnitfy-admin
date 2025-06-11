@@ -11,7 +11,7 @@ const CourseCategories = () => {
   const [formData, setFormData] = useState({
     categoryName: "",
     name: "",
-    image: "",
+    image: null,
     description: "",
     price: "",
   });
@@ -53,9 +53,9 @@ const CourseCategories = () => {
     setBrochurePdf(e.target.files[0])
   };
 
- const handleAddBrochurePdf = async (e) => {
-  console.log("here ius the add brocture adsd function")
-    e.preventDefault(); 
+  const handleAddBrochurePdf = async (e) => {
+    console.log("here ius the add brocture adsd function")
+    e.preventDefault();
 
     // if (!broturePdf) return;
 
@@ -70,7 +70,7 @@ const CourseCategories = () => {
         },
       });
       console.log('Brochure upload response:', response);
-      setSentPdf(true); 
+      setSentPdf(false);
     } catch (error) {
       console.error('Upload error:', error);
     }
@@ -96,15 +96,17 @@ const CourseCategories = () => {
   };
 
   const AddCoursesAPI = async () => {
-    try {
-      const response = await axios.post(`${API}admin/add/course`, {
-        categoryName: formData.categoryName,
-        courseName: formData.name,
-        description: formData.description,
-        price: 1000,
-      });
-      // console.log("hello", response.data.data.courseId);
+    const data = new FormData();
+    data.append("categoryName", formData.categoryName)
+    data.append("courseName", formData.name)
+    data.appennd("description", formData.description)
 
+    try {
+      const response = await axios.post(`${API}admin/add/course`, data, {
+        header: {
+          'content-type': 'multipart/form-data'
+        }
+      });
       setCourseData(response.data.data);
       setCourseID(response.data.data.courseId);
     } catch (error) {
@@ -131,39 +133,45 @@ const CourseCategories = () => {
     const { name, value, files } = e.target;
     if (name === "image" && files.length > 0) {
       const file = files[0];
-      const imageUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, image: imageUrl }));
+      setFormData((prev) => ({ ...prev, image: file })); // Store the File object
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleAddCourse = async (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.image || !formData.description || !formData.categoryName) return;
 
-    try {
-      const response = await axios.post(`${API}admin/add/course`, {
-        categoryName: formData.categoryName,
-        courseName: formData.name,
-        description: formData.description,
-        price: 1000,
-      });
+const handleAddCourse = async (e) => {
+  e.preventDefault();
+  if (!formData.name || !formData.image || !formData.description || !formData.categoryName) return;
 
-      // console.log("Added Course ID:", response.data.data.courseId);
-      setCourseData(response.data.data);
-      setCourseID(response.data.data.courseId);
-    } catch (error) {
-      console.error("Error adding course:", error.message);
-      setError("Failed to add course");
-    }
+  try {
+    const data = new FormData();
+    data.append("categoryName", formData.categoryName);
+    data.append("courseName", formData.name);
+    data.append("description", formData.description);
+    data.append("price", formData.price || "1000"); // Optional
+    data.append("image", formData.image); // ✅ Append the image correctly
 
-    setCourses((prev) => [...prev, { ...formData, modules: [] }]);
-    setCurrentCourseIndex(courses.length);
-    setShowModuleForm(true);
-    setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
-    setShowForm(false);
-  };
+    const response = await axios.post(`${API}admin/add/course`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    setCourseData(response.data.data);
+    setCourseID(response.data.data.courseId);
+  } catch (error) {
+    console.error("Error adding course:", error.message);
+    setError("Failed to add course");
+  }
+
+  setCourses((prev) => [...prev, { ...formData, modules: [] }]);
+  setCurrentCourseIndex(courses.length);
+  setShowModuleForm(true);
+  setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
+  setShowForm(false);
+};
+
 
 
   const handleModuleChange = (e) => {
@@ -209,7 +217,7 @@ const CourseCategories = () => {
 
   useEffect(() => {
     if (courseID) {
-      // console.log("Course ID from useEffect:", courseID);
+      console.log("hi")
     }
   }, [courseID]);
 
@@ -297,13 +305,14 @@ const CourseCategories = () => {
               className="bg-gray-700 border px-4 py-2 rounded-md text-white"
               required
             />
-            {formData.image && (
+            {formData.image instanceof File && (
               <img
-                src={formData.image}
+                src={URL.createObjectURL(formData.image)}
                 alt="Preview"
                 className="mt-2 w-24 h-24 object-cover rounded-md border"
               />
             )}
+
             <textarea
               name="description"
               placeholder="Description"
@@ -414,8 +423,8 @@ const CourseCategories = () => {
             </ul>
           </form>
         )}
-        {/* {sendPdf ? */}
-          <form 
+        {sendPdf ?
+          <form
             onSubmit={handleAddBrochurePdf}>
             <input
               type="file"
@@ -426,12 +435,11 @@ const CourseCategories = () => {
               required
             />
             <button
-            className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
-            type="submit">send pdf</button>
-        </form>
-         {/* :""} */}
-    </main>
-      
+              className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
+              type="submit">send pdf</button>
+          </form>
+          : ""}
+      </main>
     </div >
   );
 };
