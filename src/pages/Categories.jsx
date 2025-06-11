@@ -3,12 +3,20 @@ import { Plus, Edit, Trash2, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
-import { ADMIN__CATEGORY, ADMIN__DELETE_CATEFGORY, ADMIN_GET_CATEGORY} from "../constants";
+import {
+  ADMIN__CATEGORY,
+  ADMIN__DELETE_CATEFGORY,
+  ADMIN_GET_CATEGORY,
+} from "../constants";
 
 const OverviewPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [formData, setFormData] = useState({ name: "", image: "", description: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    image: null,
+    description: "",
+  });
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryData, setCategoryData] = useState([]);
@@ -16,29 +24,33 @@ const OverviewPage = () => {
 
   const API = import.meta.env.VITE_BASE_URL_API;
 
-const addCategoryAPI = async () => {
-  try {
-    const response = await axios.post(`${API}${ADMIN__CATEGORY}`, {
-      categoryName: formData.name,
-      description: formData.description,
-      logo: formData.image,
-    });
+  const addCategoryAPI = async () => {
+    try {
+      const data = new FormData();
+      data.append("categoryName", formData.name);
+      data.append("description", formData.description);
+      data.append("logo", formData.image);
 
-    console.log("Category added:", response.data);
-    const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
-    setCategoryData(res.data.data);
-  } catch (error) {
-    console.error("Error adding category:", error.message);
-  }
-};
+      const response = await axios.post(`${API}${ADMIN__CATEGORY}`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
+      console.log("Category added:", response.data);
+      const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
+      setCategoryData(res.data.data);
+    } catch (error) {
+      console.error("Error adding category:", error.message);
+    }
+  };
 
   useEffect(() => {
     const GetcategoryData = async () => {
       try {
         const response = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
         setCategoryData(response.data.data);
-        console.log("here is the category data",response.data.data)
+        console.log("here is the category data", response.data.data);
       } catch (error) {
         console.log(error);
       } finally {
@@ -49,7 +61,6 @@ const addCategoryAPI = async () => {
     GetcategoryData();
   }, []);
 
-
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image" && files.length > 0) {
@@ -59,8 +70,7 @@ const addCategoryAPI = async () => {
         alert("Please upload a valid image file (PNG, JPEG, JPG).");
         return;
       }
-      const imageUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, image: imageUrl }));
+      setFormData((prev) => ({ ...prev, image: file }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -79,13 +89,16 @@ const addCategoryAPI = async () => {
       setCategories((prev) => [...prev, formData]);
     }
 
-    setFormData({ name: "", image: "", description: "" });
+    setFormData({ name: "", image: null, description: "" });
     setShowForm(false);
   };
 
   const handleEdit = async (categoryId, updatedData) => {
     try {
-      const response = await axios.patch(`${API}admin/update/category/${categoryId}`, updatedData);
+      const response = await axios.patch(
+        `${API}admin/update/category/${categoryId}`,
+        updatedData
+      );
       console.log("Category updated:", response.data);
     } catch (error) {
       console.error("Error updating category:", error);
@@ -94,18 +107,22 @@ const addCategoryAPI = async () => {
 
   const handleDelete = async (categoryId) => {
     try {
-      const deleteResponse = await axios.delete(`${API}${ADMIN__DELETE_CATEFGORY}`, {
-        data: { categoryId },
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
+      const deleteResponse = await axios.delete(
+        `${API}${ADMIN__DELETE_CATEFGORY}`,
+        {
+          data: { categoryId },
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
-      const updatedcategoryData = categoryData.filter(course => course.categoryId !== categoryId);
+      const updatedcategoryData = categoryData.filter(
+        (course) => course.categoryId !== categoryId
+      );
       setCategoryData(updatedcategoryData);
       console.log("Remaining courses after deletion:", deleteResponse);
-
     } catch (error) {
       console.error("Error deleting category:", error);
     }
@@ -125,7 +142,7 @@ const addCategoryAPI = async () => {
             onClick={() => {
               setShowForm(!showForm);
               setEditIndex(null);
-              setFormData({ name: "", image: "", description: "" });
+              setFormData({ name: "", image: null, description: "" });
             }}
             className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
           >
@@ -142,7 +159,10 @@ const addCategoryAPI = async () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 value={searchTerm}
               />
-              <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-2.5 text-gray-400"
+                size={18}
+              />
             </div>
           )}
         </div>
@@ -169,7 +189,7 @@ const addCategoryAPI = async () => {
             />
             {formData.image && (
               <img
-                src={formData.image}
+                src={URL.createObjectURL(formData.image)}
                 alt="Preview"
                 className="mt-2 w-24 h-24 object-cover rounded-md border"
               />
@@ -216,6 +236,9 @@ const addCategoryAPI = async () => {
                         Description
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Category ID
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -235,9 +258,15 @@ const addCategoryAPI = async () => {
                             className="w-12 h-12 object-cover rounded-md"
                           />
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-100 font-semibold">{cat.categoryName}</td>
-                        <td className="px-6 py-4 text-sm text-gray-300">{cat.description}</td>
-                        <td className="px-6 py-4 text-sm text-gray-300">{cat.categoryId}</td>
+                        <td className="px-6 py-4 text-sm text-gray-100 font-semibold">
+                          {cat.categoryName}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-300">
+                          {cat.description}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-300">
+                          {cat.categoryId}
+                        </td>
                         <td className="px-6 py-4 text-sm text-gray-300">
                           <button
                             onClick={() => handleEdit(cat.categoryId)}
@@ -258,9 +287,10 @@ const addCategoryAPI = async () => {
                 </table>
               </div>
             ) : (
-              <p className="text-center text-gray-400 mt-8">No categories found.</p>
+              <p className="text-center text-gray-400 mt-8">
+                No categories found.
+              </p>
             )}
-
           </motion.div>
         ) : (
           <p className="text-center text-gray-400 mt-8">No categories found.</p>
