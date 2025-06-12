@@ -126,7 +126,7 @@ const QueriesTable = () => {
 						</thead>
 						<tbody className="divide-y divide-gray-700">
 							{filteredUsers.map((user, index) => (
-								<React.Fragment key={user.id}>
+								<React.Fragment key={user.id || index}>
 									<tr className="hover:bg-gray-700">
 										<td className="px-6 py-4">
 											<div className="flex items-center">
@@ -142,11 +142,11 @@ const QueriesTable = () => {
 										<td className="px-6 py-4 text-sm text-gray-300">{user.mobile}</td>
 										<td className="px-6 py-4">
 											<button
-												onClick={() => toggleExpand(user.id)}
+												onClick={() => toggleExpand(user.id || index)}
 												className="flex items-center text-blue-400 hover:text-blue-300"
 											>
 												View Details{" "}
-												{expandedId === user.id ? (
+												{expandedId === (user.id || index) ? (
 													<ChevronUp size={16} className="ml-1" />
 												) : (
 													<ChevronDown size={16} className="ml-1" />
@@ -167,7 +167,7 @@ const QueriesTable = () => {
 									</tr>
 
 									<AnimatePresence>
-										{expandedId === user.id && (
+										{expandedId === (user.id || index) && (
 											<motion.tr
 												initial={{ opacity: 0, height: 0 }}
 												animate={{ opacity: 1, height: "auto" }}
