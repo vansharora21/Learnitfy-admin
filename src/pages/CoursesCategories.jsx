@@ -150,7 +150,7 @@ const handleAddCourse = async (e) => {
     data.append("courseName", formData.name);
     data.append("description", formData.description);
     data.append("price", formData.price || "1000"); // Optional
-    data.append("image", formData.image); // ✅ Append the image correctly
+    data.append("image", formData.image); 
 
     const response = await axios.post(`${API}admin/add/course`, data, {
       headers: {
