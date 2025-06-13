@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
-	{ name: "Categories",icon: BookMarked ,color: "#6366f1",href: "/"},
+	{ name: "Categories",icon: BookMarked ,color: "#6366f1",href: "/dashboard"},
 	{ name: "Courses", icon: Newspaper , color: "#8B5CF6", href: "/Cocat" },
 	// { name: "Course Description", icon: Dock , color: "#F97316", href: "/desc" },
 	{ name: "Enrollments ", icon: ArchiveRestore , color: "#EC4899", href: "/Enroll" },

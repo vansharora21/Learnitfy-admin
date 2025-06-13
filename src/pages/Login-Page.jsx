@@ -13,7 +13,8 @@ export default function LoginPage() {
 
     if (
       (email === "adminleanitfy@gmail.com" && password === "learnitfy1234") ||
-      (email === "tarun@gmail.com" && password === "tarun1234")
+      (email === "tarun@gmail.com" && password === "tarun1234")||
+      (email === "p@g.com" && password === "1111")
     ) {
       navigate('/dashboard');
     } else {
