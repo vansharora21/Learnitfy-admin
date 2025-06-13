@@ -71,6 +71,7 @@ const CourseCategories = () => {
       });
       console.log('Brochure upload response:', response);
       setSentPdf(false);
+      setShowModuleForm(false)
     } catch (error) {
       console.error('Upload error:', error);
     }
