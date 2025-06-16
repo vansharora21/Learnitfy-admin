@@ -22,10 +22,31 @@ const FAQPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expandedFAQ, setExpandedFAQ] = useState(null);
-  const [tempFAQs, setTempFAQs] = useState([]); // Temporary storage for multiple FAQs
-//   const [count, setCount] = useState(0);
+  const [tempFAQs, setTempFAQs] = useState([]);
 
   const API = import.meta.env.VITE_BASE_URL_API;
+
+  // Load FAQs from localStorage on component mount
+  useEffect(() => {
+    const savedFAQs = localStorage.getItem('faqs');
+    if (savedFAQs) {
+      try {
+        const parsedFAQs = JSON.parse(savedFAQs);
+        setFaqs(parsedFAQs);
+        console.log("Loaded FAQs from localStorage:", parsedFAQs);
+      } catch (error) {
+        console.error("Error parsing localStorage FAQs:", error);
+      }
+    }
+  }, []);
+
+  // Save FAQs to localStorage whenever faqs state changes
+  useEffect(() => {
+    if (faqs.length > 0) {
+      localStorage.setItem('faqs', JSON.stringify(faqs));
+      console.log("Saved FAQs to localStorage:", faqs);
+    }
+  }, [faqs]);
 
   // Fetch Categories
   useEffect(() => {
@@ -56,22 +77,27 @@ const FAQPage = () => {
     fetchCourses();
   }, []);
 
-  // Fetch FAQs
+  // Fetch FAQs - FIXED VERSION
   useEffect(() => {
     const fetchFAQs = async () => {
       try {
-        // Uncomment when API is ready
         const response = await axios.get(`${API}faq/get`);
-        setFaqs(response.data.data);
+        console.log("FAQ API Response:", response.data);
         
-        // Placeholder for now
-        setFaqs([]);
+        if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+          // Only set from API if we get actual data
+          setFaqs(response.data.data);
+          console.log("Set FAQs from API:", response.data.data);
+        } else {
+          console.log("No FAQ data from API, keeping localStorage data");
+        }
       } catch (error) {
         console.error("Error fetching FAQs:", error);
+        // Keep localStorage data if API fails
       }
     };
     fetchFAQs();
-  },[]);
+  }, []);
 
   // Filter courses based on selected category
   useEffect(() => {
@@ -110,7 +136,7 @@ const FAQPage = () => {
       question: formData.question,
       answer: formData.answer
     };
-    // setCount(count ++);
+
     setTempFAQs(prev => [...prev, newFAQ]);
     setFormData(prev => ({ ...prev, question: "", answer: "" }));
     alert("FAQ added to list! Add more or submit all FAQs.");
@@ -128,11 +154,15 @@ const FAQPage = () => {
         faq: tempFAQs
       };
 
+      console.log("Sending FAQ data:", faqData);
+
       const response = await axios.post(`${API}faq/add`, faqData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
+
+      console.log("FAQ Add Response:", response.data);
 
       // Add to local state for immediate display
       const newFAQsWithMeta = tempFAQs.map((faq, index) => ({
@@ -143,7 +173,7 @@ const FAQPage = () => {
         courseId: formData.courseId,
         createdAt: new Date().toISOString()
       }));
-    //   setCount(0);
+
       setFaqs(prev => [...prev, ...newFAQsWithMeta]);
       setTempFAQs([]);
       setFormData({ categoryName: "", courseName: "", courseId: "", question: "", answer: "" });
@@ -152,18 +182,33 @@ const FAQPage = () => {
 
     } catch (error) {
       console.error("Error adding FAQs:", error);
-      alert("Failed to add FAQs. Please try again.");
+      
+      // Even if API fails, save locally for persistence
+      const newFAQsWithMeta = tempFAQs.map((faq, index) => ({
+        id: Date.now() + index,
+        ...faq,
+        categoryName: formData.categoryName,
+        courseName: formData.courseName,
+        courseId: formData.courseId,
+        createdAt: new Date().toISOString()
+      }));
+
+      setFaqs(prev => [...prev, ...newFAQsWithMeta]);
+      setTempFAQs([]);
+      setFormData({ categoryName: "", courseName: "", courseId: "", question: "", answer: "" });
+      setShowForm(false);
+      alert(`${tempFAQs.length} FAQs saved locally!`);
     }
   };
 
   const handleEdit = (index) => {
     const faq = faqs[index];
     setFormData({
-      categoryName: faq.categoryName,
-      courseName: faq.courseName,
-      courseId: faq.courseId,
-      question: faq.question,
-      answer: faq.answer
+      categoryName: faq.categoryName || "",
+      courseName: faq.courseName || "",
+      courseId: faq.courseId || "",
+      question: faq.question || "",
+      answer: faq.answer || ""
     });
     setEditIndex(index);
     setShowForm(true);
@@ -176,11 +221,15 @@ const FAQPage = () => {
 
     try {
       const faqId = faqs[index].id;
-      // API call to delete FAQ
+      // API call to delete FAQ (uncomment when ready)
       // await axios.delete(`${API}faq/delete`, { data: { faqId } });
 
       const updatedFAQs = faqs.filter((_, i) => i !== index);
       setFaqs(updatedFAQs);
+      
+      // Update localStorage
+      localStorage.setItem('faqs', JSON.stringify(updatedFAQs));
+      
       alert("FAQ deleted successfully!");
 
       if (editIndex === index) {
@@ -200,14 +249,24 @@ const FAQPage = () => {
   };
 
   const filteredFAQs = faqs.filter((faq) =>
-    faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    faq.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    faq.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    faq.courseName.toLowerCase().includes(searchTerm.toLowerCase())
+    (faq.question && faq.question.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (faq.answer && faq.answer.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (faq.categoryName && faq.categoryName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (faq.courseName && faq.courseName.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const toggleFAQ = (index) => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
+  };
+
+  // Clear all FAQs function (for testing)
+  const clearAllFAQs = () => {
+    const confirmClear = window.confirm("Are you sure you want to clear all FAQs?");
+    if (confirmClear) {
+      setFaqs([]);
+      localStorage.removeItem('faqs');
+      alert("All FAQs cleared!");
+    }
   };
 
   return (
@@ -216,18 +275,30 @@ const FAQPage = () => {
       <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
 
         <div className="mb-6 flex justify-between items-center">
-          <button
-            onClick={() => {
-              setShowForm(!showForm);
-              setEditIndex(null);
-              setTempFAQs([]);
-              setFormData({ categoryName: "", courseName: "", courseId: "", question: "", answer: "" });
-            }}
-            className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
-          >
-            <Plus className="w-4 h-4" />
-            {editIndex !== null ? "Edit FAQ" : "Add FAQs"}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                setShowForm(!showForm);
+                setEditIndex(null);
+                setTempFAQs([]);
+                setFormData({ categoryName: "", courseName: "", courseId: "", question: "", answer: "" });
+              }}
+              className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
+            >
+              <Plus className="w-4 h-4" />
+              {editIndex !== null ? "Edit FAQ" : "Add FAQs"}
+            </button>
+            
+            {/* Clear All Button for testing */}
+            {faqs.length > 0 && (
+              <button
+                onClick={clearAllFAQs}
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition text-sm"
+              >
+                Clear All ({faqs.length})
+              </button>
+            )}
+          </div>
           
           {faqs.length > 0 && (
             <div className="relative">
@@ -243,6 +314,7 @@ const FAQPage = () => {
           )}
         </div>
 
+        {/* Rest of your JSX remains the same... */}
         {showForm && (
           <div className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700">
             <h3 className="text-lg font-semibold mb-2">
@@ -358,7 +430,9 @@ const FAQPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className="text-xl font-semibold text-white mb-4">FAQ List</h2>
+          <h2 className="text-xl font-semibold text-white mb-4">
+            FAQ List ({faqs.length} total)
+          </h2>
           
           {filteredFAQs.length === 0 ? (
             <div className="text-center py-8">
@@ -379,10 +453,10 @@ const FAQPage = () => {
                       <div className="flex-1">
                         <div className="flex gap-2 mb-2">
                           <span className="px-2 py-1 bg-indigo-600 text-white text-xs rounded">
-                            {faq.categoryName}
+                            {faq.categoryName || 'No Category'}
                           </span>
                           <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">
-                            {faq.courseName}
+                            {faq.courseName || 'No Course'}
                           </span>
                         </div>
                         <button
@@ -472,10 +546,10 @@ const FAQPage = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <td className="px-6 py-4 text-sm text-gray-300">
-                      {faq.categoryName}
+                      {faq.categoryName || 'No Category'}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-300">
-                      {faq.courseName}
+                      {faq.courseName || 'No Course'}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-100 font-medium max-w-xs">
                       <div className="truncate" title={faq.question}>
