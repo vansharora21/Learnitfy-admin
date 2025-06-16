@@ -6,9 +6,11 @@ import Enrollments from "./pages/Enrollments";
 import Queries from "./pages/Queries";
 import Emails from "./pages/BorcEmail";
 import LoginPage from "./pages/Login-Page";
+import FAQPage from "./pages/FAQ";
 
 
 import { useLocation } from "react-router-dom";
+// import FAQPage from "./pages/FAQ";
 
 function App() {
   const location = useLocation();
@@ -31,6 +33,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/dashboard" element={<Categories />} />
+        <Route path="/FAQ" element={<FAQPage />} />
         <Route path="/Cocat" element={<Courses />} />
         <Route path="/Enroll" element={<Enrollments />} />
         <Route path="/Queries" element={<Queries />} />
