@@ -27,8 +27,6 @@ function App() {
       )}
 
       {!hideSidebar && <Sidebar />}
-
-	  const private_route = 
       
       <Routes>
         <Route path="/" element={<LoginPage />} />
