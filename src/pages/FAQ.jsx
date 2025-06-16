@@ -23,6 +23,7 @@ const FAQPage = () => {
   const [error, setError] = useState("");
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const [tempFAQs, setTempFAQs] = useState([]); // Temporary storage for multiple FAQs
+//   const [count, setCount] = useState(0);
 
   const API = import.meta.env.VITE_BASE_URL_API;
 
@@ -60,8 +61,8 @@ const FAQPage = () => {
     const fetchFAQs = async () => {
       try {
         // Uncomment when API is ready
-        // const response = await axios.get(`${API}faq/get`);
-        // setFaqs(response.data.data);
+        const response = await axios.get(`${API}faq/get`);
+        setFaqs(response.data.data);
         
         // Placeholder for now
         setFaqs([]);
@@ -70,7 +71,7 @@ const FAQPage = () => {
       }
     };
     fetchFAQs();
-  }, []);
+  },[]);
 
   // Filter courses based on selected category
   useEffect(() => {
@@ -109,7 +110,7 @@ const FAQPage = () => {
       question: formData.question,
       answer: formData.answer
     };
-
+    // setCount(count ++);
     setTempFAQs(prev => [...prev, newFAQ]);
     setFormData(prev => ({ ...prev, question: "", answer: "" }));
     alert("FAQ added to list! Add more or submit all FAQs.");
@@ -142,7 +143,7 @@ const FAQPage = () => {
         courseId: formData.courseId,
         createdAt: new Date().toISOString()
       }));
-
+    //   setCount(0);
       setFaqs(prev => [...prev, ...newFAQsWithMeta]);
       setTempFAQs([]);
       setFormData({ categoryName: "", courseName: "", courseId: "", question: "", answer: "" });
