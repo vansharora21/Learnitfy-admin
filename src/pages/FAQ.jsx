@@ -10,6 +10,7 @@ const FAQPage = () => {
   const [formData, setFormData] = useState({
     categoryName: "",
     courseName: "",
+    courseId: "",
     question: "",
     answer: "",
   });
@@ -21,6 +22,7 @@ const FAQPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expandedFAQ, setExpandedFAQ] = useState(null);
+  const [tempFAQs, setTempFAQs] = useState([]); // Temporary storage for multiple FAQs
 
   const API = import.meta.env.VITE_BASE_URL_API;
 
@@ -57,8 +59,8 @@ const FAQPage = () => {
   useEffect(() => {
     const fetchFAQs = async () => {
       try {
-        // API call to fetch FAQs
-        // const response = await axios.get(`${API}admin/get/faqs`);
+        // Uncomment when API is ready
+        // const response = await axios.get(`${API}faq/get`);
         // setFaqs(response.data.data);
         
         // Placeholder for now
@@ -88,57 +90,80 @@ const FAQPage = () => {
       ...prev, 
       [name]: value,
       // Reset course when category changes
-      ...(name === 'categoryName' && { courseName: '' })
+      ...(name === 'categoryName' && { courseName: '', courseId: '' }),
+      // Set courseId when course is selected
+      ...(name === 'courseName' && { 
+        courseId: courseData.find(course => course.courseName === value)?.courseId || ''
+      })
     }));
   };
 
-  const handleAddFAQ = async (e) => {
+  const handleAddFAQToList = (e) => {
     e.preventDefault();
-    if (!formData.categoryName || !formData.courseName || !formData.question || !formData.answer) {
-      alert("Please fill in all required fields");
+    if (!formData.question || !formData.answer) {
+      alert("Please fill in question and answer");
+      return;
+    }
+
+    const newFAQ = {
+      question: formData.question,
+      answer: formData.answer
+    };
+
+    setTempFAQs(prev => [...prev, newFAQ]);
+    setFormData(prev => ({ ...prev, question: "", answer: "" }));
+    alert("FAQ added to list! Add more or submit all FAQs.");
+  };
+
+  const handleSubmitAllFAQs = async () => {
+    if (!formData.courseId || tempFAQs.length === 0) {
+      alert("Please select a course and add at least one FAQ");
       return;
     }
 
     try {
-      // API call to add FAQ
       const faqData = {
+        courseId: formData.courseId,
+        faq: tempFAQs
+      };
+
+      const response = await axios.post(`${API}faq/add`, faqData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // Add to local state for immediate display
+      const newFAQsWithMeta = tempFAQs.map((faq, index) => ({
+        id: Date.now() + index,
+        ...faq,
         categoryName: formData.categoryName,
         courseName: formData.courseName,
-        question: formData.question,
-        answer: formData.answer
-      };
-
-      // const response = await axios.post(`${API}admin/add/faq`, faqData);
-      
-      // For now, add to local state
-      const newFAQ = {
-        id: Date.now(),
-        ...faqData,
+        courseId: formData.courseId,
         createdAt: new Date().toISOString()
-      };
+      }));
 
-      if (editIndex !== null) {
-        const updatedFAQs = [...faqs];
-        updatedFAQs[editIndex] = newFAQ;
-        setFaqs(updatedFAQs);
-        setEditIndex(null);
-        alert("FAQ updated successfully!");
-      } else {
-        setFaqs(prev => [...prev, newFAQ]);
-        alert("FAQ added successfully!");
-      }
-
-      setFormData({ categoryName: "", courseName: "", question: "", answer: "" });
+      setFaqs(prev => [...prev, ...newFAQsWithMeta]);
+      setTempFAQs([]);
+      setFormData({ categoryName: "", courseName: "", courseId: "", question: "", answer: "" });
       setShowForm(false);
+      alert(`${tempFAQs.length} FAQs added successfully!`);
 
     } catch (error) {
-      console.error("Error adding FAQ:", error);
-      alert("Failed to add FAQ. Please try again.");
+      console.error("Error adding FAQs:", error);
+      alert("Failed to add FAQs. Please try again.");
     }
   };
 
   const handleEdit = (index) => {
-    setFormData(faqs[index]);
+    const faq = faqs[index];
+    setFormData({
+      categoryName: faq.categoryName,
+      courseName: faq.courseName,
+      courseId: faq.courseId,
+      question: faq.question,
+      answer: faq.answer
+    });
     setEditIndex(index);
     setShowForm(true);
   };
@@ -151,7 +176,7 @@ const FAQPage = () => {
     try {
       const faqId = faqs[index].id;
       // API call to delete FAQ
-      // await axios.delete(`${API}admin/delete/faq`, { data: { faqId } });
+      // await axios.delete(`${API}faq/delete`, { data: { faqId } });
 
       const updatedFAQs = faqs.filter((_, i) => i !== index);
       setFaqs(updatedFAQs);
@@ -159,13 +184,18 @@ const FAQPage = () => {
 
       if (editIndex === index) {
         setEditIndex(null);
-        setFormData({ categoryName: "", courseName: "", question: "", answer: "" });
+        setFormData({ categoryName: "", courseName: "", courseId: "", question: "", answer: "" });
         setShowForm(false);
       }
     } catch (error) {
       console.error("Error deleting FAQ:", error);
       alert("Failed to delete FAQ. Please try again.");
     }
+  };
+
+  const removeTempFAQ = (index) => {
+    const updatedTempFAQs = tempFAQs.filter((_, i) => i !== index);
+    setTempFAQs(updatedTempFAQs);
   };
 
   const filteredFAQs = faqs.filter((faq) =>
@@ -189,12 +219,13 @@ const FAQPage = () => {
             onClick={() => {
               setShowForm(!showForm);
               setEditIndex(null);
-              setFormData({ categoryName: "", courseName: "", question: "", answer: "" });
+              setTempFAQs([]);
+              setFormData({ categoryName: "", courseName: "", courseId: "", question: "", answer: "" });
             }}
             className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
           >
             <Plus className="w-4 h-4" />
-            {editIndex !== null ? "Edit FAQ" : "Add FAQ"}
+            {editIndex !== null ? "Edit FAQ" : "Add FAQs"}
           </button>
           
           {faqs.length > 0 && (
@@ -212,12 +243,9 @@ const FAQPage = () => {
         </div>
 
         {showForm && (
-          <form
-            onSubmit={handleAddFAQ}
-            className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
-          >
+          <div className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700">
             <h3 className="text-lg font-semibold mb-2">
-              {editIndex !== null ? "Edit FAQ" : "Add New FAQ"}
+              {editIndex !== null ? "Edit FAQ" : "Add FAQs for Course"}
             </h3>
             
             {/* Category Selection */}
@@ -277,13 +305,49 @@ const FAQPage = () => {
               required
             />
 
-            <button
-              type="submit"
-              className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-            >
-              {editIndex !== null ? "Update FAQ" : "Add FAQ"}
-            </button>
-          </form>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleAddFAQToList}
+                className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+              >
+                Add FAQ to List
+              </button>
+              
+              {tempFAQs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleSubmitAllFAQs}
+                  className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                >
+                  Submit All FAQs ({tempFAQs.length})
+                </button>
+              )}
+            </div>
+
+            {/* Temporary FAQ List */}
+            {tempFAQs.length > 0 && (
+              <div className="mt-4 p-4 bg-gray-700 rounded-md">
+                <h4 className="text-md font-medium mb-3">FAQs to be submitted:</h4>
+                <div className="space-y-2">
+                  {tempFAQs.map((faq, index) => (
+                    <div key={index} className="flex justify-between items-start p-3 bg-gray-600 rounded">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{faq.question}</p>
+                        <p className="text-gray-300 text-xs mt-1">{faq.answer}</p>
+                      </div>
+                      <button
+                        onClick={() => removeTempFAQ(index)}
+                        className="text-red-400 hover:text-red-300 ml-2"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* FAQ List */}
