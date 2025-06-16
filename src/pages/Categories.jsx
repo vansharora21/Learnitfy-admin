@@ -8,6 +8,7 @@ import {
   ADMIN__DELETE_CATEFGORY,
   ADMIN_GET_CATEGORY,
 } from "../constants";
+import SpinnerLoader from "../components/Loader";
 
 const OverviewPage = () => {
   const [showForm, setShowForm] = useState(false);
@@ -152,6 +153,8 @@ const OverviewPage = () => {
 
           {categories.length > 0 && (
             <div className="relative">
+          <SpinnerLoader/>
+
               <input
                 type="text"
                 placeholder="Search categories..."

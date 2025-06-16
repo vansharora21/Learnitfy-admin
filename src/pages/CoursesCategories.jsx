@@ -330,10 +330,57 @@ const handleAddCourse = async (e) => {
             >
               {editIndex !== null ? "Update Course" : "Save Course"}
             </button>
-
-
           </form>
         )}
+                {showModuleForm && (
+          <form
+            onSubmit={handleAddModule}
+            className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
+          >
+            <h3 className="text-lg font-semibold mb-2">Add Modules for this Course</h3>
+            <input
+              type="text"
+              name="name"
+              placeholder="Module Name"
+              value={moduleData.name}
+              onChange={handleModuleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+              required
+            />
+            <textarea
+              name="description"
+              placeholder="Module Description"
+              value={moduleData.description}
+              onChange={handleModuleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+              rows="2"
+              required
+            />
+            <button onClick={hadleAddModule} className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module {count}</button>
+            <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">Finish & Save Course </button>
+            <ul className="mt-2">
+              {modules.map((mod, idx) => (
+                <li key={idx} className="text-sm text-gray-300">{mod.name} - {mod.description} ({mod.pdf && mod.pdf.name})</li>
+              ))}
+            </ul>
+          </form>
+        )}
+        {sendPdf ?
+          <form
+            onSubmit={handleAddBrochurePdf}>
+            <input
+              type="file"
+              name="pdf"
+              accept="application/pdf"
+              className="bg-gray-700 border px-4 py-2 rounded-md text-white"
+              onChange={handlebroturePDF}
+              required
+            />
+            <button
+              className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
+              type="submit">send pdf</button>
+          </form>
+          : ""}
         <motion.div
           className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
           initial={{ opacity: 0, y: 20 }}
@@ -391,55 +438,7 @@ const handleAddCourse = async (e) => {
           </div>
         </motion.div>
 
-        {showModuleForm && (
-          <form
-            onSubmit={handleAddModule}
-            className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
-          >
-            <h3 className="text-lg font-semibold mb-2">Add Modules for this Course</h3>
-            <input
-              type="text"
-              name="name"
-              placeholder="Module Name"
-              value={moduleData.name}
-              onChange={handleModuleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-              required
-            />
-            <textarea
-              name="description"
-              placeholder="Module Description"
-              value={moduleData.description}
-              onChange={handleModuleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-              rows="2"
-              required
-            />
-            <button onClick={hadleAddModule} className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module {count}</button>
-            <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">Finish & Save Course </button>
-            <ul className="mt-2">
-              {modules.map((mod, idx) => (
-                <li key={idx} className="text-sm text-gray-300">{mod.name} - {mod.description} ({mod.pdf && mod.pdf.name})</li>
-              ))}
-            </ul>
-          </form>
-        )}
-        {sendPdf ?
-          <form
-            onSubmit={handleAddBrochurePdf}>
-            <input
-              type="file"
-              name="pdf"
-              accept="application/pdf"
-              className="bg-gray-700 border px-4 py-2 rounded-md text-white"
-              onChange={handlebroturePDF}
-              required
-            />
-            <button
-              className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
-              type="submit">send pdf</button>
-          </form>
-          : ""}
+
       </main>
     </div >
   );
