@@ -34,6 +34,7 @@ const CourseCategories = () => {
   const [count, setCount] = useState(0);
   const [getCourseData, setGetCourseData] = useState([]);
   const [broturePdf, setBrochurePdf] = useState(null)
+  const [showPdfForm, setShowPdfForm] = useState(false);
 
   console.log("hjdshjadsjhasd", getCourseData);
 
@@ -54,14 +55,10 @@ const CourseCategories = () => {
   };
 
   const handleAddBrochurePdf = async (e) => {
-    console.log("here ius the add brocture adsd function")
     e.preventDefault();
-
-    // if (!broturePdf) return;
-
     const formData = new FormData();
     formData.append('pdf', broturePdf);
-    formData.append('courseId', courseID);
+    formData.append('courseId', courseID); // Ensure course ID is included
 
     try {
       const response = await axios.post(`${API}admin/upload/pdf`, formData, {
@@ -71,7 +68,8 @@ const CourseCategories = () => {
       });
       console.log('Brochure upload response:', response);
       setSentPdf(false);
-      setShowModuleForm(false)
+      setShowModuleForm(false);
+      setShowPdfForm(false); // Hide PDF form after sending
     } catch (error) {
       console.error('Upload error:', error);
     }
@@ -79,28 +77,28 @@ const CourseCategories = () => {
 
   const DeleteCourse = async (courseId) => {
     try {
-      const deleteResponse = await axios.delete(`${API}admin/delete/course`, {
+      await axios.delete(`${API}admin/delete/course`, {
         data: { courseId },
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json"
         }
       });
-
-      const updatedCourseData = getCourseData.filter(course => course.categoryId !== categoryId);
+      const updatedCourseData = getCourseData.filter(course => course.courseId !== courseId);
       setGetCourseData(updatedCourseData);
-      console.log("Remaining courses after deletion:", deleteResponse);
-
+      console.log("Course deleted successfully:", deleteResponse);
     } catch (error) {
-      console.error("Error adding course:", error.message);
+      console.error("Error deleting course:", error.message);
     }
   };
+  
+  
 
   const AddCoursesAPI = async () => {
     const data = new FormData();
     data.append("categoryName", formData.categoryName)
     data.append("courseName", formData.name)
-    data.appennd("description", formData.description)
+    data.append("description", formData.description)
 
     try {
       const response = await axios.post(`${API}admin/add/course`, data, {
@@ -158,9 +156,13 @@ const handleAddCourse = async (e) => {
         'Content-Type': 'multipart/form-data',
       },
     });
-
-    setCourseData(response.data.data);
-    setCourseID(response.data.data.courseId);
+    const newCourse = response.data.data;
+    setCourseData(newCourse);
+    setCourseID(newCourse.courseId);
+    
+    // Add new course to UI immediately
+    setGetCourseData(prev => [...prev, newCourse]);
+    
   } catch (error) {
     console.error("Error adding course:", error.message);
     setError("Failed to add course");
@@ -171,6 +173,7 @@ const handleAddCourse = async (e) => {
   setShowModuleForm(true);
   setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
   setShowForm(false);
+  setSentPdf(true);
 };
 
 
@@ -193,7 +196,8 @@ const handleAddCourse = async (e) => {
 
   const handleFinishModules = async () => {
     setCount(0);
-    setSentPdf(true)
+    setSentPdf(true);
+    setShowPdfForm(prev => !prev); // Toggle the visibility of the PDF form
   };
 
   const handleEdit = (index) => {
@@ -357,7 +361,27 @@ const handleAddCourse = async (e) => {
               required
             />
             <button onClick={hadleAddModule} className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module {count}</button>
-            <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">Finish & Save Course </button>
+            <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">
+              Finish & Save Course
+            </button>
+            {showPdfForm && (
+              <form onSubmit={handleAddBrochurePdf} className="mt-4">
+                <input
+                  type="file"
+                  name="pdf"
+                  accept="application/pdf"
+                  className="bg-gray-700 border px-4 py-2 rounded-md text-white"
+                  onChange={handlebroturePDF}
+                  required
+                />
+                <button
+                  className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                  type="submit"
+                >
+                  Send PDF
+                </button>
+              </form>
+            )}
             <ul className="mt-2">
               {modules.map((mod, idx) => (
                 <li key={idx} className="text-sm text-gray-300">{mod.name} - {mod.description} ({mod.pdf && mod.pdf.name})</li>
@@ -365,22 +389,6 @@ const handleAddCourse = async (e) => {
             </ul>
           </form>
         )}
-        {sendPdf ?
-          <form
-            onSubmit={handleAddBrochurePdf}>
-            <input
-              type="file"
-              name="pdf"
-              accept="application/pdf"
-              className="bg-gray-700 border px-4 py-2 rounded-md text-white"
-              onChange={handlebroturePDF}
-              required
-            />
-            <button
-              className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
-              type="submit">send pdf</button>
-          </form>
-          : ""}
         <motion.div
           className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
           initial={{ opacity: 0, y: 20 }}

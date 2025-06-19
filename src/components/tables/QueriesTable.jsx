@@ -121,7 +121,7 @@ const QueriesTable = () => {
 								<th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Email</th>
 								<th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Phone</th>
 								<th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Details</th>
-								<th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
+								{/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th> */}
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-gray-700">
@@ -153,7 +153,7 @@ const QueriesTable = () => {
 												)}
 											</button>
 										</td>
-										<td className="px-6 py-4 text-sm text-gray-300">
+										{/* <td className="px-6 py-4 text-sm text-gray-300">
 											<button className="text-indigo-400 hover:text-indigo-300 mr-3">
 												<Pencil size={18} />
 											</button>
@@ -163,7 +163,7 @@ const QueriesTable = () => {
 											>
 												<Trash size={18} />
 											</button>
-										</td>
+										</td> */}
 									</tr>
 
 									<AnimatePresence>
