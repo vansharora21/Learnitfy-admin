@@ -27,6 +27,28 @@ const CourseDetails = () => {
 
   const API = import.meta.env.VITE_BASE_URL_API;
 
+  // Load course details from localStorage on component mount
+  useEffect(() => {
+    const savedDetails = localStorage.getItem('courseDetails');
+    if (savedDetails) {
+      try {
+        const parsedDetails = JSON.parse(savedDetails);
+        setCourseDetails(parsedDetails);
+        console.log("Loaded course details from localStorage:", parsedDetails);
+      } catch (error) {
+        console.error("Error parsing localStorage course details:", error);
+      }
+    }
+  }, []);
+
+  // Save course details to localStorage whenever state changes
+  useEffect(() => {
+    if (courseDetails.length > 0) {
+      localStorage.setItem('courseDetails', JSON.stringify(courseDetails));
+      console.log("Saved course details to localStorage:", courseDetails);
+    }
+  }, [courseDetails]);
+
   // Fetch Categories
   useEffect(() => {
     const fetchCategories = async () => {
@@ -60,16 +82,17 @@ const CourseDetails = () => {
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
-        const response = await axios.get(`${API}add/activities`);
+        const response = await axios.get(`${API}/add/activities`);
         console.log("Course Details API Response:", response.data);
         
-        if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
           setCourseDetails(response.data.data);
           console.log("Set course details from API:", response.data.data);
+        } else {
+          console.log("No course details data from API, keeping localStorage data");
         }
       } catch (error) {
         console.error("Error fetching course details:", error);
-        setError("Failed to fetch course details");
       }
     };
     fetchCourseDetails();
@@ -130,7 +153,7 @@ const CourseDetails = () => {
           id: courseDetails[editIndex].id
         };
 
-        const response = await axios.put(`${API}add/activities`, updateData, {
+        const response = await axios.put(`${API}course-details/update`, updateData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -138,16 +161,18 @@ const CourseDetails = () => {
 
         console.log("Course Details Update Response:", response.data);
 
-        // Refresh data from API after update
-        const refreshResponse = await axios.get(`${API}add/activities`);
-        if (refreshResponse.data && refreshResponse.data.data) {
-          setCourseDetails(refreshResponse.data.data);
-        }
-
+        const updatedDetails = [...courseDetails];
+        updatedDetails[editIndex] = {
+          ...courseDetailData,
+          id: courseDetails[editIndex].id,
+          createdAt: courseDetails[editIndex].createdAt,
+          updatedAt: new Date().toISOString()
+        };
+        setCourseDetails(updatedDetails);
         alert("Course details updated successfully!");
       } else {
         // Add new course detail - POST API call
-        const response = await axios.post(`${API}add/activities`, courseDetailData, {
+        const response = await axios.post(`${API}course-details/add`, courseDetailData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -155,12 +180,15 @@ const CourseDetails = () => {
 
         console.log("Course Details Add Response:", response.data);
 
-        // Refresh data from API after adding
-        const refreshResponse = await axios.get(`${API}add/activities`);
-        if (refreshResponse.data && refreshResponse.data.data) {
-          setCourseDetails(refreshResponse.data.data);
-        }
+        // Create new course detail with API response data
+        const newCourseDetail = {
+          id: response.data.data?.id || Date.now(),
+          ...courseDetailData,
+          createdAt: response.data.data?.createdAt || new Date().toISOString(),
+          updatedAt: response.data.data?.updatedAt || new Date().toISOString()
+        };
 
+        setCourseDetails(prev => [...prev, newCourseDetail]);
         alert("Course details added successfully!");
       }
 
@@ -187,6 +215,40 @@ const CourseDetails = () => {
       } else {
         alert("An unexpected error occurred. Please try again.");
       }
+
+      // Save locally as fallback if API fails
+      const newCourseDetail = {
+        id: Date.now(),
+        ...formData,
+        numberOfModules: parseInt(formData.numberOfModules),
+        createdAt: new Date().toISOString(),
+        isLocal: true // Flag to indicate this is stored locally
+      };
+
+      if (editIndex !== null) {
+        const updatedDetails = [...courseDetails];
+        updatedDetails[editIndex] = {
+          ...newCourseDetail,
+          id: courseDetails[editIndex].id,
+          createdAt: courseDetails[editIndex].createdAt
+        };
+        setCourseDetails(updatedDetails);
+        alert("Course details updated locally (API failed)!");
+      } else {
+        setCourseDetails(prev => [...prev, newCourseDetail]);
+        alert("Course details saved locally (API failed)!");
+      }
+
+      setFormData({ 
+        categoryName: "", 
+        courseName: "", 
+        courseId: "", 
+        description: "", 
+        duration: "", 
+        numberOfModules: "" 
+      });
+      setEditIndex(null);
+      setShowForm(false);
     } finally {
       setSubmitting(false);
     }
@@ -215,7 +277,7 @@ const CourseDetails = () => {
       const detailId = courseDetails[index].id;
       
       // API call to delete course detail
-      const response = await axios.delete(`${API}add/activities`, { 
+      const response = await axios.delete(`${API}course-details/delete`, { 
         data: { id: detailId },
         headers: {
           'Content-Type': 'application/json'
@@ -224,11 +286,11 @@ const CourseDetails = () => {
 
       console.log("Course Details Delete Response:", response.data);
 
-      // Refresh data from API after deletion
-      const refreshResponse = await axios.get(`${API}add/activities`);
-      if (refreshResponse.data && refreshResponse.data.data) {
-        setCourseDetails(refreshResponse.data.data);
-      }
+      const updatedDetails = courseDetails.filter((_, i) => i !== index);
+      setCourseDetails(updatedDetails);
+      
+      // Update localStorage
+      localStorage.setItem('courseDetails', JSON.stringify(updatedDetails));
       
       alert("Course details deleted successfully!");
 
@@ -272,6 +334,16 @@ const CourseDetails = () => {
     return description.split('\n').filter(line => line.trim() !== '');
   };
 
+  // Clear all course details function (for testing)
+  const clearAllDetails = () => {
+    const confirmClear = window.confirm("Are you sure you want to clear all course details?");
+    if (confirmClear) {
+      setCourseDetails([]);
+      localStorage.removeItem('courseDetails');
+      alert("All course details cleared!");
+    }
+  };
+
   return (
     <div className="flex-1 overflow-auto relative z-10">
       <Header title="Course Details Management" />
@@ -298,6 +370,16 @@ const CourseDetails = () => {
               <Plus className="w-4 h-4" />
               {editIndex !== null ? "Edit Course Details" : "Add Course Details"}
             </button>
+            
+            {/* Clear All Button for testing */}
+            {courseDetails.length > 0 && (
+              <button
+                onClick={clearAllDetails}
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition text-sm"
+              >
+                Clear All ({courseDetails.length})
+              </button>
+            )}
           </div>
           
           {courseDetails.length > 0 && (
@@ -313,20 +395,6 @@ const CourseDetails = () => {
             </div>
           )}
         </div>
-
-        {/* Error Display */}
-        {error && (
-          <div className="mb-4 p-4 bg-red-600 bg-opacity-20 border border-red-600 rounded-lg">
-            <p className="text-red-400">{error}</p>
-          </div>
-        )}
-
-        {/* Loading Display */}
-        {loading && (
-          <div className="mb-4 p-4 bg-blue-600 bg-opacity-20 border border-blue-600 rounded-lg">
-            <p className="text-blue-400">Loading...</p>
-          </div>
-        )}
 
         {/* Form */}
         {showForm && (
@@ -490,6 +558,11 @@ const CourseDetails = () => {
                           <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">
                             {detail.numberOfModules} Modules
                           </span>
+                          {detail.isLocal && (
+                            <span className="px-2 py-1 bg-yellow-600 text-white text-xs rounded">
+                              Local
+                            </span>
+                          )}
                         </div>
                         <button
                           onClick={() => toggleDetail(index)}
