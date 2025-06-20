@@ -11,9 +11,13 @@ const CourseDetails = () => {
     categoryName: "",
     courseName: "",
     courseId: "",
-    description: "",
     duration: "",
-    numberOfModules: "",
+    noOfModules: "",
+    activities: "",
+    notes1: "",
+    notes2: "",
+    notes3: "",
+    notes4: "",
   });
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,30 +28,9 @@ const CourseDetails = () => {
   const [error, setError] = useState("");
   const [expandedDetail, setExpandedDetail] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [tempCourseDetails, setTempCourseDetails] = useState([]);
 
   const API = import.meta.env.VITE_BASE_URL_API;
-
-  // Load course details from localStorage on component mount
-  useEffect(() => {
-    const savedDetails = localStorage.getItem('courseDetails');
-    if (savedDetails) {
-      try {
-        const parsedDetails = JSON.parse(savedDetails);
-        setCourseDetails(parsedDetails);
-        console.log("Loaded course details from localStorage:", parsedDetails);
-      } catch (error) {
-        console.error("Error parsing localStorage course details:", error);
-      }
-    }
-  }, []);
-
-  // Save course details to localStorage whenever state changes
-  useEffect(() => {
-    if (courseDetails.length > 0) {
-      localStorage.setItem('courseDetails', JSON.stringify(courseDetails));
-      console.log("Saved course details to localStorage:", courseDetails);
-    }
-  }, [courseDetails]);
 
   // Fetch Categories
   useEffect(() => {
@@ -82,17 +65,16 @@ const CourseDetails = () => {
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
-        const response = await axios.get(`${API}/add/activities`);
+        const response = await axios.get(`${API}add/activities`);
         console.log("Course Details API Response:", response.data);
         
-        if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+        if (response.data && response.data.data && Array.isArray(response.data.data)) {
           setCourseDetails(response.data.data);
           console.log("Set course details from API:", response.data.data);
-        } else {
-          console.log("No course details data from API, keeping localStorage data");
         }
       } catch (error) {
         console.error("Error fetching course details:", error);
+        setError("Failed to fetch course details");
       }
     };
     fetchCourseDetails();
@@ -124,134 +106,111 @@ const CourseDetails = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleAddCourseToList = (e) => {
     e.preventDefault();
     
-    if (!formData.categoryName || !formData.courseName || !formData.description || !formData.duration || !formData.numberOfModules) {
-      alert("Please fill in all fields");
+    if (!formData.categoryName || !formData.courseName || !formData.duration || !formData.noOfModules || !formData.activities) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    const newCourseDetail = {
+      courseId: formData.courseId,
+      categoryName: formData.categoryName,
+      courseName: formData.courseName,
+      moreAboutCourse: {
+        duration: formData.duration,
+        noOfModules: parseInt(formData.noOfModules),
+        Activities: parseInt(formData.activities)
+      },
+      notes: {
+        notes1: formData.notes1 || "",
+        notes2: formData.notes2 || "",
+        notes3: formData.notes3 || "",
+        notes4: formData.notes4 || ""
+      }
+    };
+
+    setTempCourseDetails(prev => [...prev, newCourseDetail]);
+    
+    // Reset form fields but keep category selection for easier multiple course entry
+    setFormData(prev => ({ 
+      ...prev, 
+      courseName: "", 
+      courseId: "", 
+      duration: "", 
+      noOfModules: "", 
+      activities: "",
+      notes1: "",
+      notes2: "",
+      notes3: "",
+      notes4: ""
+    }));
+    
+    alert("Course details added to list! Add more courses or submit all course details.");
+  };
+
+  const handleSubmitAllCourseDetails = async () => {
+    if (tempCourseDetails.length === 0) {
+      alert("Please add at least one course detail");
       return;
     }
 
     setSubmitting(true);
 
     try {
-      const courseDetailData = {
-        courseId: formData.courseId,
-        categoryName: formData.categoryName,
-        courseName: formData.courseName,
-        description: formData.description,
-        duration: formData.duration,
-        numberOfModules: parseInt(formData.numberOfModules)
-      };
-
-      console.log("Sending course detail data:", courseDetailData);
-
-      if (editIndex !== null) {
-        // Update existing course detail
-        const updateData = {
-          ...courseDetailData,
-          id: courseDetails[editIndex].id
-        };
-
-        const response = await axios.put(`${API}course-details/update`, updateData, {
+      // Submit each course detail individually
+      const promises = tempCourseDetails.map(courseDetail => 
+        axios.post(`${API}add/activities`, courseDetail, {
           headers: {
             'Content-Type': 'application/json'
           }
-        });
+        })
+      );
 
-        console.log("Course Details Update Response:", response.data);
+      const responses = await Promise.all(promises);
+      console.log("All Course Details Add Responses:", responses);
 
-        const updatedDetails = [...courseDetails];
-        updatedDetails[editIndex] = {
-          ...courseDetailData,
-          id: courseDetails[editIndex].id,
-          createdAt: courseDetails[editIndex].createdAt,
-          updatedAt: new Date().toISOString()
-        };
-        setCourseDetails(updatedDetails);
-        alert("Course details updated successfully!");
-      } else {
-        // Add new course detail - POST API call
-        const response = await axios.post(`${API}course-details/add`, courseDetailData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        console.log("Course Details Add Response:", response.data);
-
-        // Create new course detail with API response data
-        const newCourseDetail = {
-          id: response.data.data?.id || Date.now(),
-          ...courseDetailData,
-          createdAt: response.data.data?.createdAt || new Date().toISOString(),
-          updatedAt: response.data.data?.updatedAt || new Date().toISOString()
-        };
-
-        setCourseDetails(prev => [...prev, newCourseDetail]);
-        alert("Course details added successfully!");
+      // Refresh data from API after adding all
+      const refreshResponse = await axios.get(`${API}add/activities`);
+      if (refreshResponse.data && refreshResponse.data.data) {
+        setCourseDetails(refreshResponse.data.data);
       }
 
-      // Reset form
+      setTempCourseDetails([]);
       setFormData({ 
         categoryName: "", 
         courseName: "", 
         courseId: "", 
-        description: "", 
         duration: "", 
-        numberOfModules: "" 
+        noOfModules: "", 
+        activities: "",
+        notes1: "",
+        notes2: "",
+        notes3: "",
+        notes4: ""
       });
-      setEditIndex(null);
       setShowForm(false);
+      alert(`${tempCourseDetails.length} course details added successfully!`);
 
     } catch (error) {
-      console.error("Error saving course details:", error);
+      console.error("Error adding course details:", error);
       
-      // Show specific error message
       if (error.response) {
-        alert(`Error: ${error.response.data?.message || 'Failed to save course details'}`);
+        alert(`Error: ${error.response.data?.message || 'Failed to save some course details'}`);
       } else if (error.request) {
         alert("Network error. Please check your connection and try again.");
       } else {
         alert("An unexpected error occurred. Please try again.");
       }
-
-      // Save locally as fallback if API fails
-      const newCourseDetail = {
-        id: Date.now(),
-        ...formData,
-        numberOfModules: parseInt(formData.numberOfModules),
-        createdAt: new Date().toISOString(),
-        isLocal: true // Flag to indicate this is stored locally
-      };
-
-      if (editIndex !== null) {
-        const updatedDetails = [...courseDetails];
-        updatedDetails[editIndex] = {
-          ...newCourseDetail,
-          id: courseDetails[editIndex].id,
-          createdAt: courseDetails[editIndex].createdAt
-        };
-        setCourseDetails(updatedDetails);
-        alert("Course details updated locally (API failed)!");
-      } else {
-        setCourseDetails(prev => [...prev, newCourseDetail]);
-        alert("Course details saved locally (API failed)!");
-      }
-
-      setFormData({ 
-        categoryName: "", 
-        courseName: "", 
-        courseId: "", 
-        description: "", 
-        duration: "", 
-        numberOfModules: "" 
-      });
-      setEditIndex(null);
-      setShowForm(false);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const removeTempCourseDetail = (index) => {
+    const updatedTempDetails = tempCourseDetails.filter((_, i) => i !== index);
+    setTempCourseDetails(updatedTempDetails);
   };
 
   const handleEdit = (index) => {
@@ -260,9 +219,13 @@ const CourseDetails = () => {
       categoryName: detail.categoryName || "",
       courseName: detail.courseName || "",
       courseId: detail.courseId || "",
-      description: detail.description || "",
-      duration: detail.duration || "",
-      numberOfModules: detail.numberOfModules?.toString() || ""
+      duration: detail.moreAboutCourse?.duration || "",
+      noOfModules: detail.moreAboutCourse?.noOfModules?.toString() || "",
+      activities: detail.moreAboutCourse?.Activities?.toString() || "",
+      notes1: detail.notes?.notes1 || "",
+      notes2: detail.notes?.notes2 || "",
+      notes3: detail.notes?.notes3 || "",
+      notes4: detail.notes?.notes4 || ""
     });
     setEditIndex(index);
     setShowForm(true);
@@ -276,8 +239,7 @@ const CourseDetails = () => {
     try {
       const detailId = courseDetails[index].id;
       
-      // API call to delete course detail
-      const response = await axios.delete(`${API}course-details/delete`, { 
+      const response = await axios.delete(`${API}add/activities`, { 
         data: { id: detailId },
         headers: {
           'Content-Type': 'application/json'
@@ -286,11 +248,10 @@ const CourseDetails = () => {
 
       console.log("Course Details Delete Response:", response.data);
 
-      const updatedDetails = courseDetails.filter((_, i) => i !== index);
-      setCourseDetails(updatedDetails);
-      
-      // Update localStorage
-      localStorage.setItem('courseDetails', JSON.stringify(updatedDetails));
+      const refreshResponse = await axios.get(`${API}add/activities`);
+      if (refreshResponse.data && refreshResponse.data.data) {
+        setCourseDetails(refreshResponse.data.data);
+      }
       
       alert("Course details deleted successfully!");
 
@@ -300,9 +261,13 @@ const CourseDetails = () => {
           categoryName: "", 
           courseName: "", 
           courseId: "", 
-          description: "", 
           duration: "", 
-          numberOfModules: "" 
+          noOfModules: "", 
+          activities: "",
+          notes1: "",
+          notes2: "",
+          notes3: "",
+          notes4: ""
         });
         setShowForm(false);
       }
@@ -320,28 +285,12 @@ const CourseDetails = () => {
   const filteredDetails = courseDetails.filter((detail) =>
     (detail.courseName && detail.courseName.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (detail.categoryName && detail.categoryName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (detail.description && detail.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (detail.duration && detail.duration.toLowerCase().includes(searchTerm.toLowerCase()))
+    (detail.moreAboutCourse?.duration && detail.moreAboutCourse.duration.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (detail.notes?.notes1 && detail.notes.notes1.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const toggleDetail = (index) => {
     setExpandedDetail(expandedDetail === index ? null : index);
-  };
-
-  // Format description into bullet points
-  const formatDescription = (description) => {
-    if (!description) return [];
-    return description.split('\n').filter(line => line.trim() !== '');
-  };
-
-  // Clear all course details function (for testing)
-  const clearAllDetails = () => {
-    const confirmClear = window.confirm("Are you sure you want to clear all course details?");
-    if (confirmClear) {
-      setCourseDetails([]);
-      localStorage.removeItem('courseDetails');
-      alert("All course details cleared!");
-    }
   };
 
   return (
@@ -355,31 +304,26 @@ const CourseDetails = () => {
               onClick={() => {
                 setShowForm(!showForm);
                 setEditIndex(null);
+                setTempCourseDetails([]);
                 setFormData({ 
                   categoryName: "", 
                   courseName: "", 
                   courseId: "", 
-                  description: "", 
                   duration: "", 
-                  numberOfModules: "" 
+                  noOfModules: "", 
+                  activities: "",
+                  notes1: "",
+                  notes2: "",
+                  notes3: "",
+                  notes4: ""
                 });
               }}
               className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
               disabled={submitting}
             >
               <Plus className="w-4 h-4" />
-              {editIndex !== null ? "Edit Course Details" : "Add Course Details"}
+              {editIndex !== null ? "Edit Course Details" : "Add Multiple Course Details"}
             </button>
-            
-            {/* Clear All Button for testing */}
-            {courseDetails.length > 0 && (
-              <button
-                onClick={clearAllDetails}
-                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition text-sm"
-              >
-                Clear All ({courseDetails.length})
-              </button>
-            )}
           </div>
           
           {courseDetails.length > 0 && (
@@ -396,115 +340,197 @@ const CourseDetails = () => {
           )}
         </div>
 
+        {/* Error Display */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-600 bg-opacity-20 border border-red-600 rounded-lg">
+            <p className="text-red-400">{error}</p>
+          </div>
+        )}
+
+        {/* Loading Display */}
+        {loading && (
+          <div className="mb-4 p-4 bg-blue-600 bg-opacity-20 border border-blue-600 rounded-lg">
+            <p className="text-blue-400">Loading...</p>
+          </div>
+        )}
+
         {/* Form */}
         {showForm && (
           <div className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700">
             <h3 className="text-lg font-semibold mb-2">
-              {editIndex !== null ? "Edit Course Details" : "Add Course Details"}
+              {editIndex !== null ? "Edit Course Details" : "Add Multiple Course Details"}
             </h3>
             
-            <form onSubmit={handleSubmit}>
-              {/* Category Selection */}
-              <select
-                name="categoryName"
-                value={formData.categoryName}
-                onChange={handleChange}
-                className="w-full mb-4 bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-                disabled={submitting}
-              >
-                <option value="" disabled>Select Category</option>
-                {categoryData.map((cat, index) => (
-                  <option key={index} value={cat.categoryName}>
-                    {cat.categoryName}
-                  </option>
-                ))}
-              </select>
-
-              {/* Course Selection */}
-              <select
-                name="courseName"
-                value={formData.courseName}
-                onChange={handleChange}
-                className="w-full mb-4 bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-                disabled={!formData.categoryName || submitting}
-              >
-                <option value="" disabled>
-                  {formData.categoryName ? "Select Course" : "Select Category First"}
-                </option>
-                {filteredCourses.map((course, index) => (
-                  <option key={index} value={course.courseName}>
-                    {course.courseName}
-                  </option>
-                ))}
-              </select>
-
-              {/* Description */}
-              <textarea
-                name="description"
-                placeholder="Course Description (Enter each point on a new line for bullet points)"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full mb-4 bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                rows="6"
-                required
-                disabled={submitting}
-              />
-
-              {/* Duration */}
-              <input
-                type="text"
-                name="duration"
-                placeholder="Course Duration (e.g., 8 weeks, 3 months)"
-                value={formData.duration}
-                onChange={handleChange}
-                className="w-full mb-4 bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-                disabled={submitting}
-              />
-
-              {/* Number of Modules */}
-              <input
-                type="number"
-                name="numberOfModules"
-                placeholder="Number of Modules"
-                value={formData.numberOfModules}
-                onChange={handleChange}
-                className="w-full mb-4 bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                min="1"
-                required
-                disabled={submitting}
-              />
-
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            <form onSubmit={handleAddCourseToList}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Category Selection */}
+                <select
+                  name="categoryName"
+                  value={formData.categoryName}
+                  onChange={handleChange}
+                  className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
                   disabled={submitting}
                 >
-                  {submitting ? (
-                    <>
-                      <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
-                      {editIndex !== null ? "Updating..." : "Adding..."}
-                    </>
-                  ) : (
-                    editIndex !== null ? "Update Course Details" : "Add Course Details"
-                  )}
+                  <option value="" disabled>Select Category</option>
+                  {categoryData.map((cat, index) => (
+                    <option key={index} value={cat.categoryName}>
+                      {cat.categoryName}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Course Selection */}
+                <select
+                  name="courseName"
+                  value={formData.courseName}
+                  onChange={handleChange}
+                  className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                  disabled={!formData.categoryName || submitting}
+                >
+                  <option value="" disabled>
+                    {formData.categoryName ? "Select Course" : "Select Category First"}
+                  </option>
+                  {filteredCourses.map((course, index) => (
+                    <option key={index} value={course.courseName}>
+                      {course.courseName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* More About Course Section */}
+              <div className="mt-6">
+                <h4 className="text-md font-medium mb-3 text-indigo-300">More About Course</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <input
+                    type="text"
+                    name="duration"
+                    placeholder="Duration (e.g., 9 Months)"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                    disabled={submitting}
+                  />
+
+                  <input
+                    type="number"
+                    name="noOfModules"
+                    placeholder="Number of Modules"
+                    value={formData.noOfModules}
+                    onChange={handleChange}
+                    className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    min="1"
+                    required
+                    disabled={submitting}
+                  />
+
+                  <input
+                    type="number"
+                    name="activities"
+                    placeholder="Number of Activities"
+                    value={formData.activities}
+                    onChange={handleChange}
+                    className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    min="1"
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+              </div>
+
+              {/* Notes Section */}
+              <div className="mt-6">
+                <h4 className="text-md font-medium mb-3 text-green-300">Course Notes</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    name="notes1"
+                    placeholder="Note 1 (e.g., Live classes will be conducted weekly)"
+                    value={formData.notes1}
+                    onChange={handleChange}
+                    className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    disabled={submitting}
+                  />
+
+                  <input
+                    type="text"
+                    name="notes2"
+                    placeholder="Note 2 (e.g., Includes practical assignments)"
+                    value={formData.notes2}
+                    onChange={handleChange}
+                    className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    disabled={submitting}
+                  />
+
+                  <input
+                    type="text"
+                    name="notes3"
+                    placeholder="Note 3 (e.g., Access to recorded sessions)"
+                    value={formData.notes3}
+                    onChange={handleChange}
+                    className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    disabled={submitting}
+                  />
+
+                  <input
+                    type="text"
+                    name="notes4"
+                    placeholder="Note 4 (e.g., Certification after completion)"
+                    value={formData.notes4}
+                    onChange={handleChange}
+                    className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    disabled={submitting}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+                  disabled={submitting}
+                >
+                  Add Course to List
                 </button>
                 
+                {tempCourseDetails.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSubmitAllCourseDetails}
+                    className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition disabled:opacity-50"
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                        Submitting...
+                      </>
+                    ) : (
+                      `Submit All Course Details (${tempCourseDetails.length})`
+                    )}
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={() => {
                     setShowForm(false);
                     setEditIndex(null);
+                    setTempCourseDetails([]);
                     setFormData({ 
                       categoryName: "", 
                       courseName: "", 
                       courseId: "", 
-                      description: "", 
                       duration: "", 
-                      numberOfModules: "" 
+                      noOfModules: "", 
+                      activities: "",
+                      notes1: "",
+                      notes2: "",
+                      notes3: "",
+                      notes4: ""
                     });
                   }}
                   className="px-5 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
@@ -514,6 +540,42 @@ const CourseDetails = () => {
                 </button>
               </div>
             </form>
+
+            {/* Temporary Course Details List */}
+            {tempCourseDetails.length > 0 && (
+              <div className="mt-6 p-4 bg-gray-700 rounded-md">
+                <h4 className="text-md font-medium mb-3">Course Details to be submitted ({tempCourseDetails.length}):</h4>
+                <div className="space-y-3">
+                  {tempCourseDetails.map((detail, index) => (
+                    <div key={index} className="flex justify-between items-start p-3 bg-gray-600 rounded">
+                      <div className="flex-1">
+                        <div className="flex gap-2 mb-2">
+                          <span className="px-2 py-1 bg-indigo-600 text-white text-xs rounded">
+                            {detail.categoryName}
+                          </span>
+                          <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">
+                            {detail.courseName}
+                          </span>
+                          <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded">
+                            {detail.moreAboutCourse.duration}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-300">
+                          <div>Modules: {detail.moreAboutCourse.noOfModules} | Activities: {detail.moreAboutCourse.Activities}</div>
+                          {detail.notes.notes1 && <div className="mt-1">• {detail.notes.notes1}</div>}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeTempCourseDetail(index)}
+                        className="text-red-400 hover:text-red-300 ml-2"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -553,16 +615,14 @@ const CourseDetails = () => {
                             {detail.courseName || 'No Course'}
                           </span>
                           <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded">
-                            {detail.duration}
+                            {detail.moreAboutCourse?.duration}
                           </span>
                           <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">
-                            {detail.numberOfModules} Modules
+                            {detail.moreAboutCourse?.noOfModules} Modules
                           </span>
-                          {detail.isLocal && (
-                            <span className="px-2 py-1 bg-yellow-600 text-white text-xs rounded">
-                              Local
-                            </span>
-                          )}
+                          <span className="px-2 py-1 bg-orange-600 text-white text-xs rounded">
+                            {detail.moreAboutCourse?.Activities} Activities
+                          </span>
                         </div>
                         <button
                           onClick={() => toggleDetail(index)}
@@ -602,18 +662,23 @@ const CourseDetails = () => {
                         className="mt-3 pt-3 border-t border-gray-600"
                       >
                         <div className="text-gray-300">
-                          <h4 className="font-medium mb-2">Course Description:</h4>
-                          <ul className="list-disc list-inside space-y-1 mb-4">
-                            {formatDescription(detail.description).map((point, idx) => (
-                              <li key={idx} className="text-sm">{point}</li>
-                            ))}
-                          </ul>
-                          <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
-                              <span className="font-medium">Duration:</span> {detail.duration}
+                              <h4 className="font-medium mb-2 text-indigo-300">Course Information:</h4>
+                              <div className="space-y-1 text-sm">
+                                <div><span className="font-medium">Duration:</span> {detail.moreAboutCourse?.duration}</div>
+                                <div><span className="font-medium">Modules:</span> {detail.moreAboutCourse?.noOfModules}</div>
+                                <div><span className="font-medium">Activities:</span> {detail.moreAboutCourse?.Activities}</div>
+                              </div>
                             </div>
                             <div>
-                              <span className="font-medium">Modules:</span> {detail.numberOfModules}
+                              <h4 className="font-medium mb-2 text-green-300">Course Notes:</h4>
+                              <ul className="list-disc list-inside space-y-1 text-sm">
+                                {detail.notes?.notes1 && <li>{detail.notes.notes1}</li>}
+                                {detail.notes?.notes2 && <li>{detail.notes.notes2}</li>}
+                                {detail.notes?.notes3 && <li>{detail.notes.notes3}</li>}
+                                {detail.notes?.notes4 && <li>{detail.notes.notes4}</li>}
+                              </ul>
                             </div>
                           </div>
                         </div>
@@ -624,84 +689,6 @@ const CourseDetails = () => {
               ))}
             </div>
           )}
-        </motion.div>
-
-        {/* Course Details Table View */}
-        <motion.div
-          className="mt-8 bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <h2 className="text-xl font-semibold text-white mb-4">Course Details Management Table</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-700">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Course
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Duration
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Modules
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700">
-                {filteredDetails.map((detail, index) => (
-                  <motion.tr
-                    key={detail.id || index}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      {detail.categoryName || 'No Category'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      {detail.courseName || 'No Course'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      {detail.duration}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      {detail.numberOfModules}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-300 max-w-md">
-                      <div className="truncate" title={detail.description}>
-                        {detail.description}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      <button
-                        onClick={() => handleEdit(index)}
-                        className="text-indigo-400 hover:text-indigo-300 mr-2"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(index)}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </motion.div>
       </main>
     </div>
