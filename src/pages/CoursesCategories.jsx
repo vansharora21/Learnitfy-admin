@@ -91,8 +91,8 @@ const CourseCategories = () => {
       console.error("Error deleting course:", error.message);
     }
   };
-  
-  
+
+
 
   const AddCoursesAPI = async () => {
     const data = new FormData();
@@ -141,40 +141,65 @@ const CourseCategories = () => {
 
 const handleAddCourse = async (e) => {
   e.preventDefault();
-  if (!formData.name || !formData.image || !formData.description || !formData.categoryName) return;
+  if (!formData.name || !formData.description || !formData.categoryName) return;
 
-  try {
-    const data = new FormData();
-    data.append("categoryName", formData.categoryName);
-    data.append("courseName", formData.name);
-    data.append("description", formData.description);
-    data.append("price", formData.price || "1000"); // Optional
-    data.append("image", formData.image); 
+  const data = new FormData();
+  data.append("categoryName", formData.categoryName);
+  data.append("courseName", formData.name);
+  data.append("description", formData.description);
+  data.append("price", formData.price || "1000");
 
-    const response = await axios.post(`${API}admin/add/course`, data, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    const newCourse = response.data.data;
-    setCourseData(newCourse);
-    setCourseID(newCourse.courseId);
-    
-    // Add new course to UI immediately
-    setGetCourseData(prev => [...prev, newCourse]);
-    
-  } catch (error) {
-    console.error("Error adding course:", error.message);
-    setError("Failed to add course");
+  if (formData.image) {
+    data.append("image", formData.image);
   }
 
-  setCourses((prev) => [...prev, { ...formData, modules: [] }]);
-  setCurrentCourseIndex(courses.length);
-  setShowModuleForm(true);
-  setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
-  setShowForm(false);
-  setSentPdf(true);
+  try {
+    if (editIndex !== null) {
+      // Editing existing course
+      data.append("courseId", courseID);
+
+      const response = await axios.patch(`${API}admin/update/course`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const updatedCourse = response.data.data;
+      const updatedCourses = [...getCourseData];
+      updatedCourses[editIndex] = { ...updatedCourses[editIndex], ...updatedCourse };
+      setGetCourseData(updatedCourses);
+    } else {
+      // Adding new course
+      const response = await axios.post(`${API}admin/add/course`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const newCourse = response.data.data;
+      setCourseData(newCourse);
+      setCourseID(newCourse.courseId);
+      setGetCourseData(prev => [...prev, newCourse]);
+    }
+
+    // Reset form
+    setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
+    setShowForm(false);
+    setEditIndex(null);
+    setSentPdf(true);
+
+    if (editIndex === null) {
+      setCourses(prev => [...prev, { ...formData, modules: [] }]);
+      setCurrentCourseIndex(courses.length);
+      setShowModuleForm(true);
+    }
+
+  } catch (error) {
+    console.error("Error adding/updating course:", error.message);
+    setError("Failed to save course");
+  }
 };
+
+
 
 
 
@@ -200,11 +225,25 @@ const handleAddCourse = async (e) => {
     setShowPdfForm(prev => !prev); // Toggle the visibility of the PDF form
   };
 
-  const handleEdit = (index) => {
-    setFormData(courses[index]);
-    setEditIndex(index);
-    setShowForm(true);
-  };
+const handleEdit = (courseId) => {
+  const course = getCourseData.find((c) => c.courseId === courseId);
+  const index = getCourseData.findIndex((c) => c.courseId === courseId);
+  if (!course) return;
+
+  setFormData({
+    categoryName: course.categoryName || "",
+    name: course.courseName || "",
+    image: null, // Don't prefill image, just allow replacing
+    description: course.description || "",
+    price: course.price || "",
+  });
+
+  setEditIndex(index);  // Save index for update reference
+  setCourseID(course.courseId);  // Save ID for update request
+  setShowForm(true);
+};
+
+
 
   const handleDelete = (index) => {
     const updated = courses.filter((_, i) => i !== index);
@@ -336,7 +375,7 @@ const handleAddCourse = async (e) => {
             </button>
           </form>
         )}
-                {showModuleForm && (
+        {showModuleForm && (
           <form
             onSubmit={handleAddModule}
             className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
@@ -400,9 +439,9 @@ const handleAddCourse = async (e) => {
               <thead>
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Image</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Course Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Course Description</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -423,15 +462,17 @@ const handleAddCourse = async (e) => {
                     </td>
                     {/* <td className="px-6 py-4 text-sm text-gray-100 font-semibold">{course.name}</td> */}
                     <td className="px-6 py-4 text-sm text-gray-300">{course.categoryName}</td>
+                    <td className="px-6 py-4 text-sm text-gray-300">{course.courseName}</td>
                     <td className="px-6 py-4 text-sm text-gray-300">{course.description}</td>
                     <h5>{course?.courseContent?.moduleTitle}</h5>
                     <td className="px-6 py-4 text-sm text-gray-300">
                       <button
-                        onClick={() => handleEdit(index)}
+                        onClick={() => handleEdit(course.courseId)}
                         className="text-indigo-400 hover:text-indigo-300 mr-2"
                       >
                         <Edit size={18} />
-                      </button>
+                      </button> 
+
                       <button
                         onClick={() => DeleteCourse(course.courseId)}
                         className="text-red-400 hover:text-red-300"
