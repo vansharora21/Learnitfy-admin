@@ -30,6 +30,7 @@ const CourseDetails = () => {
   const [submitting, setSubmitting] = useState(false);
   const [tempCourseDetails, setTempCourseDetails] = useState([]);
 
+  console.log("courseId is here", formData.courseId)
   const API = import.meta.env.VITE_BASE_URL_API;
 
   // Fetch Categories
@@ -67,11 +68,7 @@ const CourseDetails = () => {
       try {
         const response = await axios.get(`${API}add/activities`);
         console.log("Course Details API Response:", response.data);
-        
-        if (response.data && response.data.data && Array.isArray(response.data.data)) {
           setCourseDetails(response.data.data);
-          console.log("Set course details from API:", response.data.data);
-        }
       } catch (error) {
         console.error("Error fetching course details:", error);
         setError("Failed to fetch course details");
@@ -113,6 +110,8 @@ const CourseDetails = () => {
       alert("Please fill in all required fields");
       return;
     }
+
+    // const response = axios.post(`${API}admin/add/activity`)
 
     const newCourseDetail = {
       courseId: formData.courseId,
@@ -161,7 +160,7 @@ const CourseDetails = () => {
     try {
       // Submit each course detail individually
       const promises = tempCourseDetails.map(courseDetail => 
-        axios.post(`${API}add/activities`, courseDetail, {
+        axios.post(`${API}admin/add/activities`, courseDetail, {
           headers: {
             'Content-Type': 'application/json'
           }
