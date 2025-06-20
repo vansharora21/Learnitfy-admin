@@ -79,32 +79,44 @@ const OverviewPage = () => {
 
   const handleAddCategory = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.image || !formData.description) return;
+    if (!formData.name || !formData.description) return;
 
     if (editIndex !== null) {
-      const updated = [...categories];
-      updated[editIndex] = formData;
-      setCategories(updated);
-      setEditIndex(null);
+      handleEdit(); // 👈 call the dynamic edit function
     } else {
-      setCategories((prev) => [...prev, formData]);
+      addCategoryAPI();
     }
-
-    setFormData({ name: "", image: null, description: "" });
-    setShowForm(false);
   };
 
-  const handleEdit = async (categoryId, updatedData) => {
+
+  const handleEdit = async () => {
     try {
+      const updatedData = {
+        categoryId: editIndex,
+        categoryName: formData.name,
+        description: formData.description,
+      };
+
       const response = await axios.patch(
-        `${API}admin/update/category/${categoryId}`,
+        `${API}admin/update/category`,
         updatedData
       );
+
       console.log("Category updated:", response.data);
+
+      // Refresh list
+      const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
+      setCategoryData(res.data.data);
+
+      // Reset
+      setFormData({ name: "", image: null, description: "" });
+      setEditIndex(null);
+      setShowForm(false);
     } catch (error) {
       console.error("Error updating category:", error);
     }
   };
+
 
   const handleDelete = async (categoryId) => {
     try {
@@ -153,7 +165,7 @@ const OverviewPage = () => {
 
           {categories.length > 0 && (
             <div className="relative">
-          <SpinnerLoader/>
+              <SpinnerLoader />
 
               <input
                 type="text"
@@ -272,11 +284,20 @@ const OverviewPage = () => {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-300">
                           <button
-                            onClick={() => handleEdit(cat.categoryId)}
+                            onClick={() => {
+                              setShowForm(true);
+                              setEditIndex(cat.categoryId);
+                              setFormData({
+                                name: cat.categoryName,
+                                image: null,
+                                description: cat.description,
+                              });
+                            }}
                             className="text-indigo-400 hover:text-indigo-300 mr-2"
                           >
                             <Edit size={18} />
                           </button>
+
                           <button
                             onClick={() => handleDelete(cat.categoryId)}
                             className="text-red-400 hover:text-red-300"
