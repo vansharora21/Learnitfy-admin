@@ -7,9 +7,8 @@ import Queries from "./pages/Queries";
 import Emails from "./pages/BorcEmail";
 import LoginPage from "./pages/Login-Page";
 import FAQPage from "./pages/FAQ";
-
-
 import { useLocation } from "react-router-dom";
+import CourseDetails from "./pages/CourseDetails";
 // import FAQPage from "./pages/FAQ";
 
 function App() {
@@ -36,6 +35,7 @@ function App() {
         <Route path="/Enroll" element={<Enrollments />} />
         <Route path="/Queries" element={<Queries />} />
         <Route path="/Emails" element={<Emails />} />
+        <Route path="/details" element={<CourseDetails />} />
       </Routes>
     </div>
   );

@@ -1,4 +1,4 @@
-import { BookMarked , MessageCircleQuestion , Menu,Dock ,  Newspaper, ArchiveRestore  } from "lucide-react";
+import { BookMarked , MessageCircleQuestion , Menu,Dock ,ListCollapse,  Newspaper, ArchiveRestore  } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -9,7 +9,8 @@ const SIDEBAR_ITEMS = [
 	{ name: "FAQ", icon: Dock , color: "#F97316", href: "/FAQ" },
 	{ name: "Enrollments ", icon: ArchiveRestore , color: "#EC4899", href: "/Enroll" },
 	{ name: "Queries", icon: MessageCircleQuestion, color: "#10B981", href: "/Queries" },
-	{ name: "Brochure Emails ", icon: Dock , color: "#F97316", href: "/Emails" }
+	{ name: "Brochure Emails ", icon: Dock , color: "#F97316", href: "/Emails" },
+	{ name: "Course Details ", icon: ListCollapse , color: "#10B981", href: "/details" }
 
 
 ];
