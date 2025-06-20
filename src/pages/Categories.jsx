@@ -7,6 +7,7 @@ import {
   ADMIN__CATEGORY,
   ADMIN__DELETE_CATEFGORY,
   ADMIN_GET_CATEGORY,
+  UPDATE_CATEGORY,
 } from "../constants";
 import SpinnerLoader from "../components/Loader";
 
@@ -82,7 +83,7 @@ const OverviewPage = () => {
     if (!formData.name || !formData.description) return;
 
     if (editIndex !== null) {
-      handleEdit(); // 👈 call the dynamic edit function
+      handleEdit(); 
     } else {
       addCategoryAPI();
     }
@@ -97,9 +98,7 @@ const OverviewPage = () => {
         description: formData.description,
       };
 
-      const response = await axios.patch(
-        `${API}admin/update/category`,
-        updatedData
+      const response = await axios.patch(`${API}${UPDATE_CATEGORY}`,updatedData
       );
 
       console.log("Category updated:", response.data);

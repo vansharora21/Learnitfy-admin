@@ -38,7 +38,7 @@ const CourseDetails = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${API}admin/get/category`);
+        const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
         setCategoryData(res.data.data);
         setLoading(false);
       } catch (err) {
@@ -53,7 +53,7 @@ const CourseDetails = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get(`${API}admin/get/courses`);
+        const response = await axios.get(`${API}${ADMIN_GET_COURSES}`);
         setCourseData(response.data.data.coursesList);
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -66,7 +66,7 @@ const CourseDetails = () => {
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
-        const response = await axios.get(`${API}add/activities`);
+        const response = await axios.get(`${API}${ADD_ACTIVITIYS}`);
         console.log("Course Details API Response:", response.data);
           setCourseDetails(response.data.data);
       } catch (error) {
@@ -77,7 +77,6 @@ const CourseDetails = () => {
     fetchCourseDetails();
   }, []);
 
-  // Filter courses based on selected category
   useEffect(() => {
     if (formData.categoryName) {
       const filtered = courseData.filter(course => 
@@ -94,9 +93,7 @@ const CourseDetails = () => {
     setFormData((prev) => ({ 
       ...prev, 
       [name]: value,
-      // Reset course when category changes
       ...(name === 'categoryName' && { courseName: '', courseId: '' }),
-      // Set courseId when course is selected
       ...(name === 'courseName' && { 
         courseId: courseData.find(course => course.courseName === value)?.courseId || ''
       })
@@ -110,8 +107,6 @@ const CourseDetails = () => {
       alert("Please fill in all required fields");
       return;
     }
-
-    // const response = axios.post(`${API}admin/add/activity`)
 
     const newCourseDetail = {
       courseId: formData.courseId,
@@ -131,8 +126,6 @@ const CourseDetails = () => {
     };
 
     setTempCourseDetails(prev => [...prev, newCourseDetail]);
-    
-    // Reset form fields but keep category selection for easier multiple course entry
     setFormData(prev => ({ 
       ...prev, 
       courseName: "", 
@@ -145,7 +138,6 @@ const CourseDetails = () => {
       notes3: "",
       notes4: ""
     }));
-    
     alert("Course details added to list! Add more courses or submit all course details.");
   };
 
@@ -158,7 +150,6 @@ const CourseDetails = () => {
     setSubmitting(true);
 
     try {
-      // Submit each course detail individually
       const promises = tempCourseDetails.map(courseDetail => 
         axios.post(`${API}admin/add/activities`, courseDetail, {
           headers: {
@@ -171,7 +162,7 @@ const CourseDetails = () => {
       console.log("All Course Details Add Responses:", responses);
 
       // Refresh data from API after adding all
-      const refreshResponse = await axios.get(`${API}add/activities`);
+      const refreshResponse = await axios.get(`${API}${ADD_ACTIVITIYS}`);
       if (refreshResponse.data && refreshResponse.data.data) {
         setCourseDetails(refreshResponse.data.data);
       }
@@ -238,7 +229,7 @@ const CourseDetails = () => {
     try {
       const detailId = courseDetails[index].id;
       
-      const response = await axios.delete(`${API}add/activities`, { 
+      const response = await axios.delete(`${API}${ADD_ACTIVITIYS}`, { 
         data: { id: detailId },
         headers: {
           'Content-Type': 'application/json'
@@ -247,7 +238,7 @@ const CourseDetails = () => {
 
       console.log("Course Details Delete Response:", response.data);
 
-      const refreshResponse = await axios.get(`${API}add/activities`);
+      const refreshResponse = await axios.get(`${API}${ADD_ACTIVITIYS}`);
       if (refreshResponse.data && refreshResponse.data.data) {
         setCourseDetails(refreshResponse.data.data);
       }
@@ -378,7 +369,6 @@ const CourseDetails = () => {
                     </option>
                   ))}
                 </select>
-
                 {/* Course Selection */}
                 <select
                   name="courseName"

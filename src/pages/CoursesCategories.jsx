@@ -3,7 +3,7 @@ import { Plus, Edit, Trash2, Search, Flag } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
-import { ADMIN_GET_CATEGORY } from "../constants";
+import { ADD_CONTENT, ADD_COURSES, ADMIN_GET_CATEGORY, ADMIN_GET_COURSES, DELETE_COURSES, UPDATE_COURSES, UPLOAD_PDF } from "../constants";
 
 const CourseCategories = () => {
   const [showForm, setShowForm] = useState(false);
@@ -42,7 +42,7 @@ const CourseCategories = () => {
 
   useEffect(() => {
     const responseGetCourse = async () => {
-      const response = await axios.get(`${API}admin/get/courses`);
+      const response = await axios.get(`${API}${ADMIN_GET_COURSES}`);
       const course_data = response.data.data.coursesList;
       setGetCourseData(course_data);
       // console.log("getCourseDatagetCourseDatagetCourseDatagetCourseDatav", getCourseData)
@@ -61,7 +61,7 @@ const CourseCategories = () => {
     formData.append('courseId', courseID); // Ensure course ID is included
 
     try {
-      const response = await axios.post(`${API}admin/upload/pdf`, formData, {
+      const response = await axios.post(`${API}${UPLOAD_PDF}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -77,7 +77,7 @@ const CourseCategories = () => {
 
   const DeleteCourse = async (courseId) => {
     try {
-      await axios.delete(`${API}admin/delete/course`, {
+      await axios.delete(`${API}${DELETE_COURSES}`, {
         data: { courseId },
         headers: {
           Accept: "application/json",
@@ -101,7 +101,7 @@ const CourseCategories = () => {
     data.append("description", formData.description)
 
     try {
-      const response = await axios.post(`${API}admin/add/course`, data, {
+      const response = await axios.post(`${API}${ADD_COURSES}`, data, {
         header: {
           'content-type': 'multipart/form-data'
         }
@@ -158,7 +158,7 @@ const handleAddCourse = async (e) => {
       // Editing existing course
       data.append("courseId", courseID);
 
-      const response = await axios.patch(`${API}admin/update/course`, data, {
+      const response = await axios.patch(`${API}${UPDATE_COURSES}`, data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -170,7 +170,7 @@ const handleAddCourse = async (e) => {
       setGetCourseData(updatedCourses);
     } else {
       // Adding new course
-      const response = await axios.post(`${API}admin/add/course`, data, {
+      const response = await axios.post(`${API}${ADD_COURSES}`, data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -199,10 +199,6 @@ const handleAddCourse = async (e) => {
   }
 };
 
-
-
-
-
   const handleModuleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "pdf" && files.length > 0) {
@@ -222,7 +218,7 @@ const handleAddCourse = async (e) => {
   const handleFinishModules = async () => {
     setCount(0);
     setSentPdf(true);
-    setShowPdfForm(prev => !prev); // Toggle the visibility of the PDF form
+    setShowPdfForm(prev => !prev); 
   };
 
 const handleEdit = (courseId) => {
@@ -233,17 +229,15 @@ const handleEdit = (courseId) => {
   setFormData({
     categoryName: course.categoryName || "",
     name: course.courseName || "",
-    image: null, // Don't prefill image, just allow replacing
+    image: null,
     description: course.description || "",
     price: course.price || "",
   });
 
-  setEditIndex(index);  // Save index for update reference
-  setCourseID(course.courseId);  // Save ID for update request
+  setEditIndex(index);
+  setCourseID(course.courseId);
   setShowForm(true);
 };
-
-
 
   const handleDelete = (index) => {
     const updated = courses.filter((_, i) => i !== index);
@@ -267,7 +261,7 @@ const handleEdit = (courseId) => {
 
   const hadleAddModule = async () => {
     try {
-      const response = await axios.post(`${API}admin/add/content`, {
+      const response = await axios.post(`${API}${ADD_CONTENT}`, {
         courseId: courseID,
         courseContent: [{
           moduleTitle: moduleData.name,
@@ -276,7 +270,6 @@ const handleEdit = (courseId) => {
       });
       setModuleData({ name: "", description: "" });
       setCount(count + 1);
-      // console.log("here is content response", response);
     } catch (error) {
       console.error("Error adding course:", error.message);
     }
