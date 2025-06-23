@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, Search, ChevronDown, ChevronUp } from "lucide-react
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
+import {ADMIN_GET_CATEGORY,ADMIN_GET_COURSES,ADD_ACTIVITIYS} from "../constants"; 
 
 const CourseDetails = () => {
   const [showForm, setShowForm] = useState(false);
@@ -39,6 +40,7 @@ const CourseDetails = () => {
       try {
         setLoading(true);
         const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
+        console.log("Fetched Categories:", res.data.data);
         setCategoryData(res.data.data);
         setLoading(false);
       } catch (err) {
@@ -54,6 +56,7 @@ const CourseDetails = () => {
     const fetchCourses = async () => {
       try {
         const response = await axios.get(`${API}${ADMIN_GET_COURSES}`);
+        console.log("Fetched Courses:", response.data.data.coursesList);
         setCourseData(response.data.data.coursesList);
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -62,19 +65,58 @@ const CourseDetails = () => {
     fetchCourses();
   }, []);
 
-  // Fetch Course Details from API
+  // Updated: Fetch Course Details by CourseId
+  const fetchCourseDetailsByCourseId = async (courseId) => {
+    try {
+      const response = await axios.get(`${API}/api/admin/get/courses?courseId=${courseId}`);
+      console.log("Course Details API Response:", response.data);
+      
+      if (response.data && response.data.data && response.data.data.coursesList) {
+        return response.data.data.coursesList[0]; // Return the first course details
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching course details:", error);
+      throw error;
+    }
+  };
+
+  // Fetch All Course Details
   useEffect(() => {
-    const fetchCourseDetails = async () => {
+    const fetchAllCourseDetails = async () => {
       try {
+        setLoading(true);
         const response = await axios.get(`${API}${ADD_ACTIVITIYS}`);
-        console.log("Course Details API Response:", response.data);
-          setCourseDetails(response.data.data);
+        console.log("All Course Details API Response:", response.data);
+        
+        if (response.data && response.data.data) {
+          // For each course detail, fetch the complete course information
+          const detailedCourseData = await Promise.all(
+            response.data.data.map(async (courseDetail) => {
+              try {
+                const fullCourseData = await fetchCourseDetailsByCourseId(courseDetail.courseId);
+                return {
+                  ...courseDetail,
+                  fullCourseData: fullCourseData
+                };
+              } catch (error) {
+                console.error(`Error fetching details for course ${courseDetail.courseId}:`, error);
+                return courseDetail;
+              }
+            })
+          );
+          
+          setCourseDetails(detailedCourseData);
+        }
       } catch (error) {
         console.error("Error fetching course details:", error);
         setError("Failed to fetch course details");
+      } finally {
+        setLoading(false);
       }
     };
-    fetchCourseDetails();
+    
+    fetchAllCourseDetails();
   }, []);
 
   useEffect(() => {
@@ -151,7 +193,7 @@ const CourseDetails = () => {
 
     try {
       const promises = tempCourseDetails.map(courseDetail => 
-        axios.post(`${API}admin/add/activities`, courseDetail, {
+        axios.post(`${API}/add/activities`, courseDetail, {
           headers: {
             'Content-Type': 'application/json'
           }
