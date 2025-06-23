@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Trash } from "lucide-react";
+import { Search, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import axios from "axios";
 
 const API = import.meta.env.VITE_BASE_URL_API;
@@ -11,6 +11,8 @@ const EmailTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [brochureData, setBrochureData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
 
   const getBrochureEmail = async () => {
     try {
@@ -23,7 +25,9 @@ const EmailTable = () => {
       setLoading(false);
     }
   };
-console.log(brochureData);
+
+  console.log(brochureData);
+
   useEffect(() => {
     getBrochureEmail();
   }, []);
@@ -31,7 +35,7 @@ console.log(brochureData);
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
-    // You can filter the email data here if needed.
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const handleDelete = async (id) => {
@@ -39,7 +43,14 @@ console.log(brochureData);
       try {
         const response = await axios.delete(`${API}user/brochure/requests/${id}`);
         if (response.status === 200) {
-          setBrochureData(brochureData.filter((email) => email.id !== id)); // Remove deleted email from UI
+          const updatedData = brochureData.filter((email) => email.id !== id);
+          setBrochureData(updatedData);
+          
+          // Adjust current page if necessary
+          const totalPages = Math.ceil(updatedData.length / itemsPerPage);
+          if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(totalPages);
+          }
         }
       } catch (err) {
         console.error("Error deleting email entry:", err);
@@ -55,7 +66,7 @@ console.log(brochureData);
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <div className="text-white">
+        <div className="text-white text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading emails...</p>
         </div>
@@ -87,8 +98,60 @@ console.log(brochureData);
   const filteredEmails = brochureData.filter(
     (email) =>
       email.email.toLowerCase().includes(searchTerm) ||
-      (email.Course && email.Course.toLowerCase().includes(searchTerm))
+      (email.Course && email.Course.toLowerCase().includes(searchTerm)) ||
+      (email.categoryName && email.categoryName.toLowerCase().includes(searchTerm)) ||
+      (email.courseName && email.courseName.toLowerCase().includes(searchTerm))
   );
+
+  // Pagination calculations
+  const totalItems = filteredEmails.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredEmails.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Pagination handlers
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      const halfVisible = Math.floor(maxVisiblePages / 2);
+      let startPage = Math.max(1, currentPage - halfVisible);
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+    }
+    
+    return pageNumbers;
+  };
 
   return (
     <motion.div
@@ -98,7 +161,14 @@ console.log(brochureData);
       transition={{ delay: 0.2 }}
     >
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-100">Brochure Emails</h2>
+        <div>
+          <h2 className="text-xl font-semibold text-gray-100">Brochure Emails ({totalItems})</h2>
+          {totalItems > 0 && (
+            <p className="text-sm text-gray-400 mt-1">
+              Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, totalItems)} of {totalItems} email requests
+            </p>
+          )}
+        </div>
         <div className="relative">
           <input
             type="text"
@@ -110,54 +180,113 @@ console.log(brochureData);
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-700">
-          <thead>
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Course Inquired</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Request Date</th>
 
-              {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th> */}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-700">
-            {filteredEmails.map((brotureEmail) => (
-              <motion.tr
-                key={brotureEmail.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                layout
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-300">{brotureEmail.email}</div>
-                </td>
-				<td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-300">{brotureEmail.categoryName}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-800 text-blue-100">
-                    {brotureEmail.courseName}
-                  </span>
-                </td>
-				<td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-300">{brotureEmail.date.slice(0, 10)}</div>
-                </td>
-                {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  <button
-                    className="text-red-400 hover:text-red-300"
-                    onClick={() => handleDelete(brotureEmail.id)}
+      {filteredEmails.length === 0 ? (
+        <div className="text-center text-gray-400 py-8">No email requests found matching your search.</div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Course Inquired</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Request Date</th>
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th> */}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-700">
+                {currentItems.map((brotureEmail) => (
+                  <motion.tr
+                    key={brotureEmail.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="hover:bg-gray-700"
+                    layout
                   >
-                    <Trash size={18} />
-                  </button>
-                </td> */}
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-semibold">
+                          {brotureEmail.email?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm text-gray-300">{brotureEmail.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-300">{brotureEmail.categoryName}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-800 text-blue-100">
+                        {brotureEmail.courseName}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-300">{brotureEmail.date?.slice(0, 10)}</div>
+                    </td>
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <button
+                        className="text-red-400 hover:text-red-300"
+                        onClick={() => handleDelete(brotureEmail.id)}
+                      >
+                        <Trash size={18} />
+                      </button>
+                    </td> */}
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Enhanced Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft size={16} className="mr-1" />
+                  Previous
+                </button>
+                
+                <div className="flex items-center space-x-1">
+                  {getPageNumbers().map((pageNumber) => (
+                    <button
+                      key={pageNumber}
+                      onClick={() => handlePageChange(pageNumber)}
+                      className={`px-3 py-2 text-sm font-medium rounded-md ${
+                        currentPage === pageNumber
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-300 bg-gray-700 hover:bg-gray-600'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  ))}
+                </div>
+                
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                  <ChevronRight size={16} className="ml-1" />
+                </button>
+              </div>
+              
+              <div className="text-sm text-gray-400">
+                Page {currentPage} of {totalPages}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </motion.div>
   );
 };

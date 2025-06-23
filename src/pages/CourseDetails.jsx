@@ -68,7 +68,7 @@ const CourseDetails = () => {
   // Updated: Fetch Course Details by CourseId
   const fetchCourseDetailsByCourseId = async (courseId) => {
     try {
-      const response = await axios.get(`${API}/api/admin/get/courses?courseId=${courseId}`);
+      const response = await axios.get(`${API}/admin/get/courses?courseName=${courseId}`);
       console.log("Course Details API Response:", response.data);
       
       if (response.data && response.data.data && response.data.data.coursesList) {
@@ -193,7 +193,7 @@ const CourseDetails = () => {
 
     try {
       const promises = tempCourseDetails.map(courseDetail => 
-        axios.post(`${API}/add/activities`, courseDetail, {
+        axios.post(`${API}admin/add/activities`, courseDetail, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -204,10 +204,10 @@ const CourseDetails = () => {
       console.log("All Course Details Add Responses:", responses);
 
       // Refresh data from API after adding all
-      const refreshResponse = await axios.get(`${API}${ADD_ACTIVITIYS}`);
-      if (refreshResponse.data && refreshResponse.data.data) {
-        setCourseDetails(refreshResponse.data.data);
-      }
+      // const refreshResponse = await axios.get(`${API}${ADD_ACTIVITIYS}`);
+      // if (refreshResponse.data && refreshResponse.data.data) {
+      //   setCourseDetails(refreshResponse.data.data);
+      // }
 
       setTempCourseDetails([]);
       setFormData({ 

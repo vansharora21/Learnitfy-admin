@@ -217,7 +217,7 @@ const QueriesTable = () => {
 														<div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-400 to-blue-500 flex items-center justify-center text-white font-semibold">
 															{user.firstName?.charAt(0) || user.name?.charAt(0) || 'U'}
 														</div>
-														<div className="ml-4 text-sm text-white">
+														<div className="ml-4 text-sm text-white overflow-hidden whitespace-nowrap overflow-ellipsis" title={`${user.firstName} ${user.lastName}`}>
 															{user.firstName} {user.lastName} {user.name && !user.firstName && user.name}
 														</div>
 													</div>
