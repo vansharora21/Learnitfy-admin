@@ -30,7 +30,7 @@ const OverviewPage = () => {
     try {
       const data = new FormData();
       // let newName = formData.name.toLowerCase().replace(/\s+/g, '-');
-      data.append("categoryName", formData.name);
+      data.append("categoryName", formData.name.trim().toLowerCase());
       data.append("description", formData.description);
       data.append("logo", formData.image);
 
@@ -97,7 +97,7 @@ const OverviewPage = () => {
     try {
       const updatedData = {
         categoryId: editIndex,
-        categoryName: formData.name,
+        categoryName: formData.name.trim().toLowerCase(),
         description: formData.description,
       };
 
