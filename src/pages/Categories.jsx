@@ -29,8 +29,8 @@ const OverviewPage = () => {
   const addCategoryAPI = async () => {
     try {
       const data = new FormData();
-      let newName = formData.name.toLowerCase().replace(/\s+/g, '-');
-      data.append("categoryName", newName);
+      // let newName = formData.name.toLowerCase().replace(/\s+/g, '-');
+      data.append("categoryName", formData.name);
       data.append("description", formData.description);
       data.append("logo", formData.image);
 

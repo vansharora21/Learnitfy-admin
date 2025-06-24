@@ -305,6 +305,10 @@ const CourseCategories = () => {
         <div className="mb-6 flex justify-between items-center">
           <button
             onClick={() => {
+              if (categoryData.length === 0) {
+                alert("No category is available. Please add a category first.");
+                return;
+              }
               setShowForm(!showForm);
               setEditIndex(null);
               setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
