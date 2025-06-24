@@ -3,10 +3,12 @@ import { Plus, Edit, Trash2, Search, ChevronDown, ChevronUp } from "lucide-react
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
-import {ADMIN_GET_CATEGORY,ADMIN_GET_COURSES,ADD_ACTIVITIYS} from "../constants"; 
+import { ADMIN_GET_CATEGORY, ADMIN_GET_COURSES, ADD_ACTIVITIYS } from "../constants";
 
 const CourseDetails = () => {
   const [showForm, setShowForm] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
   const [courseDetails, setCourseDetails] = useState([]);
   const [formData, setFormData] = useState({
     categoryName: "",
@@ -31,7 +33,7 @@ const CourseDetails = () => {
   const [submitting, setSubmitting] = useState(false);
   const [tempCourseDetails, setTempCourseDetails] = useState([]);
 
-  console.log("courseId is here", formData.courseId)
+  console.log("here is the course datat", courseData)
   const API = import.meta.env.VITE_BASE_URL_API;
 
   // Fetch Categories
@@ -70,7 +72,7 @@ const CourseDetails = () => {
     try {
       const response = await axios.get(`${API}/admin/get/courses?courseName=${courseId}`);
       console.log("Course Details API Response:", response.data);
-      
+
       if (response.data && response.data.data && response.data.data.coursesList) {
         return response.data.data.coursesList[0]; // Return the first course details
       }
@@ -88,7 +90,7 @@ const CourseDetails = () => {
         setLoading(true);
         const response = await axios.get(`${API}${ADD_ACTIVITIYS}`);
         console.log("All Course Details API Response:", response.data);
-        
+
         if (response.data && response.data.data) {
           // For each course detail, fetch the complete course information
           const detailedCourseData = await Promise.all(
@@ -105,7 +107,7 @@ const CourseDetails = () => {
               }
             })
           );
-          
+
           setCourseDetails(detailedCourseData);
         }
       } catch (error) {
@@ -115,13 +117,13 @@ const CourseDetails = () => {
         setLoading(false);
       }
     };
-    
+
     fetchAllCourseDetails();
   }, []);
 
   useEffect(() => {
     if (formData.categoryName) {
-      const filtered = courseData.filter(course => 
+      const filtered = courseData.filter(course =>
         course.categoryName === formData.categoryName
       );
       setFilteredCourses(filtered);
@@ -132,11 +134,11 @@ const CourseDetails = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ 
-      ...prev, 
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
       ...(name === 'categoryName' && { courseName: '', courseId: '' }),
-      ...(name === 'courseName' && { 
+      ...(name === 'courseName' && {
         courseId: courseData.find(course => course.courseName === value)?.courseId || ''
       })
     }));
@@ -144,7 +146,7 @@ const CourseDetails = () => {
 
   const handleAddCourseToList = (e) => {
     e.preventDefault();
-    
+
     if (!formData.categoryName || !formData.courseName || !formData.duration || !formData.noOfModules || !formData.activities) {
       alert("Please fill in all required fields");
       return;
@@ -168,12 +170,12 @@ const CourseDetails = () => {
     };
 
     setTempCourseDetails(prev => [...prev, newCourseDetail]);
-    setFormData(prev => ({ 
-      ...prev, 
-      courseName: "", 
-      courseId: "", 
-      duration: "", 
-      noOfModules: "", 
+    setFormData(prev => ({
+      ...prev,
+      courseName: "",
+      courseId: "",
+      duration: "",
+      noOfModules: "",
       activities: "",
       notes1: "",
       notes2: "",
@@ -192,7 +194,7 @@ const CourseDetails = () => {
     setSubmitting(true);
 
     try {
-      const promises = tempCourseDetails.map(courseDetail => 
+      const promises = tempCourseDetails.map(courseDetail =>
         axios.post(`${API}admin/add/activities`, courseDetail, {
           headers: {
             'Content-Type': 'application/json'
@@ -210,12 +212,12 @@ const CourseDetails = () => {
       // }
 
       setTempCourseDetails([]);
-      setFormData({ 
-        categoryName: "", 
-        courseName: "", 
-        courseId: "", 
-        duration: "", 
-        noOfModules: "", 
+      setFormData({
+        categoryName: "",
+        courseName: "",
+        courseId: "",
+        duration: "",
+        noOfModules: "",
         activities: "",
         notes1: "",
         notes2: "",
@@ -227,7 +229,7 @@ const CourseDetails = () => {
 
     } catch (error) {
       console.error("Error adding course details:", error);
-      
+
       if (error.response) {
         alert(`Error: ${error.response.data?.message || 'Failed to save some course details'}`);
       } else if (error.request) {
@@ -265,13 +267,13 @@ const CourseDetails = () => {
 
   const handleDelete = async (index) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this course detail?");
-    
+
     if (!confirmDelete) return;
 
     try {
       const detailId = courseDetails[index].id;
-      
-      const response = await axios.delete(`${API}${ADD_ACTIVITIYS}`, { 
+
+      const response = await axios.delete(`${API}${ADD_ACTIVITIYS}`, {
         data: { id: detailId },
         headers: {
           'Content-Type': 'application/json'
@@ -284,17 +286,17 @@ const CourseDetails = () => {
       if (refreshResponse.data && refreshResponse.data.data) {
         setCourseDetails(refreshResponse.data.data);
       }
-      
+
       alert("Course details deleted successfully!");
 
       if (editIndex === index) {
         setEditIndex(null);
-        setFormData({ 
-          categoryName: "", 
-          courseName: "", 
-          courseId: "", 
-          duration: "", 
-          noOfModules: "", 
+        setFormData({
+          categoryName: "",
+          courseName: "",
+          courseId: "",
+          duration: "",
+          noOfModules: "",
           activities: "",
           notes1: "",
           notes2: "",
@@ -305,7 +307,7 @@ const CourseDetails = () => {
       }
     } catch (error) {
       console.error("Error deleting course details:", error);
-      
+
       if (error.response) {
         alert(`Error: ${error.response.data?.message || 'Failed to delete course details'}`);
       } else {
@@ -331,18 +333,44 @@ const CourseDetails = () => {
       <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
 
         <div className="mb-6 flex justify-between items-center">
+          {courseData.length > 0 && (
+            <div className="ml-4">
+              <select
+                onChange={(e) => {
+                  const selected = courseData.find((c) => c.courseId === e.target.value);
+                  if (selected) {
+                    setSelectedCourse({
+                      moreAboutCourse: selected.moreAboutCourse,
+                      notes: selected.notes,
+                      courseName: selected.courseName,
+                    });
+                  } else {
+                    setSelectedCourse(null);
+                  }
+                }}
+                className="bg-gray-700 text-white px-3 py-2 rounded-md focus:outline-none"
+              >
+                <option value="">🔍 View Course Details</option>
+                {courseData.map((course, index) => (
+                  <option key={index} value={course.courseId}>
+                    {course.courseName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="flex gap-3">
             <button
               onClick={() => {
                 setShowForm(!showForm);
                 setEditIndex(null);
                 setTempCourseDetails([]);
-                setFormData({ 
-                  categoryName: "", 
-                  courseName: "", 
-                  courseId: "", 
-                  duration: "", 
-                  noOfModules: "", 
+                setFormData({
+                  categoryName: "",
+                  courseName: "",
+                  courseId: "",
+                  duration: "",
+                  noOfModules: "",
                   activities: "",
                   notes1: "",
                   notes2: "",
@@ -357,7 +385,7 @@ const CourseDetails = () => {
               {editIndex !== null ? "Edit Course Details" : "Add Multiple Course Details"}
             </button>
           </div>
-          
+
           {courseDetails.length > 0 && (
             <div className="relative">
               <input
@@ -373,11 +401,11 @@ const CourseDetails = () => {
         </div>
 
         {/* Error Display */}
-        {error && (
+        {/* {error && (
           <div className="mb-4 p-4 bg-red-600 bg-opacity-20 border border-red-600 rounded-lg">
             <p className="text-red-400">{error}</p>
           </div>
-        )}
+        )} */}
 
         {/* Loading Display */}
         {loading && (
@@ -392,7 +420,7 @@ const CourseDetails = () => {
             <h3 className="text-lg font-semibold mb-2">
               {editIndex !== null ? "Edit Course Details" : "Add Multiple Course Details"}
             </h3>
-            
+
             <form onSubmit={handleAddCourseToList}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Category Selection */}
@@ -526,7 +554,7 @@ const CourseDetails = () => {
                 >
                   Add Course to List
                 </button>
-                
+
                 {tempCourseDetails.length > 0 && (
                   <button
                     type="button"
@@ -551,12 +579,12 @@ const CourseDetails = () => {
                     setShowForm(false);
                     setEditIndex(null);
                     setTempCourseDetails([]);
-                    setFormData({ 
-                      categoryName: "", 
-                      courseName: "", 
-                      courseId: "", 
-                      duration: "", 
-                      noOfModules: "", 
+                    setFormData({
+                      categoryName: "",
+                      courseName: "",
+                      courseId: "",
+                      duration: "",
+                      noOfModules: "",
                       activities: "",
                       notes1: "",
                       notes2: "",
@@ -609,118 +637,145 @@ const CourseDetails = () => {
             )}
           </div>
         )}
+        {selectedCourse && (
+          <div className="mt-4 p-4 border border-gray-600 rounded-lg bg-gray-800 text-white">
+            <h3 className="text-lg font-semibold mb-2">
+              {selectedCourse.courseName} – Quick View
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="text-indigo-300 font-medium mb-1">More About Course</h4>
+                <div className="text-sm">
+                  <div><strong>Duration:</strong> {selectedCourse.moreAboutCourse?.duration || "N/A"}</div>
+                  <div><strong>Modules:</strong> {selectedCourse.moreAboutCourse?.noOfModules || "N/A"}</div>
+                  <div><strong>Activities:</strong> {selectedCourse.moreAboutCourse?.Activities || "N/A"}</div>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-green-300 font-medium mb-1">Notes</h4>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  {selectedCourse.notes?.notes1 && <li>{selectedCourse.notes.notes1}</li>}
+                  {selectedCourse.notes?.notes2 && <li>{selectedCourse.notes.notes2}</li>}
+                  {selectedCourse.notes?.notes3 && <li>{selectedCourse.notes.notes3}</li>}
+                  {selectedCourse.notes?.notes4 && <li>{selectedCourse.notes.notes4}</li>}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* Course Details List */}
-        <motion.div
-          className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <h2 className="text-xl font-semibold text-white mb-4">
-            Course Details List ({courseDetails.length} total)
-          </h2>
-          
-          {filteredDetails.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-400">No course details found. Add your first course details to get started.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredDetails.map((detail, index) => (
-                <motion.div
-                  key={detail.id || index}
-                  className="bg-gray-700 bg-opacity-50 rounded-lg border border-gray-600"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <div className="flex gap-2 mb-2">
-                          <span className="px-2 py-1 bg-indigo-600 text-white text-xs rounded">
-                            {detail.categoryName || 'No Category'}
-                          </span>
-                          <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">
-                            {detail.courseName || 'No Course'}
-                          </span>
-                          <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded">
-                            {detail.moreAboutCourse?.duration}
-                          </span>
-                          <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">
-                            {detail.moreAboutCourse?.noOfModules} Modules
-                          </span>
-                          <span className="px-2 py-1 bg-orange-600 text-white text-xs rounded">
-                            {detail.moreAboutCourse?.Activities} Activities
-                          </span>
+          {/* <motion.div
+            className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Course Details List ({courseDetails.length} total)
+            </h2>
+
+            {filteredDetails.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400">No course details found. Add your first course details to get started.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredDetails.map((detail, index) => (
+                  <motion.div
+                    key={detail.id || index}
+                    className="bg-gray-700 bg-opacity-50 rounded-lg border border-gray-600"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <div className="flex gap-2 mb-2">
+                            <span className="px-2 py-1 bg-indigo-600 text-white text-xs rounded">
+                              {detail.categoryName || 'No Category'}
+                            </span>
+                            <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">
+                              {detail.courseName || 'No Course'}
+                            </span>
+                            <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded">
+                              {detail.moreAboutCourse?.duration}
+                            </span>
+                            <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">
+                              {detail.moreAboutCourse?.noOfModules} Modules
+                            </span>
+                            <span className="px-2 py-1 bg-orange-600 text-white text-xs rounded">
+                              {detail.moreAboutCourse?.Activities} Activities
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => toggleDetail(index)}
+                            className="flex items-center justify-between w-full text-left"
+                          >
+                            <h3 className="text-white font-medium text-lg pr-4">
+                              {detail.courseName} - Course Details
+                            </h3>
+                            {expandedDetail === index ? (
+                              <ChevronUp className="text-gray-400 flex-shrink-0" size={20} />
+                            ) : (
+                              <ChevronDown className="text-gray-400 flex-shrink-0" size={20} />
+                            )}
+                          </button>
                         </div>
-                        <button
-                          onClick={() => toggleDetail(index)}
-                          className="flex items-center justify-between w-full text-left"
-                        >
-                          <h3 className="text-white font-medium text-lg pr-4">
-                            {detail.courseName} - Course Details
-                          </h3>
-                          {expandedDetail === index ? (
-                            <ChevronUp className="text-gray-400 flex-shrink-0" size={20} />
-                          ) : (
-                            <ChevronDown className="text-gray-400 flex-shrink-0" size={20} />
-                          )}
-                        </button>
+                        <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={() => handleEdit(index)}
+                            className="text-indigo-400 hover:text-indigo-300"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(index)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex gap-2 ml-4">
-                        <button
-                          onClick={() => handleEdit(index)}
-                          className="text-indigo-400 hover:text-indigo-300"
+
+                      {expandedDetail === index && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-3 pt-3 border-t border-gray-600"
                         >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(index)}
-                          className="text-red-400 hover:text-red-300"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {expandedDetail === index && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-3 pt-3 border-t border-gray-600"
-                      >
-                        <div className="text-gray-300">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                              <h4 className="font-medium mb-2 text-indigo-300">Course Information:</h4>
-                              <div className="space-y-1 text-sm">
-                                <div><span className="font-medium">Duration:</span> {detail.moreAboutCourse?.duration}</div>
-                                <div><span className="font-medium">Modules:</span> {detail.moreAboutCourse?.noOfModules}</div>
-                                <div><span className="font-medium">Activities:</span> {detail.moreAboutCourse?.Activities}</div>
+                          <div className="text-gray-300">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                              <div>
+                                <h4 className="font-medium mb-2 text-indigo-300">Course Information:</h4>
+                                <div className="space-y-1 text-sm">
+                                  <div><span className="font-medium">Duration:</span> {detail.moreAboutCourse?.duration}</div>
+                                  <div><span className="font-medium">Modules:</span> {detail.moreAboutCourse?.noOfModules}</div>
+                                  <div><span className="font-medium">Activities:</span> {detail.moreAboutCourse?.Activities}</div>
+                                </div>
+                              </div>
+                              <div>
+                                <h4 className="font-medium mb-2 text-green-300">Course Notes:</h4>
+                                <ul className="list-disc list-inside space-y-1 text-sm">
+                                  {detail.notes?.notes1 && <li>{detail.notes.notes1}</li>}
+                                  {detail.notes?.notes2 && <li>{detail.notes.notes2}</li>}
+                                  {detail.notes?.notes3 && <li>{detail.notes.notes3}</li>}
+                                  {detail.notes?.notes4 && <li>{detail.notes.notes4}</li>}
+                                </ul>
                               </div>
                             </div>
-                            <div>
-                              <h4 className="font-medium mb-2 text-green-300">Course Notes:</h4>
-                              <ul className="list-disc list-inside space-y-1 text-sm">
-                                {detail.notes?.notes1 && <li>{detail.notes.notes1}</li>}
-                                {detail.notes?.notes2 && <li>{detail.notes.notes2}</li>}
-                                {detail.notes?.notes3 && <li>{detail.notes.notes3}</li>}
-                                {detail.notes?.notes4 && <li>{detail.notes.notes4}</li>}
-                              </ul>
-                            </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </motion.div>
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div> */}
       </main>
     </div>
   );
