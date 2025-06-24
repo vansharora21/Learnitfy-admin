@@ -21,7 +21,7 @@ const OverviewPage = () => {
   });
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryData, setCategoryData] = useState([]);
+  const [categoryData, setCategoryData] = useState([]); // default as array
   const [loading, setLoading] = useState(true);
 
   const API = import.meta.env.VITE_BASE_URL_API;
@@ -41,7 +41,7 @@ const OverviewPage = () => {
 
       console.log("Category added:", response.data);
       const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
-      setCategoryData(res.data.data);
+      setCategoryData(res?.data?.data || []);
     } catch (error) {
       console.error("Error adding category:", error.message);
     }
@@ -51,10 +51,12 @@ const OverviewPage = () => {
     const GetcategoryData = async () => {
       try {
         const response = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
-        setCategoryData(response.data.data);
-        console.log("here is the category data", response.data.data);
+        const resolvedData = response?.data?.data || [];
+        setCategoryData(resolvedData);
+        console.log("Category data:", resolvedData);
       } catch (error) {
         console.log(error);
+        setCategoryData([]); // fallback in error
       } finally {
         setLoading(false);
       }
@@ -83,12 +85,11 @@ const OverviewPage = () => {
     if (!formData.name || !formData.description) return;
 
     if (editIndex !== null) {
-      handleEdit(); 
+      handleEdit();
     } else {
       addCategoryAPI();
     }
   };
-
 
   const handleEdit = async () => {
     try {
@@ -98,16 +99,12 @@ const OverviewPage = () => {
         description: formData.description,
       };
 
-      const response = await axios.patch(`${API}${UPDATE_CATEGORY}`,updatedData
-      );
-
+      const response = await axios.patch(`${API}${UPDATE_CATEGORY}`, updatedData);
       console.log("Category updated:", response.data);
 
-      // Refresh list
       const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
-      setCategoryData(res.data.data);
+      setCategoryData(res?.data?.data || []);
 
-      // Reset
       setFormData({ name: "", image: null, description: "" });
       setEditIndex(null);
       setShowForm(false);
@@ -115,7 +112,6 @@ const OverviewPage = () => {
       console.error("Error updating category:", error);
     }
   };
-
 
   const handleDelete = async (categoryId) => {
     try {
@@ -165,7 +161,6 @@ const OverviewPage = () => {
           {categories.length > 0 && (
             <div className="relative">
               <SpinnerLoader />
-
               <input
                 type="text"
                 placeholder="Search categories..."
@@ -217,7 +212,6 @@ const OverviewPage = () => {
               rows="3"
             />
             <button
-              onClick={addCategoryAPI}
               type="submit"
               className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
             >
@@ -226,94 +220,88 @@ const OverviewPage = () => {
           </form>
         )}
 
-        {categoryData.length > 0 ? (
+        {loading ? (
+          <p className="text-center text-gray-400 mt-8">Loading...</p>
+        ) : Array.isArray(categoryData) && categoryData.length > 0 ? (
           <motion.div
             className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            {loading ? (
-              <p className="text-center text-gray-400 mt-8">Loading...</p>
-            ) : categoryData.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-700">
-                  <thead>
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Image
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Description
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Category ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-700">
-                    {categoryData.map((cat, index) => (
-                      <motion.tr
-                        key={index}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <td className="px-6 py-4">
-                          <img
-                            src={cat.logo}
-                            alt={cat.name}
-                            className="w-12 h-12 object-cover rounded-md"
-                          />
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-100 font-semibold">
-                          {cat.categoryName}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          {cat.description}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          {cat.categoryId}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          <button
-                            onClick={() => {
-                              setShowForm(true);
-                              setEditIndex(cat.categoryId);
-                              setFormData({
-                                name: cat.categoryName,
-                                image: null,
-                                description: cat.description,
-                              });
-                            }}
-                            className="text-indigo-400 hover:text-indigo-300 mr-2"
-                          >
-                            <Edit size={18} />
-                          </button>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-700">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Image
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Category ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700">
+                  {categoryData.map((cat, index) => (
+                    <motion.tr
+                      key={index}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <td className="px-6 py-4">
+                        <img
+                          src={cat.logo}
+                          alt={cat.name}
+                          className="w-12 h-12 object-cover rounded-md"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-100 font-semibold">
+                        {cat.categoryName}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        {cat.description}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        {cat.categoryId}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        <button
+                          onClick={() => {
+                            setShowForm(true);
+                            setEditIndex(cat.categoryId);
+                            setFormData({
+                              name: cat.categoryName,
+                              image: null,
+                              description: cat.description,
+                            });
+                          }}
+                          className="text-indigo-400 hover:text-indigo-300 mr-2"
+                        >
+                          <Edit size={18} />
+                        </button>
 
-                          <button
-                            onClick={() => handleDelete(cat.categoryId)}
-                            className="text-red-400 hover:text-red-300"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-center text-gray-400 mt-8">
-                No categories found.
-              </p>
-            )}
+                        <button
+                          onClick={() => handleDelete(cat.categoryId)}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </motion.div>
         ) : (
           <p className="text-center text-gray-400 mt-8">No categories found.</p>
