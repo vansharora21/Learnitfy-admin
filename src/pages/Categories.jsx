@@ -29,7 +29,8 @@ const OverviewPage = () => {
   const addCategoryAPI = async () => {
     try {
       const data = new FormData();
-      data.append("categoryName", formData.name);
+      let newName = formData.name.toLowerCase().replace(/\s+/g, '-');
+      data.append("categoryName", newName);
       data.append("description", formData.description);
       data.append("logo", formData.image);
 
@@ -89,6 +90,7 @@ const OverviewPage = () => {
     } else {
       addCategoryAPI();
     }
+    setShowForm(false)
   };
 
   const handleEdit = async () => {
