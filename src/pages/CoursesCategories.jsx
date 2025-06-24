@@ -36,9 +36,9 @@ const CourseCategories = () => {
   const [broturePdf, setBrochurePdf] = useState(null)
   const [showPdfForm, setShowPdfForm] = useState(false);
 
-  console.log("hjdshjadsjhasd", getCourseData);
-
   const API = import.meta.env.VITE_BASE_URL_API;
+  console.log(broturePdf, "plokijuhyg")
+
 
   useEffect(() => {
     const responseGetCourse = async () => {
@@ -51,29 +51,49 @@ const CourseCategories = () => {
   }, [])
 
   const handlebroturePDF = (e) => {
-    setBrochurePdf(e.target.files[0])
+    const file = e.target.files[0];
+    console.log("Selected file object:", file);
+
+    if (file) {
+      console.log("Name:", file.name);
+      console.log("Type:", file.type);
+      console.log("Size (bytes):", file.size);
+    } else {
+      console.log("No file selected.");
+    }
+
+    setBrochurePdf(e.target.files[0]);
   };
+
 
   const handleAddBrochurePdf = async (e) => {
     e.preventDefault();
+    console.log("hiii hello");
+
+    if (!broturePdf) return console.warn('No PDF selected');
+    if (!courseID) return console.warn('No course ID');
+
     const formData = new FormData();
     formData.append('pdf', broturePdf);
-    formData.append('courseId', courseID); // Ensure course ID is included
+    formData.append('courseId', courseID);
 
     try {
-      const response = await axios.post(`${API}${UPLOAD_PDF}`, formData, {
+      const response = await axios.post(`${API}admin/upload/pdf`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log('Brochure upload response:', response);
+
+      console.log('Brochure upload response:', response.data);
       setSentPdf(false);
       setShowModuleForm(false);
-      setShowPdfForm(false); // Hide PDF form after sending
+      setShowPdfForm(false);
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Upload error:', error.response || error.message);
     }
   };
+
+
 
   const DeleteCourse = async (courseId) => {
     try {
@@ -108,6 +128,7 @@ const CourseCategories = () => {
       });
       setCourseData(response.data.data);
       setCourseID(response.data.data.courseId);
+      console.log("courseId is her", courseID)
     } catch (error) {
       console.error("Error adding course:", error.message);
     }
@@ -139,65 +160,65 @@ const CourseCategories = () => {
   };
 
 
-const handleAddCourse = async (e) => {
-  e.preventDefault();
-  if (!formData.name || !formData.description || !formData.categoryName) return;
+  const handleAddCourse = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.description || !formData.categoryName) return;
 
-  const data = new FormData();
-  data.append("categoryName", formData.categoryName);
-  data.append("courseName", formData.name);
-  data.append("description", formData.description);
-  data.append("price", formData.price || "1000");
+    const data = new FormData();
+    data.append("categoryName", formData.categoryName);
+    data.append("courseName", formData.name);
+    data.append("description", formData.description);
+    data.append("price", formData.price || "1000");
 
-  if (formData.image) {
-    data.append("image", formData.image);
-  }
-
-  try {
-    if (editIndex !== null) {
-      // Editing existing course
-      data.append("courseId", courseID);
-
-      const response = await axios.patch(`${API}${UPDATE_COURSES}`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      const updatedCourse = response.data.data;
-      const updatedCourses = [...getCourseData];
-      updatedCourses[editIndex] = { ...updatedCourses[editIndex], ...updatedCourse };
-      setGetCourseData(updatedCourses);
-    } else {
-      // Adding new course
-      const response = await axios.post(`${API}${ADD_COURSES}`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      const newCourse = response.data.data;
-      setCourseData(newCourse);
-      setCourseID(newCourse.courseId);
-      setGetCourseData(prev => [...prev, newCourse]);
+    if (formData.image) {
+      data.append("image", formData.image);
     }
 
-    // Reset form
-    setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
-    setShowForm(false);
-    setEditIndex(null);
-    setSentPdf(true);
+    try {
+      if (editIndex !== null) {
+        // Editing existing course
+        data.append("courseId", courseID);
 
-    if (editIndex === null) {
-      setCourses(prev => [...prev, { ...formData, modules: [] }]);
-      setCurrentCourseIndex(courses.length);
-      setShowModuleForm(true);
+        const response = await axios.patch(`${API}${UPDATE_COURSES}`, data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        const updatedCourse = response.data.data;
+        const updatedCourses = [...getCourseData];
+        updatedCourses[editIndex] = { ...updatedCourses[editIndex], ...updatedCourse };
+        setGetCourseData(updatedCourses);
+      } else {
+        // Adding new course
+        const response = await axios.post(`${API}${ADD_COURSES}`, data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        const newCourse = response.data.data;
+        setCourseData(newCourse);
+        setCourseID(newCourse.courseId);
+        setGetCourseData(prev => [...prev, newCourse]);
+      }
+
+      // Reset form
+      setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
+      setShowForm(false);
+      setEditIndex(null);
+      setSentPdf(true);
+
+      if (editIndex === null) {
+        setCourses(prev => [...prev, { ...formData, modules: [] }]);
+        setCurrentCourseIndex(courses.length);
+        setShowModuleForm(true);
+      }
+
+    } catch (error) {
+      console.error("Error adding/updating course:", error.message);
+      setError("Failed to save course");
     }
-
-  } catch (error) {
-    console.error("Error adding/updating course:", error.message);
-    setError("Failed to save course");
-  }
-};
+  };
 
   const handleModuleChange = (e) => {
     const { name, value, files } = e.target;
@@ -217,27 +238,27 @@ const handleAddCourse = async (e) => {
 
   const handleFinishModules = async () => {
     setCount(0);
-    setSentPdf(true);
-    setShowPdfForm(prev => !prev); 
+    // setSentPdf(true);
+    setShowPdfForm(prev => !prev);
   };
 
-const handleEdit = (courseId) => {
-  const course = getCourseData.find((c) => c.courseId === courseId);
-  const index = getCourseData.findIndex((c) => c.courseId === courseId);
-  if (!course) return;
+  const handleEdit = (courseId) => {
+    const course = getCourseData.find((c) => c.courseId === courseId);
+    const index = getCourseData.findIndex((c) => c.courseId === courseId);
+    if (!course) return;
 
-  setFormData({
-    categoryName: course.categoryName || "",
-    name: course.courseName || "",
-    image: null,
-    description: course.description || "",
-    price: course.price || "",
-  });
+    setFormData({
+      categoryName: course.categoryName || "",
+      name: course.courseName || "",
+      image: null,
+      description: course.description || "",
+      price: course.price || "",
+    });
 
-  setEditIndex(index);
-  setCourseID(course.courseId);
-  setShowForm(true);
-};
+    setEditIndex(index);
+    setCourseID(course.courseId);
+    setShowForm(true);
+  };
 
   const handleDelete = (index) => {
     const updated = courses.filter((_, i) => i !== index);
@@ -397,7 +418,7 @@ const handleEdit = (courseId) => {
               Finish & Save Course
             </button>
             {showPdfForm && (
-              <form onSubmit={handleAddBrochurePdf} className="mt-4">
+              <div className="mt-4">
                 <input
                   type="file"
                   name="pdf"
@@ -407,13 +428,14 @@ const handleEdit = (courseId) => {
                   required
                 />
                 <button
-                  className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
-                  type="submit"
+                  onClick={handleAddBrochurePdf}
+                  className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition mt-2"
                 >
                   Send PDF
                 </button>
-              </form>
+              </div>
             )}
+
             <ul className="mt-2">
               {modules.map((mod, idx) => (
                 <li key={idx} className="text-sm text-gray-300">{mod.name} - {mod.description} ({mod.pdf && mod.pdf.name})</li>
@@ -464,7 +486,7 @@ const handleEdit = (courseId) => {
                         className="text-indigo-400 hover:text-indigo-300 mr-2"
                       >
                         <Edit size={18} />
-                      </button> 
+                      </button>
 
                       <button
                         onClick={() => DeleteCourse(course.courseId)}
