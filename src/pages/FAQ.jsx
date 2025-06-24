@@ -17,7 +17,9 @@ const FAQPage = () => {
   const [error, setError] = useState("");
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const [getFaq, setGetFaq] = useState([]);
-  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [faqList, setFaqList] = useState([{ question: "", answer: "" }]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const API = import.meta.env.VITE_BASE_URL_API;
 
@@ -86,13 +88,43 @@ const FAQPage = () => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
   };
 
+  const handleFaqChange = (idx, field, value) => {
+    setFaqList(prev =>
+      prev.map((faq, i) =>
+        i === idx ? { ...faq, [field]: value } : faq
+      )
+    );
+  };
+
+  const handleAddFaqField = () => {
+    setFaqList(prev => [...prev, { question: "", answer: "" }]);
+  };
+
+  const handleAddFaq = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await axios.post("https://api.learnitfy.com/api/faq/add", {
+        courseId: selectedCourseId,
+        faq: faqList,
+      });
+      alert("FAQ added successfully!");
+      setFaqList([{ question: "", answer: "" }]);
+      setSelectedCourseId("");
+    } catch (err) {
+      alert("Failed to add FAQ");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-auto relative z-10 bg-gray-900 min-h-screen">
       <Header title="FAQ Management" />
       <main className="max-w-7xl mx-auto py-10 px-4 lg:px-8">
         <h1 className="text-3xl font-bold text-white mb-6">Manage Frequently Asked Questions</h1>
 
-        <section className="mb-10">
+        {/* <section className="mb-10">
           <h2 className="text-xl font-semibold text-white mb-4">Select a Course</h2>
           <div className="flex gap-3 flex-wrap">
             {getFaq.map(course => (
@@ -107,15 +139,15 @@ const FAQPage = () => {
               </button>
             ))}
           </div>
-        </section>
+        </section> */}
 
         <section>
           <h2 className="text-xl font-semibold text-white mb-6">Frequently Asked Questions</h2>
           <motion.div className="space-y-4">
-            {filteredFAQs.length === 0 ? (
+            {/* {filteredFAQs.length === 0 ? (
               <div className="text-gray-400">No FAQs available for the selected course.</div>
-            ) : (
-              filteredFAQs.map((faq, index) => (
+            ) : ( */}
+              {filteredFAQs.map((faq, index) => (
                 <motion.div
                   key={faq._id || index}
                   className="bg-gray-800 rounded-xl shadow-md border border-gray-700 transition duration-300"
@@ -149,9 +181,67 @@ const FAQPage = () => {
                   </div>
                 </motion.div>
               ))
-            )}
+            }
+            {/* )} */}
           </motion.div>
         </section>
+
+        <form
+          onSubmit={handleAddFaq}
+          className="bg-gray-800 p-6 rounded-lg shadow-md mb-8"
+        >
+          <div className="mb-4">
+            <label className="block text-gray-300 mb-2">Select Course</label>
+            <select
+              value={selectedCourseId}
+              onChange={e => setSelectedCourseId(e.target.value)}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              required
+            >
+              <option value="">Select a course</option>
+              {/* Replace with your actual course list */}
+              {courseData.map(course => (
+                <option key={course.courseId} value={course.courseId}>
+                  {course.courseName}
+                </option>
+              ))}
+            </select>
+          </div>
+          {faqList.map((faq, idx) => (
+            <div key={idx} className="mb-4">
+              <input
+                type="text"
+                placeholder="Question"
+                value={faq.question}
+                onChange={e => handleFaqChange(idx, "question", e.target.value)}
+                className="w-full mb-2 p-2 rounded bg-gray-700 text-white"
+                required
+              />
+              <input
+                type="text"
+                placeholder="Answer"
+                value={faq.answer}
+                onChange={e => handleFaqChange(idx, "answer", e.target.value)}
+                className="w-full p-2 rounded bg-gray-700 text-white"
+                required
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleAddFaqField}
+            className="bg-blue-600 text-white px-4 py-2 rounded mr-2"
+          >
+            Add Another FAQ
+          </button>
+          <button
+            type="submit"
+            className="bg-green-600 text-white px-4 py-2 rounded"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Submit FAQ"}
+          </button>
+        </form>
       </main>
     </div>
   );
