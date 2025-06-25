@@ -32,6 +32,8 @@ const CourseDetails = () => {
   const [expandedDetail, setExpandedDetail] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [tempCourseDetails, setTempCourseDetails] = useState([]);
+  const [isEditingSelected, setIsEditingSelected] = useState(false);
+  const [editSelectedForm, setEditSelectedForm] = useState(null);
 
   console.log("here is the course datat", courseData)
   const API = import.meta.env.VITE_BASE_URL_API;
@@ -639,9 +641,28 @@ const CourseDetails = () => {
         )}
         {selectedCourse && (
           <div className="mt-4 p-4 border border-gray-600 rounded-lg bg-gray-800 text-white">
-            <h3 className="text-lg font-semibold mb-2">
-              {selectedCourse.courseName} – Quick View
-            </h3>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-semibold">
+                {selectedCourse.courseName} – Quick View
+              </h3>
+              <button
+                className="px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-700"
+                onClick={() => {
+                  setIsEditingSelected(true);
+                  setEditSelectedForm({
+                    duration: selectedCourse.moreAboutCourse?.duration || "",
+                    noOfModules: selectedCourse.moreAboutCourse?.noOfModules || "",
+                    Activities: selectedCourse.moreAboutCourse?.Activities || "",
+                    notes1: selectedCourse.notes?.notes1 || "",
+                    notes2: selectedCourse.notes?.notes2 || "",
+                    notes3: selectedCourse.notes?.notes3 || "",
+                    notes4: selectedCourse.notes?.notes4 || "",
+                  });
+                }}
+              >
+                Edit
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h4 className="text-indigo-300 font-medium mb-1">More About Course</h4>
@@ -664,6 +685,97 @@ const CourseDetails = () => {
           </div>
         )}
 
+        {isEditingSelected && editSelectedForm && (
+          <form
+            className="mt-4 p-4 border border-indigo-600 rounded-lg bg-gray-900 text-white"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                await axios.put(`https://api.learnitfy.com/api/admin/update/courseId?=${courseId}`, {
+                  courseId: selectedCourse.courseId,
+                  moreAboutCourse: {
+                    duration: editSelectedForm.duration,
+                    noOfModules: editSelectedForm.noOfModules,
+                    Activities: editSelectedForm.Activities,
+                  },
+                  notes: {
+                    notes1: editSelectedForm.notes1,
+                    notes2: editSelectedForm.notes2,
+                    notes3: editSelectedForm.notes3,
+                    notes4: editSelectedForm.notes4,
+                  }
+                });
+                alert("Course updated!");
+                setIsEditingSelected(false);
+                // Refresh selectedCourse data
+                const updated = await axios.get(`${API}admin/get/courses?courseName=${selectedCourse.courseName}`);
+                if (updated.data && updated.data.data && updated.data.data.coursesList && updated.data.data.coursesList.length > 0) {
+                  setSelectedCourse(updated.data.data.coursesList[0]);
+                }
+              } catch (err) {
+                alert("Failed to update course");
+              }
+            }}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <input
+                type="text"
+                value={editSelectedForm.duration}
+                onChange={e => setEditSelectedForm(f => ({ ...f, duration: e.target.value }))}
+                placeholder="Duration"
+                className="bg-gray-700 border px-4 py-2 rounded-md"
+              />
+              <input
+                type="number"
+                value={editSelectedForm.noOfModules}
+                onChange={e => setEditSelectedForm(f => ({ ...f, noOfModules: e.target.value }))}
+                placeholder="Modules"
+                className="bg-gray-700 border px-4 py-2 rounded-md"
+              />
+              <input
+                type="number"
+                value={editSelectedForm.Activities}
+                onChange={e => setEditSelectedForm(f => ({ ...f, Activities: e.target.value }))}
+                placeholder="Activities"
+                className="bg-gray-700 border px-4 py-2 rounded-md"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <input
+                type="text"
+                value={editSelectedForm.notes1}
+                onChange={e => setEditSelectedForm(f => ({ ...f, notes1: e.target.value }))}
+                placeholder="Note 1"
+                className="bg-gray-700 border px-4 py-2 rounded-md"
+              />
+              <input
+                type="text"
+                value={editSelectedForm.notes2}
+                onChange={e => setEditSelectedForm(f => ({ ...f, notes2: e.target.value }))}
+                placeholder="Note 2"
+                className="bg-gray-700 border px-4 py-2 rounded-md"
+              />
+              <input
+                type="text"
+                value={editSelectedForm.notes3}
+                onChange={e => setEditSelectedForm(f => ({ ...f, notes3: e.target.value }))}
+                placeholder="Note 3"
+                className="bg-gray-700 border px-4 py-2 rounded-md"
+              />
+              <input
+                type="text"
+                value={editSelectedForm.notes4}
+                onChange={e => setEditSelectedForm(f => ({ ...f, notes4: e.target.value }))}
+                placeholder="Note 4"
+                className="bg-gray-700 border px-4 py-2 rounded-md"
+              />
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button type="submit" className="px-5 py-2 bg-green-600 rounded hover:bg-green-700">Save</button>
+              <button type="button" className="px-5 py-2 bg-gray-600 rounded hover:bg-gray-700" onClick={() => setIsEditingSelected(false)}>Cancel</button>
+            </div>
+          </form>
+        )}
 
         {/* Course Details List */}
           {/* <motion.div
