@@ -21,8 +21,12 @@ const CourseCategories = () => {
   const [modules, setModules] = useState([]);
   const [moduleData, setModuleData] = useState({
     name: "",
-    description: "",
-    pdf: null
+    point1: "",
+    point2: "",
+    point3: "",
+    point4: "",
+    point5: "",
+    point6: "",
   });
   const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
@@ -221,11 +225,13 @@ const CourseCategories = () => {
   };
 
   const handleModuleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "pdf" && files.length > 0) {
-      setModuleData((prev) => ({ ...prev, pdf: files[0] }));
-    } else {
-      setModuleData((prev) => ({ ...prev, [name]: value }));
+    const { placeholder, value } = e.target;
+    if (placeholder === "Module Name") {
+      setModuleData((prev) => ({ ...prev, name: value }));
+    } else if (placeholder.startsWith("point ")) {
+      // Extract the point number from the placeholder
+      const pointKey = `point${placeholder.split(" ")[1]}`;
+      setModuleData((prev) => ({ ...prev, [pointKey]: value }));
     }
   };
 
@@ -286,15 +292,19 @@ const CourseCategories = () => {
         courseId: courseID,
         courseContent: [{
           moduleTitle: moduleData.name,
-          description: moduleData.description
+          point1: moduleData.point1,
+          point2: moduleData.point2,
+          point3: moduleData.point3,
+          point4: moduleData.point4,
+          point5: moduleData.point5,
+          point6: moduleData.point6,
         }]
       });
-      setModuleData({ name: "", description: "" });
+      setModuleData({ name: "", point1: "", point2: "", point3: "", point4: "", point5: "", point6: "" });
       setCount(count + 1);
     } catch (error) {
       console.error("Error adding course:", error.message);
     }
-
   };
 
   return (
@@ -408,7 +418,56 @@ const CourseCategories = () => {
               className="bg-gray-700 border px-4 py-2 rounded-md"
               required
             />
-            <textarea
+            <input
+              type="text"
+              name="name"
+              placeholder="point 1"
+              value={moduleData.point1}
+              onChange={handleModuleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+              required
+            /><input
+              type="text"
+              name="name"
+              placeholder="point 2"
+              value={moduleData.point2}
+              onChange={handleModuleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+              required
+            /><input
+              type="text"
+              name="name"
+              placeholder="point 3"
+              value={moduleData.point3}
+              onChange={handleModuleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+              required
+            /><input
+              type="text"
+              name="name"
+              placeholder="point 4"
+              value={moduleData.point4}
+              onChange={handleModuleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+              required
+            /><input
+            type="text"
+            name="name"
+            placeholder="point 5"
+            value={moduleData.point5}
+            onChange={handleModuleChange}
+            className="bg-gray-700 border px-4 py-2 rounded-md"
+            required
+          /><input
+          type="text"
+          name="name"
+          placeholder="point 6"
+          value={moduleData.point6}
+          onChange={handleModuleChange}
+          className="bg-gray-700 border px-4 py-2 rounded-md"
+          required
+        />
+            {/* <textarea
               name="description"
               placeholder="Module Description"
               value={moduleData.description}
@@ -416,7 +475,7 @@ const CourseCategories = () => {
               className="bg-gray-700 border px-4 py-2 rounded-md"
               rows="2"
               required
-            />
+            /> */}
             <button onClick={hadleAddModule} className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module {count}</button>
             <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">
               Finish & Save Course
@@ -505,8 +564,6 @@ const CourseCategories = () => {
             </table>
           </div>
         </motion.div>
-
-
       </main>
     </div >
   );

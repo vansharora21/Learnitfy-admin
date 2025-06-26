@@ -8,7 +8,6 @@ import { ADMIN_GET_CATEGORY, ADMIN_GET_COURSES, ADD_ACTIVITIYS } from "../consta
 const CourseDetails = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
-
   const [courseDetails, setCourseDetails] = useState([]);
   const [formData, setFormData] = useState({
     categoryName: "",
@@ -34,8 +33,59 @@ const CourseDetails = () => {
   const [tempCourseDetails, setTempCourseDetails] = useState([]);
   const [isEditingSelected, setIsEditingSelected] = useState(false);
   const [editSelectedForm, setEditSelectedForm] = useState(null);
+  const [showCourseDetailForm, setShowCourseDetailForm] = useState(false);
+  const [courseDetailForm, setCourseDetailForm] = useState({
+    heading: "",
+    aboutCourse: "",
+    subHeading: "",
+    point1: "",
+    point2: "",
+    point3: "",
+    point4: "",
+    point5: "",
+    point6: "",
+    point7: "",
+    point8: "",
+    point9: "",
+    point10: "",
+    point11: "",
+    point12: "",
+  });
+  const [submittedCourseDetail, setSubmittedCourseDetail] = useState(null);
+  const [addStep, setAddStep] = useState(0); // 0: button, 1: select, 2: 10-points, 3: more about
+  const [addCourseId, setAddCourseId] = useState("");
+  const [addCourseName, setAddCourseName] = useState("");
+  const [addCategoryName, setAddCategoryName] = useState("");
+  const [tenPointsForm, setTenPointsForm] = useState({
+    heading: "",
+    aboutCourse: "",
+    subHeading: "",
+    point1: "",
+    point2: "",
+    point3: "",
+    point4: "",
+    point5: "",
+    point6: "",
+    point7: "",
+    point8: "",
+    point9: "",
+    point10: "",
+    point11: "",
+    point12: "",
+  });
+  const [moreAboutForm, setMoreAboutForm] = useState({
+    duration: "",
+    noOfModules: "",
+    activities: "",
+    notes1: "",
+    notes2: "",
+    notes3: "",
+    notes4: "",
+  });
 
-  console.log("here is the course datat", courseData)
+  // const SelectCourseID = selectedCourse.courseId
+
+  // console.log("here is the course datat", SelectCourseID, "sklx")
   const API = import.meta.env.VITE_BASE_URL_API;
 
   // Fetch Categories
@@ -342,50 +392,189 @@ const CourseDetails = () => {
                   const selected = courseData.find((c) => c.courseId === e.target.value);
                   if (selected) {
                     setSelectedCourse({
+                      courseId: selected.courseId,
                       moreAboutCourse: selected.moreAboutCourse,
                       notes: selected.notes,
                       courseName: selected.courseName,
                     });
+                    setShowCourseDetailForm(true);
                   } else {
                     setSelectedCourse(null);
+                    setShowCourseDetailForm(false);
                   }
                 }}
                 className="bg-gray-700 text-white px-3 py-2 rounded-md focus:outline-none"
               >
                 <option value="">🔍 View Course Details</option>
-                {courseData.map((course, index) => (
-                  <option key={index} value={course.courseId}>
+                
+                {courseData.map((course, index)=>{
+                  // setSelectCourseId(course.courseId)
+                  console.log(course.courseId)
+                  return(
+                    <option key={index} value={course.courseId}>
                     {course.courseName}
                   </option>
-                ))}
+                  )
+                })}
               </select>
             </div>
           )}
           <div className="flex gap-3">
-            <button
-              onClick={() => {
-                setShowForm(!showForm);
-                setEditIndex(null);
-                setTempCourseDetails([]);
-                setFormData({
-                  categoryName: "",
-                  courseName: "",
-                  courseId: "",
-                  duration: "",
-                  noOfModules: "",
-                  activities: "",
-                  notes1: "",
-                  notes2: "",
-                  notes3: "",
-                  notes4: ""
-                });
-              }}
-              className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
-              disabled={submitting}
-            >
-              <Plus className="w-4 h-4" />
-              {editIndex !== null ? "Edit Course Details" : "Add Multiple Course Details"}
-            </button>
+            {/* Add Multiple Course Details Stepper */}
+            {addStep === 0 && (
+              <button
+                onClick={() => setAddStep(1)}
+                className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                disabled={submitting}
+              >
+                <Plus className="w-4 h-4" />
+                Add Multiple Course Details
+              </button>
+            )}
+            {addStep === 1 && (
+              <form
+                className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
+                onSubmit={e => {
+                  e.preventDefault();
+                  if (!addCategoryName || !addCourseName) {
+                    alert("Please select category and course");
+                    return;
+                  }
+                  const course = courseData.find(c => c.courseName === addCourseName && c.categoryName === addCategoryName);
+                  if (!course) {
+                    alert("Invalid course selection");
+                    return;
+                  }
+                  setAddCourseId(course.courseId);
+                  setAddStep(2);
+                }}
+              >
+                <h3 className="text-lg font-semibold mb-2">Select Category & Course</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <select
+                    value={addCategoryName}
+                    onChange={e => {
+                      setAddCategoryName(e.target.value);
+                      setAddCourseName("");
+                    }}
+                    className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="" disabled>Select Category</option>
+                    {categoryData.map((cat, idx) => (
+                      <option key={idx} value={cat.categoryName}>{cat.categoryName}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={addCourseName}
+                    onChange={e => setAddCourseName(e.target.value)}
+                    className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                    disabled={!addCategoryName}
+                  >
+                    <option value="" disabled>{addCategoryName ? "Select Course" : "Select Category First"}</option>
+                    {courseData.filter(c => c.categoryName === addCategoryName).map((course, idx) => (
+                      <option key={idx} value={course.courseName}>{course.courseName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button type="submit" className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Next</button>
+                  <button type="button" className="px-5 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition" onClick={() => setAddStep(0)}>Cancel</button>
+                </div>
+              </form>
+            )}
+            {addStep === 2 && (
+              <form
+                className="mt-6 p-6 bg-gray-800 rounded-lg border border-gray-700"
+                onSubmit={async e => {
+                  e.preventDefault();
+                  try {
+                    const payload = {
+                      courseId: addCourseId,
+                      courseDetail: { ...tenPointsForm }
+                    };
+                    await axios.post(`https://api.learnitfy.com/api/admin/add/course/detail`, payload, {
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                    setAddStep(3);
+                    alert("Course detail (10-points) submitted!");
+                  } catch (err) {
+                    alert("Failed to submit course detail");
+                  }
+                }}
+              >
+                <h3 className="text-lg font-semibold mb-4">Add Course Detail (10 Points)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input type="text" placeholder="Heading" value={tenPointsForm.heading} onChange={e => setTenPointsForm(f => ({ ...f, heading: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" required />
+                  <input type="text" placeholder="Sub Heading" value={tenPointsForm.subHeading} onChange={e => setTenPointsForm(f => ({ ...f, subHeading: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" required />
+                  <textarea placeholder="About Course" value={tenPointsForm.aboutCourse} onChange={e => setTenPointsForm(f => ({ ...f, aboutCourse: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md md:col-span-2" required />
+                  {[...Array(12)].map((_, i) => (
+                    <input
+                      key={i}
+                      type="text"
+                      placeholder={`Point ${i + 1}`}
+                      value={tenPointsForm[`point${i + 1}`]}
+                      onChange={e => setTenPointsForm(f => ({ ...f, [`point${i + 1}`]: e.target.value }))}
+                      className="bg-gray-700 border px-4 py-2 rounded-md"
+                    />
+                  ))}
+                </div>
+                <button type="submit" className="mt-4 px-5 py-2 bg-green-600 rounded hover:bg-green-700 text-white">Next</button>
+                <button type="button" className="mt-4 ml-3 px-5 py-2 bg-gray-600 rounded hover:bg-gray-700 text-white" onClick={() => setAddStep(1)}>Back</button>
+              </form>
+            )}
+            {addStep === 3 && (
+              <form
+                className="mt-6 p-6 bg-gray-800 rounded-lg border border-gray-700"
+                onSubmit={async e => {
+                  e.preventDefault();
+                  try {
+                    const payload = {
+                      courseId: addCourseId,
+                      moreAboutCourse: {
+                        duration: moreAboutForm.duration,
+                        noOfModules: moreAboutForm.noOfModules,
+                        Activities: moreAboutForm.activities
+                      },
+                      notes: {
+                        notes1: moreAboutForm.notes1,
+                        notes2: moreAboutForm.notes2,
+                        notes3: moreAboutForm.notes3,
+                        notes4: moreAboutForm.notes4
+                      }
+                    };
+                    await axios.post(`${API}admin/add/activities`, payload, {
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                    setAddStep(0);
+                    setTenPointsForm({ heading: "", aboutCourse: "", subHeading: "", point1: "", point2: "", point3: "", point4: "", point5: "", point6: "", point7: "", point8: "", point9: "", point10: "", point11: "", point12: "" });
+                    setMoreAboutForm({ duration: "", noOfModules: "", activities: "", notes1: "", notes2: "", notes3: "", notes4: "" });
+                    setAddCourseId("");
+                    setAddCourseName("");
+                    setAddCategoryName("");
+                    alert("More About Course & Notes submitted!");
+                  } catch (err) {
+                    alert("Failed to submit More About Course & Notes");
+                  }
+                }}
+              >
+                <h3 className="text-lg font-semibold mb-4">More About Course & Course Notes</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <input type="text" name="duration" placeholder="Duration (e.g., 9 Months)" value={moreAboutForm.duration} onChange={e => setMoreAboutForm(f => ({ ...f, duration: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" required />
+                  <input type="number" name="noOfModules" placeholder="Number of Modules" value={moreAboutForm.noOfModules} onChange={e => setMoreAboutForm(f => ({ ...f, noOfModules: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" min="1" required />
+                  <input type="number" name="activities" placeholder="Number of Activities" value={moreAboutForm.activities} onChange={e => setMoreAboutForm(f => ({ ...f, activities: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" min="1" required />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <input type="text" name="notes1" placeholder="Note 1" value={moreAboutForm.notes1} onChange={e => setMoreAboutForm(f => ({ ...f, notes1: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" />
+                  <input type="text" name="notes2" placeholder="Note 2" value={moreAboutForm.notes2} onChange={e => setMoreAboutForm(f => ({ ...f, notes2: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" />
+                  <input type="text" name="notes3" placeholder="Note 3" value={moreAboutForm.notes3} onChange={e => setMoreAboutForm(f => ({ ...f, notes3: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" />
+                  <input type="text" name="notes4" placeholder="Note 4" value={moreAboutForm.notes4} onChange={e => setMoreAboutForm(f => ({ ...f, notes4: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" />
+                </div>
+                <button type="submit" className="mt-4 px-5 py-2 bg-green-600 rounded hover:bg-green-700 text-white">Submit</button>
+                <button type="button" className="mt-4 ml-3 px-5 py-2 bg-gray-600 rounded hover:bg-gray-700 text-white" onClick={() => setAddStep(2)}>Back</button>
+              </form>
+            )}
           </div>
 
           {courseDetails.length > 0 && (
@@ -689,9 +878,10 @@ const CourseDetails = () => {
           <form
             className="mt-4 p-4 border border-indigo-600 rounded-lg bg-gray-900 text-white"
             onSubmit={async (e) => {
+              console.log("here is the course id testing:")
               e.preventDefault();
               try {
-                await axios.put(`https://api.learnitfy.com/api/admin/update/courseId?=${courseId}`, {
+                await axios.patch(`https://api.learnitfy.com/api/admin/update/course`, {
                   courseId: selectedCourse.courseId,
                   moreAboutCourse: {
                     duration: editSelectedForm.duration,
@@ -775,6 +965,61 @@ const CourseDetails = () => {
               <button type="button" className="px-5 py-2 bg-gray-600 rounded hover:bg-gray-700" onClick={() => setIsEditingSelected(false)}>Cancel</button>
             </div>
           </form>
+        )}
+
+        {showCourseDetailForm && (
+          <form
+            className="mt-6 p-6 bg-gray-800 rounded-lg border border-gray-700"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const payload = {
+                  courseId: selectedCourse?.courseId || formData.courseId,
+                  courseDetail: { ...courseDetailForm }
+                };
+                // Replace with your actual POST endpoint
+                await axios.post(`https://api.learnitfy.com/api/admin/add/course/detail`, payload, {
+                  headers: { 'Content-Type': 'application/json' }
+                });
+                setSubmittedCourseDetail(payload.courseDetail);
+                setShowCourseDetailForm(false);
+                alert("Course detail submitted!");
+              } catch (err) {
+                alert("Failed to submit course detail");
+              }
+            }}
+          >
+            <h3 className="text-lg font-semibold mb-4">Add Course Detail</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input type="text" placeholder="Heading" value={courseDetailForm.heading} onChange={e => setCourseDetailForm(f => ({ ...f, heading: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" required />
+              <input type="text" placeholder="Sub Heading" value={courseDetailForm.subHeading} onChange={e => setCourseDetailForm(f => ({ ...f, subHeading: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md" required />
+              <textarea placeholder="About Course" value={courseDetailForm.aboutCourse} onChange={e => setCourseDetailForm(f => ({ ...f, aboutCourse: e.target.value }))} className="bg-gray-700 border px-4 py-2 rounded-md md:col-span-2" required />
+              {[...Array(12)].map((_, i) => (
+                <input
+                  key={i}
+                  type="text"
+                  placeholder={`Point ${i + 1}`}
+                  value={courseDetailForm[`point${i + 1}`]}
+                  onChange={e => setCourseDetailForm(f => ({ ...f, [`point${i + 1}`]: e.target.value }))}
+                  className="bg-gray-700 border px-4 py-2 rounded-md"
+                />
+              ))}
+            </div>
+            <button type="submit" className="mt-4 px-5 py-2 bg-green-600 rounded hover:bg-green-700 text-white">Submit</button>
+          </form>
+        )}
+
+        {submittedCourseDetail && (
+          <div className="mt-6 p-6 bg-gray-900 rounded-lg border border-green-700">
+            <h3 className="text-lg font-semibold mb-2">{submittedCourseDetail.heading}</h3>
+            <div className="mb-2 text-indigo-300">{submittedCourseDetail.subHeading}</div>
+            <div className="mb-4 text-gray-300">{submittedCourseDetail.aboutCourse}</div>
+            <ul className="list-disc list-inside space-y-1 text-gray-200">
+              {Array.from({ length: 12 }, (_, i) => submittedCourseDetail[`point${i + 1}`])
+                .filter(Boolean)
+                .map((point, idx) => <li key={idx}>{point}</li>)}
+            </ul>
+          </div>
         )}
 
         {/* Course Details List */}
