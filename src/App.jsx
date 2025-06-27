@@ -9,6 +9,9 @@ import LoginPage from "./pages/Login-Page";
 import FAQPage from "./pages/FAQ";
 import { useLocation } from "react-router-dom";
 import CourseDetails from "./pages/CourseDetails";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 // import FAQPage from "./pages/FAQ";
 
 function App() {
@@ -37,6 +40,25 @@ function App() {
         <Route path="/Emails" element={<Emails />} />
         <Route path="/details" element={<CourseDetails />} />
       </Routes>
+
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        toastStyle={{
+          backgroundColor: '#1f2937',
+          color: '#f9fafb',
+          border: '1px solid #374151'
+        }}
+      />
     </div>
   );
 }

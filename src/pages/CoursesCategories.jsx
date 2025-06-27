@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
 import { ADD_CONTENT, ADD_COURSES, ADMIN_GET_CATEGORY, ADMIN_GET_COURSES, DELETE_COURSES, UPDATE_COURSES, UPLOAD_PDF } from "../constants";
+import { toast } from 'react-toastify';
 
 const CourseCategories = () => {
   const [showForm, setShowForm] = useState(false);
@@ -42,6 +43,7 @@ const CourseCategories = () => {
 
   const API = import.meta.env.VITE_BASE_URL_API;
   console.log(broturePdf, "plokijuhyg")
+
 
 
   useEffect(() => {
@@ -92,6 +94,7 @@ const CourseCategories = () => {
       setSentPdf(false);
       setShowModuleForm(false);
       setShowPdfForm(false);
+      toast.success("Brochure uploaded successfully");
     } catch (error) {
       console.error('Upload error:', error.response || error.message);
     }
@@ -132,6 +135,7 @@ const CourseCategories = () => {
       });
       setCourseData(response.data.data);
       setCourseID(response.data.data.courseId);
+      toast.success("Course added successfully");
       console.log("courseId is her", courseID)
     } catch (error) {
       console.error("Error adding course:", error.message);
@@ -416,7 +420,7 @@ const CourseCategories = () => {
               value={moduleData.name}
               onChange={handleModuleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md"
-              required
+
             />
             <input
               type="text"
@@ -425,7 +429,7 @@ const CourseCategories = () => {
               value={moduleData.point1}
               onChange={handleModuleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md"
-              required
+
             /><input
               type="text"
               name="name"
@@ -433,7 +437,7 @@ const CourseCategories = () => {
               value={moduleData.point2}
               onChange={handleModuleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md"
-              required
+
             /><input
               type="text"
               name="name"
@@ -441,7 +445,7 @@ const CourseCategories = () => {
               value={moduleData.point3}
               onChange={handleModuleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md"
-              required
+
             /><input
               type="text"
               name="name"
@@ -449,7 +453,7 @@ const CourseCategories = () => {
               value={moduleData.point4}
               onChange={handleModuleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md"
-              required
+
             /><input
             type="text"
             name="name"
@@ -457,7 +461,6 @@ const CourseCategories = () => {
             value={moduleData.point5}
             onChange={handleModuleChange}
             className="bg-gray-700 border px-4 py-2 rounded-md"
-            required
           /><input
           type="text"
           name="name"
@@ -465,7 +468,6 @@ const CourseCategories = () => {
           value={moduleData.point6}
           onChange={handleModuleChange}
           className="bg-gray-700 border px-4 py-2 rounded-md"
-          required
         />
             {/* <textarea
               name="description"

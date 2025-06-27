@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, Search, ChevronDown, ChevronUp } from "lucide-react
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { ADMIN_GET_CATEGORY, ADMIN_GET_COURSES, ADD_ACTIVITIYS } from "../constants";
 
 const CourseDetails = () => {
@@ -51,6 +52,17 @@ const CourseDetails = () => {
     point11: "",
     point12: "",
   });
+  const [whoEnroll, setWhoEnroll] = useState({
+    heading: "",
+    point1: "",
+    point2: "",
+    point3: "",
+    point4: "",
+  });
+  const [prerequisites, setPrerequisites] = useState({
+    point1: "",
+    point2: "",
+  });
   const [submittedCourseDetail, setSubmittedCourseDetail] = useState(null);
   const [addStep, setAddStep] = useState(0); // 0: button, 1: select, 2: 10-points, 3: more about
   const [addCourseId, setAddCourseId] = useState("");
@@ -83,6 +95,9 @@ const CourseDetails = () => {
     notes4: "",
   });
 
+  // setTimeout(() => {
+  //   toast.success("Course added successfully");
+  // }, 2000)
   // const SelectCourseID = selectedCourse.courseId
 
   // console.log("here is the course datat", SelectCourseID, "sklx")
@@ -200,7 +215,8 @@ const CourseDetails = () => {
     e.preventDefault();
 
     if (!formData.categoryName || !formData.courseName || !formData.duration || !formData.noOfModules || !formData.activities) {
-      alert("Please fill in all required fields");
+      toast.info("Please fill in all required fields");
+
       return;
     }
 
@@ -397,7 +413,6 @@ const CourseDetails = () => {
                       notes: selected.notes,
                       courseName: selected.courseName,
                     });
-                    setShowCourseDetailForm(true);
                   } else {
                     setSelectedCourse(null);
                     setShowCourseDetailForm(false);
@@ -426,6 +441,7 @@ const CourseDetails = () => {
                 onClick={() => setAddStep(1)}
                 className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
                 disabled={submitting}
+                
               >
                 <Plus className="w-4 h-4" />
                 Add Multiple Course Details
@@ -437,12 +453,12 @@ const CourseDetails = () => {
                 onSubmit={e => {
                   e.preventDefault();
                   if (!addCategoryName || !addCourseName) {
-                    alert("Please select category and course");
+                    toast.error("Please select category and course");
                     return;
                   }
                   const course = courseData.find(c => c.courseName === addCourseName && c.categoryName === addCategoryName);
                   if (!course) {
-                    alert("Invalid course selection");
+                    toast.error("Invalid course selection");
                     return;
                   }
                   setAddCourseId(course.courseId);
@@ -498,9 +514,10 @@ const CourseDetails = () => {
                       headers: { 'Content-Type': 'application/json' }
                     });
                     setAddStep(3);
-                    alert("Course detail (10-points) submitted!");
+                    toast.success("Course detail (10-points) submitted successfully!");
                   } catch (err) {
-                    alert("Failed to submit course detail");
+                    toast.error("Failed to submit course detail. Please try again.");
+                    console.error("Error submitting course detail:", err);
                   }
                 }}
               >
@@ -520,6 +537,15 @@ const CourseDetails = () => {
                     />
                   ))}
                 </div>
+                <h3 className="text-lg font-semibold mb-4 mt-10">Field your Who should enroll section</h3>
+                <input type="text" placeholder="WSI point1" className="bg-gray-700 border px-4 py-2 rounded-md" value={whoEnroll.point1} onChange={e => setWhoEnroll(f => ({ ...f, point1: e.target.value }))}/>
+                <input type="text" placeholder="WSI point1" className="bg-gray-700 border px-4 py-2 rounded-md" value={whoEnroll.point2} onChange={e => setWhoEnroll(f => ({ ...f, point2: e.target.value }))}/>
+                <input type="text" placeholder="WSI point1" className="bg-gray-700 border px-4 py-2 rounded-md" value={whoEnroll.point3} onChange={e => setWhoEnroll(f => ({ ...f, point3: e.target.value }))}/>
+                <input type="text" placeholder="WSI point1" className="bg-gray-700 border px-4 py-2 rounded-md" value={whoEnroll.point4} onChange={e => setWhoEnroll(f => ({ ...f, point4: e.target.value }))}/>
+                
+                <h3 className="text-lg font-semibold mb-4 mt-10">Prerequisites</h3>
+                <input type="text" placeholder="Prerequisites 1" className="bg-gray-700 border px-4 py-2 rounded-md" value={prerequisites.point1} onChange={e => setPrerequisites(f => ({ ...f, point1: e.target.value }))}/>
+                <input type="text" placeholder="Prerequisites 1" className="bg-gray-700 border px-4 py-2 rounded-md" value={prerequisites.point2} onChange={e => setPrerequisites(f => ({ ...f, point2: e.target.value }))}/>
                 <button type="submit" className="mt-4 px-5 py-2 bg-green-600 rounded hover:bg-green-700 text-white">Next</button>
                 <button type="button" className="mt-4 ml-3 px-5 py-2 bg-gray-600 rounded hover:bg-gray-700 text-white" onClick={() => setAddStep(1)}>Back</button>
               </form>
@@ -553,9 +579,10 @@ const CourseDetails = () => {
                     setAddCourseId("");
                     setAddCourseName("");
                     setAddCategoryName("");
-                    alert("More About Course & Notes submitted!");
+                    toast.success("Course details completed successfully!");
                   } catch (err) {
-                    alert("Failed to submit More About Course & Notes");
+                    toast.error("Failed to submit course details. Please try again.");
+                    console.error("Error submitting course details:", err);
                   }
                 }}
               >
