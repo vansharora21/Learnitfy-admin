@@ -901,98 +901,246 @@ const CourseDetails = () => {
           </div>
         )}
 
-        {isEditingSelected && editSelectedForm && (
-          <form
-            className="mt-4 p-4 border border-indigo-600 rounded-lg bg-gray-900 text-white"
-            onSubmit={async (e) => {
-              console.log("here is the course id testing:")
-              e.preventDefault();
-              try {
-                await axios.patch(`https://api.learnitfy.com/api/admin/update/course`, {
-                  courseId: selectedCourse.courseId,
-                  moreAboutCourse: {
-                    duration: editSelectedForm.duration,
-                    noOfModules: editSelectedForm.noOfModules,
-                    Activities: editSelectedForm.Activities,
-                  },
-                  notes: {
-                    notes1: editSelectedForm.notes1,
-                    notes2: editSelectedForm.notes2,
-                    notes3: editSelectedForm.notes3,
-                    notes4: editSelectedForm.notes4,
-                  }
-                });
-                alert("Course updated!");
-                setIsEditingSelected(false);
-                // Refresh selectedCourse data
-                const updated = await axios.get(`${API}admin/get/courses?courseName=${selectedCourse.courseName}`);
-                if (updated.data && updated.data.data && updated.data.data.coursesList && updated.data.data.coursesList.length > 0) {
-                  setSelectedCourse(updated.data.data.coursesList[0]);
-                }
-              } catch (err) {
-                alert("Failed to update course");
-              }
-            }}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <input
-                type="text"
-                value={editSelectedForm.duration}
-                onChange={e => setEditSelectedForm(f => ({ ...f, duration: e.target.value }))}
-                placeholder="Duration"
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-              <input
-                type="number"
-                value={editSelectedForm.noOfModules}
-                onChange={e => setEditSelectedForm(f => ({ ...f, noOfModules: e.target.value }))}
-                placeholder="Modules"
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-              <input
-                type="number"
-                value={editSelectedForm.Activities}
-                onChange={e => setEditSelectedForm(f => ({ ...f, Activities: e.target.value }))}
-                placeholder="Activities"
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <input
-                type="text"
-                value={editSelectedForm.notes1}
-                onChange={e => setEditSelectedForm(f => ({ ...f, notes1: e.target.value }))}
-                placeholder="Note 1"
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-              <input
-                type="text"
-                value={editSelectedForm.notes2}
-                onChange={e => setEditSelectedForm(f => ({ ...f, notes2: e.target.value }))}
-                placeholder="Note 2"
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-              <input
-                type="text"
-                value={editSelectedForm.notes3}
-                onChange={e => setEditSelectedForm(f => ({ ...f, notes3: e.target.value }))}
-                placeholder="Note 3"
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-              <input
-                type="text"
-                value={editSelectedForm.notes4}
-                onChange={e => setEditSelectedForm(f => ({ ...f, notes4: e.target.value }))}
-                placeholder="Note 4"
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-            </div>
-            <div className="flex gap-3 mt-4">
-              <button type="submit" className="px-5 py-2 bg-green-600 rounded hover:bg-green-700">Save</button>
-              <button type="button" className="px-5 py-2 bg-gray-600 rounded hover:bg-gray-700" onClick={() => setIsEditingSelected(false)}>Cancel</button>
-            </div>
-          </form>
-        )}
+{isEditingSelected && editSelectedForm && (
+  <form
+    className="mt-4 p-4 border border-indigo-600 rounded-lg bg-gray-900 text-white"
+    onSubmit={async (e) => {
+      console.log("here is the course id testing:")
+      e.preventDefault();
+      try {
+        // Update basic course details
+        await axios.patch(`https://api.learnitfy.com/api/admin/update/course`, {
+          courseId: selectedCourse.courseId,
+          moreAboutCourse: {
+            duration: editSelectedForm.duration,
+            noOfModules: editSelectedForm.noOfModules,
+            Activities: editSelectedForm.Activities,
+          },
+          notes: {
+            notes1: editSelectedForm.notes1,
+            notes2: editSelectedForm.notes2,
+            notes3: editSelectedForm.notes3,
+            notes4: editSelectedForm.notes4,
+          }
+        });
+
+        // Update course detail information
+        const courseDetailPayload = {
+          courseId: selectedCourse.courseId,
+          courseDetail: {
+            heading: editSelectedForm.heading,
+            aboutCourse: editSelectedForm.aboutCourse,
+            subHeading: editSelectedForm.subHeading,
+            point1: editSelectedForm.point1,
+            point2: editSelectedForm.point2,
+            point3: editSelectedForm.point3,
+            point4: editSelectedForm.point4,
+            point5: editSelectedForm.point5,
+            point6: editSelectedForm.point6,
+            point7: editSelectedForm.point7,
+            point8: editSelectedForm.point8,
+            point9: editSelectedForm.point9,
+            point10: editSelectedForm.point10,
+            point11: editSelectedForm.point11,
+            point12: editSelectedForm.point12,
+            whoEnrollHeading: editSelectedForm.whoEnrollHeading,
+            whoEnrollPoint1: editSelectedForm.whoEnrollPoint1,
+            whoEnrollPoint2: editSelectedForm.whoEnrollPoint2,
+            whoEnrollPoint3: editSelectedForm.whoEnrollPoint3,
+            whoEnrollPoint4: editSelectedForm.whoEnrollPoint4,
+            prerequisitesPoint1: editSelectedForm.prerequisitesPoint1,
+            prerequisitesPoint2: editSelectedForm.prerequisitesPoint2
+          }
+        };
+        
+        await axios.patch(`${API}/admin/update/course/detail`, courseDetailPayload, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        toast.success("Course updated successfully!");
+        setIsEditingSelected(false);
+        
+        // Refresh selectedCourse data
+        const updated = await axios.get(`${API}admin/get/courses?courseName=${selectedCourse.courseName}`);
+        if (updated.data && updated.data.data && updated.data.data.coursesList && updated.data.data.coursesList.length > 0) {
+          setSelectedCourse(updated.data.data.coursesList[0]);
+        }
+      } catch (err) {
+        toast.error("Failed to update course");
+        console.error("Update error:", err);
+      }
+    }}
+  >
+    <h3 className="text-xl font-semibold mb-6 text-white">Edit Course Details</h3>
+
+    {/* Basic Course Information */}
+    <div className="mb-6">
+      <h4 className="text-lg font-medium mb-4 text-indigo-300">Basic Course Information</h4>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input
+          type="text"
+          value={editSelectedForm.duration || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, duration: e.target.value }))}
+          placeholder="Duration"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+        />
+        <input
+          type="number"
+          value={editSelectedForm.noOfModules || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, noOfModules: e.target.value }))}
+          placeholder="Modules"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+        />
+        <input
+          type="number"
+          value={editSelectedForm.Activities || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, Activities: e.target.value }))}
+          placeholder="Activities"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+        />
+      </div>
+    </div>
+
+    {/* Course Notes */}
+    <div className="mb-6">
+      <h4 className="text-lg font-medium mb-4 text-green-300">Course Notes</h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input
+          type="text"
+          value={editSelectedForm.notes1 || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, notes1: e.target.value }))}
+          placeholder="Note 1"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+        />
+        <input
+          type="text"
+          value={editSelectedForm.notes2 || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, notes2: e.target.value }))}
+          placeholder="Note 2"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+        />
+        <input
+          type="text"
+          value={editSelectedForm.notes3 || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, notes3: e.target.value }))}
+          placeholder="Note 3"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+        />
+        <input
+          type="text"
+          value={editSelectedForm.notes4 || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, notes4: e.target.value }))}
+          placeholder="Note 4"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+        />
+      </div>
+    </div>
+
+    {/* Course Detail Information */}
+    <div className="mb-6">
+      <h4 className="text-lg font-medium mb-4 text-yellow-300">Course Detail Information</h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <input
+          type="text"
+          value={editSelectedForm.heading || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, heading: e.target.value }))}
+          placeholder="Heading"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+        />
+        <input
+          type="text"
+          value={editSelectedForm.subHeading || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, subHeading: e.target.value }))}
+          placeholder="Sub Heading"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+        />
+      </div>
+      
+      <textarea
+        value={editSelectedForm.aboutCourse || ""}
+        onChange={e => setEditSelectedForm(f => ({ ...f, aboutCourse: e.target.value }))}
+        placeholder="About Course"
+        className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 w-full mb-4"
+        rows="3"
+      />
+
+      {/* 12 Points Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[...Array(12)].map((_, i) => (
+          <input
+            key={i}
+            type="text"
+            value={editSelectedForm[`point${i + 1}`] || ""}
+            onChange={e => setEditSelectedForm(f => ({ ...f, [`point${i + 1}`]: e.target.value }))}
+            placeholder={`Point ${i + 1}`}
+            className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+          />
+        ))}
+      </div>
+    </div>
+
+    {/* Who Should Enroll Section */}
+    <div className="mb-6">
+      <h4 className="text-lg font-medium mb-4 text-purple-300">Who Should Enroll</h4>
+      <div className="mb-4">
+        <input
+          type="text"
+          value={editSelectedForm.whoEnrollHeading || ""}
+          onChange={e => setEditSelectedForm(f => ({ ...f, whoEnrollHeading: e.target.value }))}
+          placeholder="Who Should Enroll Heading"
+          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 w-full"
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[1, 2, 3, 4].map(num => (
+          <input
+            key={num}
+            type="text"
+            value={editSelectedForm[`whoEnrollPoint${num}`] || ""}
+            onChange={e => setEditSelectedForm(f => ({ ...f, [`whoEnrollPoint${num}`]: e.target.value }))}
+            placeholder={`Who Should Enroll Point ${num}`}
+            className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+          />
+        ))}
+      </div>
+    </div>
+
+    {/* Prerequisites Section */}
+    <div className="mb-6">
+      <h4 className="text-lg font-medium mb-4 text-orange-300">Prerequisites</h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[1, 2].map(num => (
+          <input
+            key={num}
+            type="text"
+            value={editSelectedForm[`prerequisitesPoint${num}`] || ""}
+            onChange={e => setEditSelectedForm(f => ({ ...f, [`prerequisitesPoint${num}`]: e.target.value }))}
+            placeholder={`Prerequisites ${num}`}
+            className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+          />
+        ))}
+      </div>
+    </div>
+
+    {/* Action Buttons */}
+    <div className="flex gap-3 mt-6">
+      <button 
+        type="submit" 
+        className="px-6 py-3 bg-green-600 rounded-md hover:bg-green-700 transition font-medium text-white"
+      >
+        Save Changes
+      </button>
+      <button 
+        type="button" 
+        className="px-6 py-3 bg-gray-600 rounded-md hover:bg-gray-700 transition font-medium text-white" 
+        onClick={() => setIsEditingSelected(false)}
+      >
+        Cancel
+      </button>
+    </div>
+  </form>
+)}
+
 
         {showCourseDetailForm && (
           <form

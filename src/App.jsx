@@ -12,8 +12,6 @@ import CourseDetails from "./pages/CourseDetails";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// import FAQPage from "./pages/FAQ";
-
 function App() {
   const location = useLocation();
   const hideSidebar = location.pathname === "/";
