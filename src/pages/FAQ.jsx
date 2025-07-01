@@ -108,7 +108,8 @@ const FAQPage = () => {
         courseId: selectedCourseId,
         faq: faqList,
       });
-      alert("FAQ added successfully!");
+      // alert("FAQ added successfully!");
+      toast.success("All FAQ added successfully!");
       setFaqList([{ question: "", answer: "" }]);
       setSelectedCourseId("");
     } catch (err) {
