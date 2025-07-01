@@ -97,13 +97,6 @@ const CourseDetails = () => {
   const [modules, setModules] = useState([
     { moduleTitle: "", point1: "", point2: "", point3: "", point4: "", point5: "", point6: "" }
   ]);
-
-  // setTimeout(() => {
-  //   toast.success("Course added successfully");
-  // }, 2000)
-  // const SelectCourseID = selectedCourse.courseId
-
-  // console.log("here is the course datat", SelectCourseID, "sklx")
   const API = import.meta.env.VITE_BASE_URL_API;
 
   // Fetch Categories
@@ -543,7 +536,9 @@ const CourseDetails = () => {
                   try {
                     const payload = {
                       courseId: addCourseId,
-                      courseDetail: { ...tenPointsForm }
+                      courseDetail: { ...tenPointsForm },
+                      whoShouldEnroll: { ...whoEnroll },
+                      prerequisites: { ...prerequisites }
                     };
                     await axios.post(`https://api.learnitfy.com/api/admin/add/course/detail`, payload, {
                       headers: { 'Content-Type': 'application/json' }
