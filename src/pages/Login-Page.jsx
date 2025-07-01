@@ -42,12 +42,9 @@ export default function LoginPage() {
       setLoading(true);
       console.log("here is the response:", response);
       if (response.data.message === "Admin registered successfully" || "Admin logged in successfully") {
-        setTimeout(() => {
           localStorage.setItem("isAuthenticated", "true");
-          
           navigate('/dashboard');
           setLoading(false);
-        }, 5000)
       } else {
         alert(response.data.message || message);
       }

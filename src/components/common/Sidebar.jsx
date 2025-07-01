@@ -1,7 +1,7 @@
 import { BookMarked , MessageCircleQuestion , Menu,Dock ,ListCollapse,  Newspaper, ArchiveRestore  } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
 	{ name: "Categories",icon: BookMarked ,color: "#6366f1",href: "/dashboard"},
@@ -11,6 +11,8 @@ const SIDEBAR_ITEMS = [
 	{ name: "Enrollments ", icon: ArchiveRestore , color: "#EC4899", href: "/Enroll" },
 	{ name: "Queries", icon: MessageCircleQuestion, color: "#10B981", href: "/Queries" },
 	{ name: "Brochure Emails ", icon: Dock , color: "#F97316", href: "/Emails" },
+	// { name: "Logout", icon: Dock , color: "#F97316", href: "/logout" },
+
 	// { name: "Course Details ", icon: ListCollapse , color: "#10B981", href: "/details" }
 
 
@@ -18,6 +20,12 @@ const SIDEBAR_ITEMS = [
 
 const Sidebar = () => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+	const navigate = useNavigate();
+
+	const handleLogout=()=>{
+		localStorage.removeItem("isAuthenticated");
+		navigate("/");
+	}
 
 	return (
 		<motion.div
@@ -58,6 +66,7 @@ const Sidebar = () => {
 						</Link>
 					))}
 				</nav>
+				<button onClick={handleLogout}>Logout</button>
 			</div>
 		</motion.div>
 	);

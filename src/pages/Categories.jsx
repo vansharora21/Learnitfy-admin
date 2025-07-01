@@ -40,12 +40,9 @@ const OverviewPage = () => {
       data.append("categoryName", formData.name.trim().toLowerCase());
       data.append("description", formData.description);
       data.append("logo", formData.image);
-      data.append("metaTag", formData.metaTag);
-      data.append("metaDescription", formData.metaDescription);
-      data.append("url", formData.url);
-
-
-      console.log(data, "here is full data")
+      // data.append("metaTag", formData.metaTag);
+      // data.append("metaDescription", formData.metaDescription);
+      // data.append("url", formData.url);
 
       const response = await axios.post(`${API}${ADMIN__CATEGORY}`, data, {
         headers: {
@@ -212,7 +209,7 @@ const OverviewPage = () => {
               onChange={handleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
             />
-              <input
+              {/* <input
                 type="text"
                 name="metaTag"
                 placeholder="Add meta tag"
@@ -235,7 +232,7 @@ const OverviewPage = () => {
                 value={formData.url}
                 onChange={handleChange}
                 className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
+              /> */}
             {formData.image && (
               <img
                 src={URL.createObjectURL(formData.image)}

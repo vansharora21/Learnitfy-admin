@@ -48,6 +48,7 @@ function App() {
         <Route path="/Queries" element={<ProtectedRoute><Queries /></ProtectedRoute>} />
         <Route path="/Emails" element={<ProtectedRoute><Emails /></ProtectedRoute>} />
         <Route path="/details" element={<ProtectedRoute><CourseDetails /></ProtectedRoute>} />
+        {/* <Route path="/logout" element={<ProtectedRoute><Logout /></ProtectedRoute>} /> */}
       </Routes>
 
       {/* Toast Container */}
