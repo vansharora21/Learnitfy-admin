@@ -29,10 +29,23 @@ const OverviewPage = () => {
   const addCategoryAPI = async () => {
     try {
       const data = new FormData();
+
+      console.log(formData,"formData is here")
+
+
+
+
+
       // let newName = formData.name.toLowerCase().replace(/\s+/g, '-');
       data.append("categoryName", formData.name.trim().toLowerCase());
       data.append("description", formData.description);
       data.append("logo", formData.image);
+      data.append("metaTag", formData.metaTag);
+      data.append("metaDescription", formData.metaDescription);
+      data.append("url", formData.url);
+
+
+      console.log(data, "here is full data")
 
       const response = await axios.post(`${API}${ADMIN__CATEGORY}`, data, {
         headers: {
@@ -191,6 +204,7 @@ const OverviewPage = () => {
               onChange={handleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
+
             <input
               type="file"
               name="image"
@@ -198,6 +212,30 @@ const OverviewPage = () => {
               onChange={handleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
             />
+              <input
+                type="text"
+                name="metaTag"
+                placeholder="Add meta tag"
+                value={formData.metaTag}
+                onChange={handleChange}
+                className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <input
+                type="text"
+                name="metaDescription"
+                placeholder="Add meta description"
+                value={formData.metaDescription}
+                onChange={handleChange}
+                className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <input
+                type="text"
+                name="url"
+                placeholder="Add meta url"
+                value={formData.url}
+                onChange={handleChange}
+                className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             {formData.image && (
               <img
                 src={URL.createObjectURL(formData.image)}

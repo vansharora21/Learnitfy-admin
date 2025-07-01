@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
 import { ADD_CONTENT, ADD_COURSES, ADMIN_GET_CATEGORY, ADMIN_GET_COURSES, DELETE_COURSES, UPDATE_COURSES, UPLOAD_PDF } from "../constants";
-import { toast } from 'react-toastify';
 
 const CourseCategories = () => {
   const [showForm, setShowForm] = useState(false);
@@ -22,12 +21,8 @@ const CourseCategories = () => {
   const [modules, setModules] = useState([]);
   const [moduleData, setModuleData] = useState({
     name: "",
-    point1: "",
-    point2: "",
-    point3: "",
-    point4: "",
-    point5: "",
-    point6: "",
+    description: "",
+    pdf: null
   });
   const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
@@ -43,7 +38,6 @@ const CourseCategories = () => {
 
   const API = import.meta.env.VITE_BASE_URL_API;
   console.log(broturePdf, "plokijuhyg")
-
 
 
   useEffect(() => {
@@ -94,7 +88,6 @@ const CourseCategories = () => {
       setSentPdf(false);
       setShowModuleForm(false);
       setShowPdfForm(false);
-      toast.success("Brochure uploaded successfully");
     } catch (error) {
       console.error('Upload error:', error.response || error.message);
     }
@@ -126,6 +119,9 @@ const CourseCategories = () => {
     data.append("categoryName", formData.categoryName)
     data.append("courseName", formData.name)
     data.append("description", formData.description)
+    data.append("metaTag", formData.metaTag);
+    data.append("metaDescription", formData.metaDescription);
+    data.append("url", formData.url);
 
     try {
       const response = await axios.post(`${API}${ADD_COURSES}`, data, {
@@ -135,7 +131,6 @@ const CourseCategories = () => {
       });
       setCourseData(response.data.data);
       setCourseID(response.data.data.courseId);
-      toast.success("Course added successfully");
       console.log("courseId is her", courseID)
     } catch (error) {
       console.error("Error adding course:", error.message);
@@ -172,11 +167,18 @@ const CourseCategories = () => {
     e.preventDefault();
     if (!formData.name || !formData.description || !formData.categoryName) return;
 
+
+    console.log(formData,"formData is here full data")
+
     const data = new FormData();
     data.append("categoryName", formData.categoryName);
     data.append("courseName", formData.name);
     data.append("description", formData.description);
     data.append("price", formData.price || "1000");
+    data.append("metaTag", formData.metaTag);
+    data.append("metaDescription", formData.metaDescription);
+    data.append("url", formData.url);
+    
 
     if (formData.image) {
       data.append("image", formData.image);
@@ -184,6 +186,8 @@ const CourseCategories = () => {
 
     try {
       if (editIndex !== null) {
+
+        
         // Editing existing course
         data.append("courseId", courseID);
 
@@ -198,6 +202,7 @@ const CourseCategories = () => {
         updatedCourses[editIndex] = { ...updatedCourses[editIndex], ...updatedCourse };
         setGetCourseData(updatedCourses);
       } else {
+        
         // Adding new course
         const response = await axios.post(`${API}${ADD_COURSES}`, data, {
           headers: {
@@ -229,13 +234,11 @@ const CourseCategories = () => {
   };
 
   const handleModuleChange = (e) => {
-    const { placeholder, value } = e.target;
-    if (placeholder === "Module Name") {
-      setModuleData((prev) => ({ ...prev, name: value }));
-    } else if (placeholder.startsWith("point ")) {
-      // Extract the point number from the placeholder
-      const pointKey = `point${placeholder.split(" ")[1]}`;
-      setModuleData((prev) => ({ ...prev, [pointKey]: value }));
+    const { name, value, files } = e.target;
+    if (name === "pdf" && files.length > 0) {
+      setModuleData((prev) => ({ ...prev, pdf: files[0] }));
+    } else {
+      setModuleData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -296,19 +299,15 @@ const CourseCategories = () => {
         courseId: courseID,
         courseContent: [{
           moduleTitle: moduleData.name,
-          point1: moduleData.point1,
-          point2: moduleData.point2,
-          point3: moduleData.point3,
-          point4: moduleData.point4,
-          point5: moduleData.point5,
-          point6: moduleData.point6,
+          description: moduleData.description
         }]
       });
-      setModuleData({ name: "", point1: "", point2: "", point3: "", point4: "", point5: "", point6: "" });
+      setModuleData({ name: "", description: "" });
       setCount(count + 1);
     } catch (error) {
       console.error("Error adding course:", error.message);
     }
+
   };
 
   return (
@@ -389,6 +388,35 @@ const CourseCategories = () => {
               />
             )}
 
+
+
+<input
+              type="text"
+              name="metaTag"
+              placeholder="Add meta tag"
+              value={formData.metaTag}
+              onChange={handleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <input
+              type="text"
+              name="metaDescription"
+              placeholder="Add meta description"
+              value={formData.metaDescription}
+              onChange={handleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <input
+              type="text"
+              name="url"
+              placeholder="Add meta url"
+              value={formData.url}
+              onChange={handleChange}
+              className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+
+
+
             <textarea
               name="description"
               placeholder="Description"
@@ -399,7 +427,7 @@ const CourseCategories = () => {
               required
             />
             <button
-              onClick={AddCoursesAPI}
+              //onClick={AddCoursesAPI}
               type="submit"
               className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
             >
@@ -420,56 +448,9 @@ const CourseCategories = () => {
               value={moduleData.name}
               onChange={handleModuleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md"
-
+              required
             />
-            <input
-              type="text"
-              name="name"
-              placeholder="point 1"
-              value={moduleData.point1}
-              onChange={handleModuleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-
-            /><input
-              type="text"
-              name="name"
-              placeholder="point 2"
-              value={moduleData.point2}
-              onChange={handleModuleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-
-            /><input
-              type="text"
-              name="name"
-              placeholder="point 3"
-              value={moduleData.point3}
-              onChange={handleModuleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-
-            /><input
-              type="text"
-              name="name"
-              placeholder="point 4"
-              value={moduleData.point4}
-              onChange={handleModuleChange}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-
-            /><input
-            type="text"
-            name="name"
-            placeholder="point 5"
-            value={moduleData.point5}
-            onChange={handleModuleChange}
-            className="bg-gray-700 border px-4 py-2 rounded-md"
-          /><input
-          type="text"
-          name="name"
-          placeholder="point 6"
-          value={moduleData.point6}
-          onChange={handleModuleChange}
-          className="bg-gray-700 border px-4 py-2 rounded-md"
-        />
-            {/* <textarea
+            <textarea
               name="description"
               placeholder="Module Description"
               value={moduleData.description}
@@ -477,7 +458,7 @@ const CourseCategories = () => {
               className="bg-gray-700 border px-4 py-2 rounded-md"
               rows="2"
               required
-            /> */}
+            />
             <button onClick={hadleAddModule} className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module {count}</button>
             <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">
               Finish & Save Course
@@ -566,6 +547,8 @@ const CourseCategories = () => {
             </table>
           </div>
         </motion.div>
+
+
       </main>
     </div >
   );

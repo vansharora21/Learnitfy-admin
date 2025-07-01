@@ -11,10 +11,15 @@ import { useLocation } from "react-router-dom";
 import CourseDetails from "./pages/CourseDetails";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ProtectedRoute from "./components/protectedRoute";
 
 function App() {
   const location = useLocation();
   const hideSidebar = location.pathname === "/";
+
+
+  const getAuth= localStorage.getItem("isAuthenticated")
+  console.log(getAuth,"getAuth is here")
 
   return (
     <div className='flex h-screen bg-gray-900 text-gray-100 overflow-hidden'>
@@ -26,17 +31,23 @@ function App() {
         </div>
       )}
 
-      {!hideSidebar && <Sidebar />}
+      {!hideSidebar &&  getAuth && <Sidebar />}
+
+
+
       
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/dashboard" element={<Categories />} />
-        <Route path="/FAQ" element={<FAQPage />} />
-        <Route path="/Cocat" element={<Courses />} />
-        <Route path="/Enroll" element={<Enrollments />} />
-        <Route path="/Queries" element={<Queries />} />
-        <Route path="/Emails" element={<Emails />} />
-        <Route path="/details" element={<CourseDetails />} />
+
+
+        
+        <Route path="/dashboard" element={   <ProtectedRoute><Categories /> </ProtectedRoute>} />
+        <Route path="/FAQ" element={<ProtectedRoute><FAQPage /></ProtectedRoute>} />
+        <Route path="/Cocat" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
+        <Route path="/Enroll" element={<ProtectedRoute><Enrollments /></ProtectedRoute>} />
+        <Route path="/Queries" element={<ProtectedRoute><Queries /></ProtectedRoute>} />
+        <Route path="/Emails" element={<ProtectedRoute><Emails /></ProtectedRoute>} />
+        <Route path="/details" element={<ProtectedRoute><CourseDetails /></ProtectedRoute>} />
       </Routes>
 
       {/* Toast Container */}
