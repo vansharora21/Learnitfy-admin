@@ -21,7 +21,12 @@ const CourseCategories = () => {
   const [modules, setModules] = useState([]);
   const [moduleData, setModuleData] = useState({
     name: "",
-    description: "",
+    point1: "",
+    point2: "",
+    point3: "",
+    point4: "",
+    point5: "",
+    point6: "",
     pdf: null
   });
   const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
@@ -168,7 +173,7 @@ const CourseCategories = () => {
     if (!formData.name || !formData.description || !formData.categoryName) return;
 
 
-    console.log(formData,"formData is here full data")
+    console.log(formData, "formData is here full data")
 
     const data = new FormData();
     data.append("categoryName", formData.categoryName);
@@ -178,7 +183,7 @@ const CourseCategories = () => {
     data.append("metaTag", formData.metaTag);
     data.append("metaDescription", formData.metaDescription);
     data.append("url", formData.url);
-    
+
 
     if (formData.image) {
       data.append("image", formData.image);
@@ -187,7 +192,7 @@ const CourseCategories = () => {
     try {
       if (editIndex !== null) {
 
-        
+
         // Editing existing course
         data.append("courseId", courseID);
 
@@ -202,7 +207,7 @@ const CourseCategories = () => {
         updatedCourses[editIndex] = { ...updatedCourses[editIndex], ...updatedCourse };
         setGetCourseData(updatedCourses);
       } else {
-        
+
         // Adding new course
         const response = await axios.post(`${API}${ADD_COURSES}`, data, {
           headers: {
@@ -246,7 +251,13 @@ const CourseCategories = () => {
     e.preventDefault();
     if (!moduleData.name || !moduleData.description || !moduleData.pdf) return;
     setModules((prev) => [...prev, moduleData]);
-    setModuleData({ name: "", description: "", pdf: null });
+    setModuleData({pdf: null,name: "",
+      point1: "",
+      point2: "",
+      point3: "",
+      point4: "",
+      point5: "",
+      point6: "", });
   };
 
   const handleFinishModules = async () => {
@@ -299,10 +310,15 @@ const CourseCategories = () => {
         courseId: courseID,
         courseContent: [{
           moduleTitle: moduleData.name,
-          description: moduleData.description
+          point1: moduleData.point1,
+          point2: moduleData.point2,
+          point3: moduleData.point3,
+          point4: moduleData.point4,
+          point5: moduleData.point5,
+          point6: moduleData.point6
         }]
       });
-      setModuleData({ name: "", description: "" });
+      setModuleData({ name: "",point1: "",point2: "",point3: "",point4: "",point5: "",point6: "", });
       setCount(count + 1);
     } catch (error) {
       console.error("Error adding course:", error.message);
@@ -390,7 +406,7 @@ const CourseCategories = () => {
 
 
 
-<input
+            <input
               type="text"
               name="metaTag"
               placeholder="Add meta tag"
@@ -414,9 +430,6 @@ const CourseCategories = () => {
               onChange={handleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-
-
-
             <textarea
               name="description"
               placeholder="Description"
@@ -446,18 +459,53 @@ const CourseCategories = () => {
               name="name"
               placeholder="Module Name"
               value={moduleData.name}
-              onChange={handleModuleChange}
+              onChange={e => setModuleData({ ...moduleData, name: e.target.value })}
               className="bg-gray-700 border px-4 py-2 rounded-md"
               required
             />
-            <textarea
-              name="description"
-              placeholder="Module Description"
-              value={moduleData.description}
-              onChange={handleModuleChange}
+            <input
+              type="text"
+              name="name"
+              placeholder="point1"
+              value={moduleData.point1}
+              onChange={e => setModuleData({ ...moduleData, point1: e.target.value })}
               className="bg-gray-700 border px-4 py-2 rounded-md"
-              rows="2"
               required
+            /><input
+              type="text"
+              name="name"
+              placeholder="point2"
+              value={moduleData.point2}
+              onChange={e => setModuleData({ ...moduleData, point2: e.target.value })}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+            /><input
+              type="text"
+              name="name"
+              placeholder="point3"
+              value={moduleData.point3}
+              onChange={e => setModuleData({ ...moduleData, point3: e.target.value })}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+            /><input
+              type="text"
+              name="name"
+              placeholder="point4"
+              value={moduleData.point4}
+              onChange={e => setModuleData({ ...moduleData, point4: e.target.value })}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+            /><input
+              type="text"
+              name="name"
+              placeholder="point5"
+              value={moduleData.point5}
+              onChange={e => setModuleData({ ...moduleData, point5: e.target.value })}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
+            /><input
+              type="text"
+              name="name"
+              placeholder="point6"
+              value={moduleData.point6}
+              onChange={e => setModuleData({ ...moduleData, point6: e.target.value })}
+              className="bg-gray-700 border px-4 py-2 rounded-md"
             />
             <button onClick={hadleAddModule} className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module {count}</button>
             <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">

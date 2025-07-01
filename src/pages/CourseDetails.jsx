@@ -94,6 +94,9 @@ const CourseDetails = () => {
     notes3: "",
     notes4: "",
   });
+  const [modules, setModules] = useState([
+    { moduleTitle: "", point1: "", point2: "", point3: "", point4: "", point5: "", point6: "" }
+  ]);
 
   // setTimeout(() => {
   //   toast.success("Course added successfully");
@@ -393,6 +396,38 @@ const CourseDetails = () => {
 
   const toggleDetail = (index) => {
     setExpandedDetail(expandedDetail === index ? null : index);
+  };
+
+  const addModule = () => {
+    setModules([
+      ...modules,
+      { moduleTitle: "", point1: "", point2: "", point3: "", point4: "", point5: "", point6: "" }
+    ]);
+  };
+
+  const removeModule = (index) => {
+    setModules(modules.filter((_, i) => i !== index));
+  };
+
+  const handleModuleChange = (index, field, value) => {
+    setModules(modules.map((mod, i) => i === index ? { ...mod, [field]: value } : mod));
+  };
+
+  const handleSubmitModules = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        courseId: formData.courseId || selectedCourse?.courseId,
+        courseContent: modules
+      };
+      await axios.post(`${API}/admin/add/course/modules`, payload, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      toast.success("Modules added successfully!");
+      setModules([{ moduleTitle: "", point1: "", point2: "", point3: "", point4: "", point5: "", point6: "" }]);
+    } catch (err) {
+      toast.error("Failed to add modules");
+    }
   };
 
   return (
@@ -1197,117 +1232,37 @@ const CourseDetails = () => {
           </div>
         )}
 
-        {/* Course Details List */}
-          {/* <motion.div
-            className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Course Details List ({courseDetails.length} total)
-            </h2>
-
-            {filteredDetails.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-400">No course details found. Add your first course details to get started.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredDetails.map((detail, index) => (
-                  <motion.div
-                    key={detail.id || index}
-                    className="bg-gray-700 bg-opacity-50 rounded-lg border border-gray-600"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <div className="flex gap-2 mb-2">
-                            <span className="px-2 py-1 bg-indigo-600 text-white text-xs rounded">
-                              {detail.categoryName || 'No Category'}
-                            </span>
-                            <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">
-                              {detail.courseName || 'No Course'}
-                            </span>
-                            <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded">
-                              {detail.moreAboutCourse?.duration}
-                            </span>
-                            <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">
-                              {detail.moreAboutCourse?.noOfModules} Modules
-                            </span>
-                            <span className="px-2 py-1 bg-orange-600 text-white text-xs rounded">
-                              {detail.moreAboutCourse?.Activities} Activities
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => toggleDetail(index)}
-                            className="flex items-center justify-between w-full text-left"
-                          >
-                            <h3 className="text-white font-medium text-lg pr-4">
-                              {detail.courseName} - Course Details
-                            </h3>
-                            {expandedDetail === index ? (
-                              <ChevronUp className="text-gray-400 flex-shrink-0" size={20} />
-                            ) : (
-                              <ChevronDown className="text-gray-400 flex-shrink-0" size={20} />
-                            )}
-                          </button>
-                        </div>
-                        <div className="flex gap-2 ml-4">
-                          <button
-                            onClick={() => handleEdit(index)}
-                            className="text-indigo-400 hover:text-indigo-300"
-                          >
-                            <Edit size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(index)}
-                            className="text-red-400 hover:text-red-300"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {expandedDetail === index && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="mt-3 pt-3 border-t border-gray-600"
-                        >
-                          <div className="text-gray-300">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                              <div>
-                                <h4 className="font-medium mb-2 text-indigo-300">Course Information:</h4>
-                                <div className="space-y-1 text-sm">
-                                  <div><span className="font-medium">Duration:</span> {detail.moreAboutCourse?.duration}</div>
-                                  <div><span className="font-medium">Modules:</span> {detail.moreAboutCourse?.noOfModules}</div>
-                                  <div><span className="font-medium">Activities:</span> {detail.moreAboutCourse?.Activities}</div>
-                                </div>
-                              </div>
-                              <div>
-                                <h4 className="font-medium mb-2 text-green-300">Course Notes:</h4>
-                                <ul className="list-disc list-inside space-y-1 text-sm">
-                                  {detail.notes?.notes1 && <li>{detail.notes.notes1}</li>}
-                                  {detail.notes?.notes2 && <li>{detail.notes.notes2}</li>}
-                                  {detail.notes?.notes3 && <li>{detail.notes.notes3}</li>}
-                                  {detail.notes?.notes4 && <li>{detail.notes.notes4}</li>}
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </motion.div> */}
+        {/* Place this section after course creation UI */}
+        <form onSubmit={handleSubmitModules} className="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 text-blue-300">Add Course Modules</h3>
+          {modules.map((module, idx) => (
+            <div key={idx} className="mb-4 p-4 border rounded bg-gray-700">
+              <input
+                type="text"
+                placeholder="Module Title"
+                value={module.moduleTitle}
+                onChange={e => handleModuleChange(idx, "moduleTitle", e.target.value)}
+                className="mb-2 w-full px-3 py-2 rounded"
+                required
+              />
+              {[1,2,3,4,5,6].map(num => (
+                <input
+                  key={num}
+                  type="text"
+                  placeholder={`Point ${num}`}
+                  value={module[`point${num}`] || ""}
+                  onChange={e => handleModuleChange(idx, `point${num}`, e.target.value)}
+                  className="mb-2 w-full px-3 py-2 rounded"
+                />
+              ))}
+              {modules.length > 1 && (
+                <button type="button" onClick={() => removeModule(idx)} className="text-red-400">Remove Module</button>
+              )}
+            </div>
+          ))}
+          <button type="button" onClick={addModule} className="bg-green-600 text-white px-4 py-2 rounded mr-4">Add Module</button>
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Submit Modules</button>
+        </form>
       </main>
     </div>
   );
