@@ -1,16 +1,16 @@
-import { BookMarked , MessageCircleQuestion , Menu,Dock ,ListCollapse,  Newspaper, ArchiveRestore  } from "lucide-react";
+import { BookMarked, MessageCircleQuestion, Menu, Dock,LogOut, ListCollapse, Newspaper, ArchiveRestore } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
-	{ name: "Categories",icon: BookMarked ,color: "#6366f1",href: "/dashboard"},
-	{ name: "Courses", icon: Newspaper , color: "#8B5CF6", href: "/Cocat" },
-	{ name: "Course Details ", icon: ListCollapse , color: "#10B981", href: "/details" },
-	{ name: "FAQ", icon: Dock , color: "#F97316", href: "/FAQ" },
-	{ name: "Enrollments ", icon: ArchiveRestore , color: "#EC4899", href: "/Enroll" },
+	{ name: "Categories", icon: BookMarked, color: "#6366f1", href: "/dashboard" },
+	{ name: "Courses", icon: Newspaper, color: "#8B5CF6", href: "/Cocat" },
+	{ name: "Course Details ", icon: ListCollapse, color: "#10B981", href: "/details" },
+	{ name: "FAQ", icon: Dock, color: "#F97316", href: "/FAQ" },
+	{ name: "Enrollments ", icon: ArchiveRestore, color: "#EC4899", href: "/Enroll" },
 	{ name: "Queries", icon: MessageCircleQuestion, color: "#10B981", href: "/Queries" },
-	{ name: "Brochure Emails ", icon: Dock , color: "#F97316", href: "/Emails" },
+	{ name: "Brochure Emails ", icon: Dock, color: "#F97316", href: "/Emails" },
 	// { name: "Logout", icon: Dock , color: "#F97316", href: "/logout" },
 
 	// { name: "Course Details ", icon: ListCollapse , color: "#10B981", href: "/details" }
@@ -22,16 +22,15 @@ const Sidebar = () => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const navigate = useNavigate();
 
-	const handleLogout=()=>{
+	const handleLogout = () => {
 		localStorage.removeItem("isAuthenticated");
 		navigate("/");
 	}
 
 	return (
 		<motion.div
-			className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${
-				isSidebarOpen ? "w-64" : "w-20"
-			}`}
+			className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarOpen ? "w-64" : "w-20"
+				}`}
 			animate={{ width: isSidebarOpen ? 256 : 80 }}
 		>
 			<div className='h-full bg-gray-800 bg-opacity-50 backdrop-blur-md p-4 flex flex-col border-r border-gray-700'>
@@ -66,7 +65,14 @@ const Sidebar = () => {
 						</Link>
 					))}
 				</nav>
-				<button onClick={handleLogout}>Logout</button>
+				<button
+					onClick={handleLogout}
+					className="flex items-center gap-2 px-4 py-2 text-white rounded hover:bg-red-700"
+				>
+					<LogOut size={18} />
+					Logout
+				</button>
+
 			</div>
 		</motion.div>
 	);
