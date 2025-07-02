@@ -20,6 +20,7 @@ const FAQPage = () => {
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [faqList, setFaqList] = useState([{ question: "", answer: "" }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const API = import.meta.env.VITE_BASE_URL_API;
 
@@ -88,6 +89,24 @@ const FAQPage = () => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
   };
 
+  const handleUpdateFAQ = async (faq) => {
+    try {
+      const payload = {
+        courseId: selectedCourseId,
+        _id: faq._id,
+        question: faq.question,
+        answer: faq.answer
+      };
+
+      await axios.patch("https://api.learnItfy.com/api/faq/update", payload);
+      toast.success("FAQ updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update FAQ");
+      console.error("Error updating FAQ:", error);
+    }
+  };
+
+
   const handleFaqChange = (idx, field, value) => {
     setFaqList(prev =>
       prev.map((faq, i) =>
@@ -126,107 +145,249 @@ const FAQPage = () => {
 
         <section>
           <h2 className="text-xl font-semibold text-white mb-6">Frequently Asked Questions</h2>
-          <motion.div className="space-y-4">
-            {/* {filteredFAQs.length === 0 ? (
-              <div className="text-gray-400">No FAQs available for the selected course.</div>
-            ) : ( */}
-              {filteredFAQs.map((faq, index) => (
+          <button
+            onClick={() => setIsEditMode(!isEditMode)}
+            className="mb-6 bg-yellow-600 text-white px-4 py-2 rounded"
+          >
+            {isEditMode ? "Cancel Edit" : "Edit All FAQs"}
+          </button>
+
+          {/* <motion.div
+            key={faq._id || index}
+            className="bg-gray-800 rounded-xl shadow-md border border-gray-700 transition duration-300"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="p-4">
+              <button
+                onClick={() => toggleFAQ(index)}
+                className="flex items-center justify-between w-full text-left"
+              >
+                <h3 className="text-white font-medium text-lg pr-4">{faq.question}</h3>
+                {expandedFAQ === index ? (
+                  <ChevronUp className="text-gray-400" size={20} />
+                ) : (
+                  <ChevronDown className="text-gray-400" size={20} />
+                )}
+              </button>
+
+
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 pt-3 border-t border-gray-600"
+              >
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    className="w-full p-2 rounded bg-gray-700 text-white"
+                    value={faq.question}
+                    onChange={(e) => {
+                      const updated = [...filteredFAQs];
+                      updated[index].question = e.target.value;
+                      selectedCourse.faq = updated;
+                      setGetFaq([...getFaq]);
+                    }}
+                  />
+                  <textarea
+                    className="w-full p-2 rounded bg-gray-700 text-white"
+                    value={faq.answer}
+                    onChange={(e) => {
+                      const updated = [...filteredFAQs];
+                      updated[index].answer = e.target.value;
+                      selectedCourse.faq = updated;
+                      setGetFaq([...getFaq]);
+                    }}
+                  />
+                  <button
+                    onClick={() => handleUpdateFAQ(faq)}
+                    className="mt-2 px-4 py-2 bg-yellow-500 text-white rounded"
+                  >
+                    Save FAQ
+                  </button>
+                </div>
+
+              </motion.div>
+              {expandedFAQ === index && (
                 <motion.div
-                  key={faq._id || index}
-                  className="bg-gray-800 rounded-xl shadow-md border border-gray-700 transition duration-300"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-3 pt-3 border-t border-gray-600 space-y-2"
                 >
-                  <div className="p-4">
-                    <button
-                      onClick={() => toggleFAQ(index)}
-                      className="flex items-center justify-between w-full text-left"
-                    >
-                      <h3 className="text-white font-medium text-lg pr-4">{faq.question}</h3>
-                      {expandedFAQ === index ? (
-                        <ChevronUp className="text-gray-400" size={20} />
-                      ) : (
-                        <ChevronDown className="text-gray-400" size={20} />
-                      )}
-                    </button>
-
-                    {expandedFAQ === index && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-3 pt-3 border-t border-gray-600"
+                  {isEditMode ? (
+                    <>
+                      <input
+                        type="text"
+                        className="w-full p-2 rounded bg-gray-700 text-white"
+                        value={faq.question}
+                        onChange={(e) => {
+                          const updated = [...filteredFAQs];
+                          updated[index].question = e.target.value;
+                          selectedCourse.faq = updated;
+                          setGetFaq([...getFaq]);
+                        }}
+                      />
+                      <textarea
+                        className="w-full p-2 rounded bg-gray-700 text-white"
+                        value={faq.answer}
+                        onChange={(e) => {
+                          const updated = [...filteredFAQs];
+                          updated[index].answer = e.target.value;
+                          selectedCourse.faq = updated;
+                          setGetFaq([...getFaq]);
+                        }}
+                      />
+                      <button
+                        onClick={() => handleUpdateFAQ(faq)}
+                        className="mt-2 px-4 py-2 bg-green-600 text-white rounded"
                       >
-                        <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
-                      </motion.div>
-                    )}
-                  </div>
+                        Save FAQ
+                      </button>
+                    </>
+                  ) : (
+                    <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
+                  )}
                 </motion.div>
-              ))
-            }
-            {/* )} */}
-          </motion.div>
-        </section>
+              )}
 
-        <form
-          onSubmit={handleAddFaq}
-          className="bg-gray-800 p-6 rounded-lg shadow-md mb-8 mt-20"
+            </div>
+          </motion.div>
+          ))
+            }
+          {/* )} */}
+        {/* </motion.div>  */}
+        <motion.div className="space-y-4">
+  {filteredFAQs.map((faq, index) => (
+    <motion.div
+      key={faq._id || index}
+      className="bg-gray-800 rounded-xl shadow-md border border-gray-700 transition duration-300"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="p-4">
+        <button
+          onClick={() => toggleFAQ(index)}
+          className="flex items-center justify-between w-full text-left"
         >
-          <div className="mb-4 pt-10 ">
-            <label className="block text-gray-300 mb-2">Select Course</label>
-            <select
-              value={selectedCourseId}
-              onChange={e => setSelectedCourseId(e.target.value)}
+          <h3 className="text-white font-medium text-lg pr-4">{faq.question}</h3>
+          {expandedFAQ === index ? (
+            <ChevronUp className="text-gray-400" size={20} />
+          ) : (
+            <ChevronDown className="text-gray-400" size={20} />
+          )}
+        </button>
+
+        {expandedFAQ === index && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mt-3 pt-3 border-t border-gray-600 space-y-2"
+          >
+            {isEditMode ? (
+              <>
+                <input
+                  type="text"
+                  className="w-full p-2 rounded bg-gray-700 text-white"
+                  value={faq.question}
+                  onChange={(e) => {
+                    const updated = [...filteredFAQs];
+                    updated[index].question = e.target.value;
+                    selectedCourse.faq = updated;
+                    setGetFaq([...getFaq]);
+                  }}
+                />
+                <textarea
+                  className="w-full p-2 rounded bg-gray-700 text-white"
+                  value={faq.answer}
+                  onChange={(e) => {
+                    const updated = [...filteredFAQs];
+                    updated[index].answer = e.target.value;
+                    selectedCourse.faq = updated;
+                    setGetFaq([...getFaq]);
+                  }}
+                />
+                <button
+                  onClick={() => handleUpdateFAQ(faq)}
+                  className="mt-2 px-4 py-2 bg-green-600 text-white rounded"
+                >
+                  Save FAQ
+                </button>
+              </>
+            ) : (
+              <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
+            )}
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
+  ))}
+</motion.div>
+
+      </section>
+
+      <form
+        onSubmit={handleAddFaq}
+        className="bg-gray-800 p-6 rounded-lg shadow-md mb-8 mt-20"
+      >
+        <div className="mb-4 pt-10 ">
+          <label className="block text-gray-300 mb-2">Select Course</label>
+          <select
+            value={selectedCourseId}
+            onChange={e => setSelectedCourseId(e.target.value)}
+            className="w-full p-2 rounded bg-gray-700 text-white"
+            required
+          >
+            <option value="">Select a course</option>
+            {/* Replace with your actual course list */}
+            {courseData.map(course => (
+              <option key={course.courseId} value={course.courseId}>
+                {course.courseName}
+              </option>
+            ))}
+          </select>
+        </div>
+        {faqList.map((faq, idx) => (
+          <div key={idx} className="mb-4">
+            <input
+              type="text"
+              placeholder="Question"
+              value={faq.question}
+              onChange={e => handleFaqChange(idx, "question", e.target.value)}
+              className="w-full mb-2 p-2 rounded bg-gray-700 text-white"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Answer"
+              value={faq.answer}
+              onChange={e => handleFaqChange(idx, "answer", e.target.value)}
               className="w-full p-2 rounded bg-gray-700 text-white"
               required
-            >
-              <option value="">Select a course</option>
-              {/* Replace with your actual course list */}
-              {courseData.map(course => (
-                <option key={course.courseId} value={course.courseId}>
-                  {course.courseName}
-                </option>
-              ))}
-            </select>
+            />
           </div>
-          {faqList.map((faq, idx) => (
-            <div key={idx} className="mb-4">
-              <input
-                type="text"
-                placeholder="Question"
-                value={faq.question}
-                onChange={e => handleFaqChange(idx, "question", e.target.value)}
-                className="w-full mb-2 p-2 rounded bg-gray-700 text-white"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Answer"
-                value={faq.answer}
-                onChange={e => handleFaqChange(idx, "answer", e.target.value)}
-                className="w-full p-2 rounded bg-gray-700 text-white"
-                required
-              />
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={handleAddFaqField}
-            className="bg-blue-600 text-white px-4 py-2 rounded mr-2"
-          >
-            Add Another FAQ
-          </button>
-          <button
-            type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting..." : "Submit FAQ"}
-          </button>
-        </form>
-      </main>
-    </div>
+        ))}
+        <button
+          type="button"
+          onClick={handleAddFaqField}
+          className="bg-blue-600 text-white px-4 py-2 rounded mr-2"
+        >
+          Add Another FAQ
+        </button>
+        <button
+          type="submit"
+          className="bg-green-600 text-white px-4 py-2 rounded"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Submitting..." : "Submit FAQ"}
+        </button>
+      </form>
+    </main>
+    </div >
   );
 };
 
