@@ -113,7 +113,6 @@ const FAQPage = () => {
       setFaqList([{ question: "", answer: "" }]);
       setSelectedCourseId("");
     } catch (err) {
-      alert("Failed to add FAQ");
     } finally {
       setIsSubmitting(false);
     }
@@ -124,23 +123,6 @@ const FAQPage = () => {
       <Header title="FAQ Management" />
       <main className="max-w-7xl mx-auto py-10 px-4 lg:px-8">
         <h1 className="text-3xl font-bold text-white mb-6">Manage Frequently Asked Questions</h1>
-
-        {/* <section className="mb-10">
-          <h2 className="text-xl font-semibold text-white mb-4">Select a Course</h2>
-          <div className="flex gap-3 flex-wrap">
-            {getFaq.map(course => (
-              <button
-                key={course.courseId}
-                onClick={() => setSelectedCourseId(course.courseId)}
-                className={`px-5 py-2 rounded-full transition-all duration-200 font-medium shadow-sm
-                  ${selectedCourseId === course.courseId ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}
-                `}
-              >
-                {course.courseName}
-              </button>
-            ))}
-          </div>
-        </section> */}
 
         <section>
           <h2 className="text-xl font-semibold text-white mb-6">Frequently Asked Questions</h2>
@@ -189,9 +171,9 @@ const FAQPage = () => {
 
         <form
           onSubmit={handleAddFaq}
-          className="bg-gray-800 p-6 rounded-lg shadow-md mb-8"
+          className="bg-gray-800 p-6 rounded-lg shadow-md mb-8 mt-20"
         >
-          <div className="mb-4">
+          <div className="mb-4 pt-10 ">
             <label className="block text-gray-300 mb-2">Select Course</label>
             <select
               value={selectedCourseId}

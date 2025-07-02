@@ -51,6 +51,7 @@ const OverviewPage = () => {
       });
 
       console.log("Category added:", response.data);
+      toast.success("Category added successfully!");
       const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
       setCategoryData(res?.data?.data || []);
     } catch (error) {

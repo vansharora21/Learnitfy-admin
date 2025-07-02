@@ -99,12 +99,6 @@ const CourseDetails = () => {
     { moduleTitle: "", point1: "", point2: "", point3: "", point4: "", point5: "", point6: "" }
   ]);
 
-  // setTimeout(() => {
-  //   toast.success("Course added successfully");
-  // }, 2000)
-  // const SelectCourseID = selectedCourse.courseId
-
-  // console.log("here is the course datat", SelectCourseID, "sklx")
   const API = import.meta.env.VITE_BASE_URL_API;
 
   // Fetch Categories
@@ -443,12 +437,7 @@ const CourseDetails = () => {
                 onChange={(e) => {
                   const selected = courseData.find((c) => c.courseId === e.target.value);
                   if (selected) {
-                    setSelectedCourse({
-                      courseId: selected.courseId,
-                      moreAboutCourse: selected.moreAboutCourse,
-                      notes: selected.notes,
-                      courseName: selected.courseName,
-                    });
+                    setSelectedCourse(selected);
                   } else {
                     setSelectedCourse(null);
                     setShowCourseDetailForm(false);
@@ -900,13 +889,12 @@ const CourseDetails = () => {
           </div>
         )}
         {selectedCourse && (
-          <div className="mt-4 p-4 border border-gray-600 rounded-lg bg-gray-800 text-white">
+          <div className="mt-6 space-y-6">
+            {/* Top bar with course name and Edit button */}
             <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold">
-                {selectedCourse.courseName} – Quick View
-              </h3>
+              <h2 className="text-xl font-semibold text-gray-100">{selectedCourse.courseName} – Details</h2>
               <button
-                className="px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-700"
+                className="px-4 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition text-sm font-medium"
                 onClick={() => {
                   setIsEditingSelected(true);
                   setEditSelectedForm({
@@ -917,28 +905,76 @@ const CourseDetails = () => {
                     notes2: selectedCourse.notes?.notes2 || "",
                     notes3: selectedCourse.notes?.notes3 || "",
                     notes4: selectedCourse.notes?.notes4 || "",
+                    heading: selectedCourse.courseDetail?.heading || "",
+                    subHeading: selectedCourse.courseDetail?.subHeading || "",
+                    aboutCourse: selectedCourse.courseDetail?.aboutCourse || "",
+                    whoShouldEnroll: selectedCourse.courseDetail?.whoShouldEnroll || {},
+                    prerequisites: selectedCourse.courseDetail?.Prerequisites || {},
+                    // Add points if you want to edit them too
+                    ...Object.fromEntries(Array.from({length: 12}, (_, i) => [`point${i+1}`, selectedCourse.courseDetail?.[`point${i+1}`] || ""])),
                   });
                 }}
               >
                 Edit
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="text-indigo-300 font-medium mb-1">More About Course</h4>
-                <div className="text-sm">
-                  <div><strong>Duration:</strong> {selectedCourse.moreAboutCourse?.duration || "N/A"}</div>
-                  <div><strong>Modules:</strong> {selectedCourse.moreAboutCourse?.noOfModules || "N/A"}</div>
-                  <div><strong>Activities:</strong> {selectedCourse.moreAboutCourse?.Activities || "N/A"}</div>
+
+            {/* More About Course & Notes */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded border border-gray-300 bg-white/5 p-4">
+                <h4 className="text-base font-medium text-gray-200 mb-2">More About Course</h4>
+                <div className="space-y-1 text-gray-200 text-sm">
+                  <div><span className="font-semibold">Duration:</span> {selectedCourse.moreAboutCourse?.duration || "N/A"}</div>
+                  <div><span className="font-semibold">Modules:</span> {selectedCourse.moreAboutCourse?.noOfModules || "N/A"}</div>
+                  <div><span className="font-semibold">Activities:</span> {selectedCourse.moreAboutCourse?.Activities || "N/A"}</div>
                 </div>
               </div>
-              <div>
-                <h4 className="text-green-300 font-medium mb-1">Notes</h4>
-                <ul className="list-disc list-inside text-sm space-y-1">
+              <div className="rounded border border-gray-300 bg-white/5 p-4">
+                <h4 className="text-base font-medium text-gray-200 mb-2">Notes</h4>
+                <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
                   {selectedCourse.notes?.notes1 && <li>{selectedCourse.notes.notes1}</li>}
                   {selectedCourse.notes?.notes2 && <li>{selectedCourse.notes.notes2}</li>}
                   {selectedCourse.notes?.notes3 && <li>{selectedCourse.notes.notes3}</li>}
                   {selectedCourse.notes?.notes4 && <li>{selectedCourse.notes.notes4}</li>}
+                </ul>
+              </div>
+            </div>
+
+            {/* Main Points */}
+            <div className="rounded border border-gray-300 bg-white/5 p-4">
+              <h4 className="text-base font-medium text-gray-200 mb-2">Main Points</h4>
+              <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                {Array.from({ length: 12 }, (_, i) => {
+                  const key = `point${i + 1}`;
+                  return selectedCourse?.courseDetail?.[key] ? (
+                    <li key={i}>{selectedCourse.courseDetail[key]}</li>
+                  ) : null;
+                })}
+              </ul>
+            </div>
+
+            {/* Who Should Enroll & Prerequisites */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded border border-gray-300 bg-white/5 p-4">
+                <h4 className="text-base font-medium text-gray-200 mb-2">Who Should Enroll</h4>
+                <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                  {selectedCourse?.courseDetail?.whoShouldEnroll &&
+                    Object.values(selectedCourse.courseDetail.whoShouldEnroll)
+                      .filter(Boolean)
+                      .map((point, idx) => (
+                        <li key={idx}>{point}</li>
+                      ))}
+                </ul>
+              </div>
+              <div className="rounded border border-gray-300 bg-white/5 p-4">
+                <h4 className="text-base font-medium text-gray-200 mb-2">Prerequisites</h4>
+                <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                  {selectedCourse?.courseDetail?.Prerequisites &&
+                    Object.values(selectedCourse.courseDetail.Prerequisites)
+                      .filter(Boolean)
+                      .map((point, idx) => (
+                        <li key={idx}>{point}</li>
+                      ))}
                 </ul>
               </div>
             </div>
@@ -947,9 +983,8 @@ const CourseDetails = () => {
 
         {isEditingSelected && editSelectedForm && (
           <form
-            className="mt-4 p-4 border border-indigo-600 rounded-lg bg-gray-900 text-white"
+            className="mt-4 space-y-6"
             onSubmit={async (e) => {
-              console.log("here is the course id testing:")
               e.preventDefault();
               try {
                 // Update basic course details
@@ -975,29 +1010,13 @@ const CourseDetails = () => {
                     heading: editSelectedForm.heading,
                     aboutCourse: editSelectedForm.aboutCourse,
                     subHeading: editSelectedForm.subHeading,
-                    point1: editSelectedForm.point1,
-                    point2: editSelectedForm.point2,
-                    point3: editSelectedForm.point3,
-                    point4: editSelectedForm.point4,
-                    point5: editSelectedForm.point5,
-                    point6: editSelectedForm.point6,
-                    point7: editSelectedForm.point7,
-                    point8: editSelectedForm.point8,
-                    point9: editSelectedForm.point9,
-                    point10: editSelectedForm.point10,
-                    point11: editSelectedForm.point11,
-                    point12: editSelectedForm.point12,
-                    whoEnrollHeading: editSelectedForm.whoEnrollHeading,
-                    whoEnrollPoint1: editSelectedForm.whoEnrollPoint1,
-                    whoEnrollPoint2: editSelectedForm.whoEnrollPoint2,
-                    whoEnrollPoint3: editSelectedForm.whoEnrollPoint3,
-                    whoEnrollPoint4: editSelectedForm.whoEnrollPoint4,
-                    prerequisitesPoint1: editSelectedForm.prerequisitesPoint1,
-                    prerequisitesPoint2: editSelectedForm.prerequisitesPoint2
+                    ...Object.fromEntries(Array.from({length: 12}, (_, i) => [`point${i+1}`, editSelectedForm[`point${i+1}`] || ""])),
+                    whoShouldEnroll: editSelectedForm.whoShouldEnroll,
+                    Prerequisites: editSelectedForm.prerequisites,
                   }
                 };
 
-                await axios.patch(`${API}/admin/update/course/detail`, courseDetailPayload, {
+                await axios.patch(`${API}admin/update/course/detail`, courseDetailPayload, {
                   headers: { 'Content-Type': 'application/json' }
                 });
 
@@ -1015,152 +1034,146 @@ const CourseDetails = () => {
               }
             }}
           >
-            <h3 className="text-xl font-semibold mb-6 text-white">Edit Course Details</h3>
-
-            {/* Basic Course Information */}
-            <div className="mb-6">
-              <h4 className="text-lg font-medium mb-4 text-indigo-300">Basic Course Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input
-                  type="text"
-                  value={editSelectedForm.duration || ""}
-                  onChange={e => setEditSelectedForm(f => ({ ...f, duration: e.target.value }))}
-                  placeholder="Duration"
-                  className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
-                />
-                <input
-                  type="number"
-                  value={editSelectedForm.noOfModules || ""}
-                  onChange={e => setEditSelectedForm(f => ({ ...f, noOfModules: e.target.value }))}
-                  placeholder="Modules"
-                  className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
-                />
-                <input
-                  type="number"
-                  value={editSelectedForm.Activities || ""}
-                  onChange={e => setEditSelectedForm(f => ({ ...f, Activities: e.target.value }))}
-                  placeholder="Activities"
-                  className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
-                />
-              </div>
-            </div>
-
-            {/* Course Notes */}
-            <div className="mb-6">
-              <h4 className="text-lg font-medium mb-4 text-green-300">Course Notes</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  value={editSelectedForm.notes1 || ""}
-                  onChange={e => setEditSelectedForm(f => ({ ...f, notes1: e.target.value }))}
-                  placeholder="Note 1"
-                  className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
-                />
-                <input
-                  type="text"
-                  value={editSelectedForm.notes2 || ""}
-                  onChange={e => setEditSelectedForm(f => ({ ...f, notes2: e.target.value }))}
-                  placeholder="Note 2"
-                  className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
-                />
-                <input
-                  type="text"
-                  value={editSelectedForm.notes3 || ""}
-                  onChange={e => setEditSelectedForm(f => ({ ...f, notes3: e.target.value }))}
-                  placeholder="Note 3"
-                  className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
-                />
-                <input
-                  type="text"
-                  value={editSelectedForm.notes4 || ""}
-                  onChange={e => setEditSelectedForm(f => ({ ...f, notes4: e.target.value }))}
-                  placeholder="Note 4"
-                  className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
-                />
-              </div>
-            </div>
-
-            {/* Course Detail Information */}
-            <div className="mb-6">
-              <h4 className="text-lg font-medium mb-4 text-yellow-300">Course Detail Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <input
-                  type="text"
-                  value={editSelectedForm.heading || ""}
-                  onChange={e => setEditSelectedForm(f => ({ ...f, heading: e.target.value }))}
-                  placeholder="Heading"
-                  className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
-                />
-                <input
-                  type="text"
-                  value={editSelectedForm.subHeading || ""}
-                  onChange={e => setEditSelectedForm(f => ({ ...f, subHeading: e.target.value }))}
-                  placeholder="Sub Heading"
-                  className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
-                />
-              </div>
-
+            {/* Heading, Subheading, About Course */}
+            <div className="rounded border border-gray-300 bg-white/5 p-5 mb-6">
+              <input
+                type="text"
+                className="w-full mb-2 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                value={editSelectedForm.heading}
+                onChange={e => setEditSelectedForm(f => ({ ...f, heading: e.target.value }))}
+                placeholder="Heading"
+                required
+              />
+              <input
+                type="text"
+                className="w-full mb-2 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                value={editSelectedForm.subHeading}
+                onChange={e => setEditSelectedForm(f => ({ ...f, subHeading: e.target.value }))}
+                placeholder="Subheading"
+                required
+              />
               <textarea
-                value={editSelectedForm.aboutCourse || ""}
+                className="w-full mb-0 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                value={editSelectedForm.aboutCourse}
                 onChange={e => setEditSelectedForm(f => ({ ...f, aboutCourse: e.target.value }))}
                 placeholder="About Course"
-                className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 w-full mb-4"
-                rows="3"
+                rows={3}
+                required
               />
+            </div>
 
-              {/* 12 Points Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* More About Course & Notes */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="rounded border border-gray-300 bg-white/5 p-4">
+                <h4 className="text-base font-medium text-gray-200 mb-2">More About Course</h4>
+                <input
+                  type="text"
+                  className="w-full mb-2 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                  value={editSelectedForm.duration}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, duration: e.target.value }))}
+                  placeholder="Duration"
+                  required
+                />
+                <input
+                  type="number"
+                  className="w-full mb-2 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                  value={editSelectedForm.noOfModules}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, noOfModules: e.target.value }))}
+                  placeholder="Number of Modules"
+                  min={1}
+                  required
+                />
+                <input
+                  type="number"
+                  className="w-full mb-2 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                  value={editSelectedForm.Activities}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, Activities: e.target.value }))}
+                  placeholder="Number of Activities"
+                  min={1}
+                  required
+                />
+              </div>
+              <div className="rounded border border-gray-300 bg-white/5 p-4">
+                <h4 className="text-base font-medium text-gray-200 mb-2">Notes</h4>
+                <input
+                  type="text"
+                  className="w-full mb-2 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                  value={editSelectedForm.notes1}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, notes1: e.target.value }))}
+                  placeholder="Note 1"
+                />
+                <input
+                  type="text"
+                  className="w-full mb-2 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                  value={editSelectedForm.notes2}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, notes2: e.target.value }))}
+                  placeholder="Note 2"
+                />
+                <input
+                  type="text"
+                  className="w-full mb-2 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                  value={editSelectedForm.notes3}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, notes3: e.target.value }))}
+                  placeholder="Note 3"
+                />
+                <input
+                  type="text"
+                  className="w-full mb-0 px-3 py-2 rounded border bg-gray-800 text-gray-100"
+                  value={editSelectedForm.notes4}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, notes4: e.target.value }))}
+                  placeholder="Note 4"
+                />
+              </div>
+            </div>
+
+            {/* Main Points */}
+            <div className="rounded border border-gray-300 bg-white/5 p-4 mb-6">
+              <h4 className="text-base font-medium text-gray-200 mb-2">Main Points</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {[...Array(12)].map((_, i) => (
                   <input
                     key={i}
                     type="text"
+                    className="w-full px-3 py-2 rounded border bg-gray-800 text-gray-100 mb-1"
                     value={editSelectedForm[`point${i + 1}`] || ""}
                     onChange={e => setEditSelectedForm(f => ({ ...f, [`point${i + 1}`]: e.target.value }))}
                     placeholder={`Point ${i + 1}`}
-                    className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
                   />
                 ))}
               </div>
             </div>
 
-            {/* Who Should Enroll Section */}
-            <div className="mb-6">
-              <h4 className="text-lg font-medium mb-4 text-purple-300">Who Should Enroll</h4>
-              {/* <div className="mb-4">
-        <input
-          type="text"
-          value={editSelectedForm.whoEnrollHeading || ""}
-          onChange={e => setEditSelectedForm(f => ({ ...f, whoEnrollHeading: e.target.value }))}
-          placeholder="Who Should Enroll Heading"
-          className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 w-full"
-        />
-      </div> */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[1, 2, 3, 4].map(num => (
+            {/* Who Should Enroll & Prerequisites */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded border border-gray-300 bg-white/5 p-4">
+                <h4 className="text-base font-medium text-gray-200 mb-2">Who Should Enroll</h4>
+                {[1,2,3,4].map(num => (
                   <input
                     key={num}
                     type="text"
-                    value={editSelectedForm[`whoEnrollPoint${num}`] || ""}
-                    onChange={e => setEditSelectedForm(f => ({ ...f, [`whoEnrollPoint${num}`]: e.target.value }))}
+                    className="w-full px-3 py-2 rounded border bg-gray-800 text-gray-100 mb-1"
+                    value={editSelectedForm.whoShouldEnroll?.[`point${num}`] || ""}
+                    onChange={e => setEditSelectedForm(f => ({
+                      ...f,
+                      whoShouldEnroll: { ...f.whoShouldEnroll, [`point${num}`]: e.target.value }
+                    }))}
                     placeholder={`Who Should Enroll Point ${num}`}
-                    className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
                   />
                 ))}
               </div>
-            </div>
-
-            {/* Prerequisites Section */}
-            <div className="mb-6">
-              <h4 className="text-lg font-medium mb-4 text-orange-300">Prerequisites</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[1, 2].map(num => (
+              <div className="rounded border border-gray-300 bg-white/5 p-4">
+                <h4 className="text-base font-medium text-gray-200 mb-2">Prerequisites</h4>
+                {[1,2,3,4].map(num => (
                   <input
                     key={num}
                     type="text"
-                    value={editSelectedForm[`prerequisitesPoint${num}`] || ""}
-                    onChange={e => setEditSelectedForm(f => ({ ...f, [`prerequisitesPoint${num}`]: e.target.value }))}
-                    placeholder={`Prerequisites ${num}`}
-                    className="bg-gray-700 border border-gray-600 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+                    className="w-full px-3 py-2 rounded border bg-gray-800 text-gray-100 mb-1"
+                    value={editSelectedForm.prerequisites?.[`point${num}`] || ""}
+                    onChange={e => setEditSelectedForm(f => ({
+                      ...f,
+                      prerequisites: { ...f.prerequisites, [`point${num}`]: e.target.value }
+                    }))}
+                    placeholder={`Prerequisite ${num}`}
                   />
                 ))}
               </div>
@@ -1168,19 +1181,8 @@ const CourseDetails = () => {
 
             {/* Action Buttons */}
             <div className="flex gap-3 mt-6">
-              <button
-                type="submit"
-                className="px-6 py-3 bg-green-600 rounded-md hover:bg-green-700 transition font-medium text-white"
-              >
-                Save Changes
-              </button>
-              <button
-                type="button"
-                className="px-6 py-3 bg-gray-600 rounded-md hover:bg-gray-700 transition font-medium text-white"
-                onClick={() => setIsEditingSelected(false)}
-              >
-                Cancel
-              </button>
+              <button type="submit" className="px-6 py-2 bg-green-600 rounded text-white">Save Changes</button>
+              <button type="button" className="px-6 py-2 bg-gray-600 rounded text-white" onClick={() => setIsEditingSelected(false)}>Cancel</button>
             </div>
           </form>
         )}
