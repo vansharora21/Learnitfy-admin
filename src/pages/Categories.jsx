@@ -10,6 +10,7 @@ import {
   UPDATE_CATEGORY,
 } from "../constants";
 import SpinnerLoader from "../components/Loader";
+import { toast } from "react-toastify";
 
 const OverviewPage = () => {
   const [showForm, setShowForm] = useState(false);
@@ -29,12 +30,7 @@ const OverviewPage = () => {
   const addCategoryAPI = async () => {
     try {
       const data = new FormData();
-
       console.log(formData,"formData is here")
-
-
-
-
 
       // let newName = formData.name.toLowerCase().replace(/\s+/g, '-');
       data.append("categoryName", formData.name.trim().toLowerCase());
@@ -43,7 +39,6 @@ const OverviewPage = () => {
       // data.append("metaTag", formData.metaTag);
       // data.append("metaDescription", formData.metaDescription);
       // data.append("url", formData.url);
-
       const response = await axios.post(`${API}${ADMIN__CATEGORY}`, data, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -51,7 +46,7 @@ const OverviewPage = () => {
       });
 
       console.log("Category added:", response.data);
-      toast.success("Category added successfully!");
+      toast.success(` ${formData.name} Category added successfully!`);
       const res = await axios.get(`${API}${ADMIN_GET_CATEGORY}`);
       setCategoryData(res?.data?.data || []);
     } catch (error) {
@@ -111,7 +106,7 @@ const OverviewPage = () => {
         categoryName: formData.name.trim().toLowerCase(),
         description: formData.description,
       };
-
+      toast.success(`Category updated successfully!`);
       const response = await axios.patch(`${API}${UPDATE_CATEGORY}`, updatedData);
       console.log("Category updated:", response.data);
 
@@ -142,6 +137,7 @@ const OverviewPage = () => {
       const updatedcategoryData = categoryData.filter(
         (course) => course.categoryId !== categoryId
       );
+      toast.success(`Category deleted 🗳 successfully!`);
       setCategoryData(updatedcategoryData);
       console.log("Remaining courses after deletion:", deleteResponse);
     } catch (error) {

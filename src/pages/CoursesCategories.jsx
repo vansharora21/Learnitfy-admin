@@ -171,8 +171,6 @@ const CourseCategories = () => {
   const handleAddCourse = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.description || !formData.categoryName) return;
-
-
     console.log(formData, "formData is here full data")
 
     const data = new FormData();
@@ -214,6 +212,7 @@ const CourseCategories = () => {
             'Content-Type': 'multipart/form-data',
           },
         });
+        toast.success(`${formData.name} Course added successfully!`);
         const newCourse = response.data.data;
         setCourseData(newCourse);
         setCourseID(newCourse.courseId);
