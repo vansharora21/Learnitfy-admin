@@ -1016,7 +1016,7 @@ const CourseDetails = () => {
                   }
                 };
 
-                await axios.patch(`${API}admin/update/course/detail`, courseDetailPayload, {
+                await axios.patch(`${API}admin/update/course`, courseDetailPayload, {
                   headers: { 'Content-Type': 'application/json' }
                 });
 
