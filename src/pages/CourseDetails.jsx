@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Edit, Trash2, Search, ChevronDown, ChevronUp } from "lucide-react";
-import { motion } from "framer-motion";
+import { Plus, Edit, Trash2, Search } from "lucide-react";
 import Header from "../components/common/Header";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -270,12 +269,6 @@ const CourseDetails = () => {
 
       const responses = await Promise.all(promises);
       console.log("All Course Details Add Responses:", responses);
-
-      // Refresh data from API after adding all
-      // const refreshResponse = await axios.get(`${API}${ADD_ACTIVITIYS}`);
-      // if (refreshResponse.data && refreshResponse.data.data) {
-      //   setCourseDetails(refreshResponse.data.data);
-      // }
 
       setTempCourseDetails([]);
       setFormData({
@@ -651,13 +644,6 @@ const CourseDetails = () => {
           )}
         </div>
 
-        {/* Error Display */}
-        {/* {error && (
-          <div className="mb-4 p-4 bg-red-600 bg-opacity-20 border border-red-600 rounded-lg">
-            <p className="text-red-400">{error}</p>
-          </div>
-        )} */}
-
         {/* Loading Display */}
         {loading && (
           <div className="mb-4 p-4 bg-blue-600 bg-opacity-20 border border-blue-600 rounded-lg">
@@ -910,7 +896,6 @@ const CourseDetails = () => {
                     aboutCourse: selectedCourse.courseDetail?.aboutCourse || "",
                     whoShouldEnroll: selectedCourse.courseDetail?.whoShouldEnroll || {},
                     prerequisites: selectedCourse.courseDetail?.Prerequisites || {},
-                    // Add points if you want to edit them too
                     ...Object.fromEntries(Array.from({length: 12}, (_, i) => [`point${i+1}`, selectedCourse.courseDetail?.[`point${i+1}`] || ""])),
                   });
                 }}
@@ -1198,7 +1183,6 @@ const CourseDetails = () => {
                   courseId: selectedCourse?.courseId || formData.courseId,
                   courseDetail: { ...courseDetailForm }
                 };
-                // Replace with your actual POST endpoint
                 await axios.post(`https://api.learnitfy.com/api/admin/add/course/detail`, payload, {
                   headers: { 'Content-Type': 'application/json' }
                 });
@@ -1242,38 +1226,6 @@ const CourseDetails = () => {
             </ul>
           </div>
         )}
-
-        {/* Place this section after course creation UI */}
-        {/* <form onSubmit={handleSubmitModules} className="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
-          <h3 className="text-lg font-semibold mb-4 text-blue-300">Add Course Modules</h3>
-          {modules.map((module, idx) => (
-            <div key={idx} className="mb-4 p-4 border rounded bg-gray-700">
-              <input
-                type="text"
-                placeholder="Module Title"
-                value={module.moduleTitle}
-                onChange={e => handleModuleChange(idx, "moduleTitle", e.target.value)}
-                className="mb-2 w-full px-3 py-2 rounded"
-                required
-              />
-              {[1,2,3,4,5,6].map(num => (
-                <input
-                  key={num}
-                  type="text"
-                  placeholder={`Point ${num}`}
-                  value={module[`point${num}`] || ""}
-                  onChange={e => handleModuleChange(idx, `point${num}`, e.target.value)}
-                  className="mb-2 w-full px-3 py-2 rounded"
-                />
-              ))}
-              {modules.length > 1 && (
-                <button type="button" onClick={() => removeModule(idx)} className="text-red-400">Remove Module</button>
-              )}
-            </div>
-          ))}
-          <button type="button" onClick={addModule} className="bg-green-600 text-white px-4 py-2 rounded mr-4">Add Module</button>
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Submit Modules</button>
-        </form> */}
       </main>
     </div>
   );
