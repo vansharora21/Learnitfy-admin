@@ -18,7 +18,8 @@ const FAQPage = () => {
   const [error, setError] = useState("");
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const [getFaq, setGetFaq] = useState([]);
-  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectCategory, setSelectCategory] = useState("")
   const [faqList, setFaqList] = useState([{ question: "", answer: "" }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -83,7 +84,7 @@ const FAQPage = () => {
     }));
   };
 
-  const selectedCourse = getFaq.find(course => course.courseId === selectedCourseId);
+  const selectedCourseId = getFaq.find(course => course.courseId === selectedCourse);
   const filteredFAQs = selectedCourse?.faq || [];
 
   const toggleFAQ = (index) => {
@@ -121,28 +122,12 @@ const FAQPage = () => {
     setFaqList(prev => [...prev, { question: "", answer: "" }]);
   };
 
-  // const handleAddFaq = async (e) => {
-  //   e.preventDefault();
-  //   setIsSubmitting(true);
-  //   try {
-  //     await axios.post("https://api.learnitfy.com/api/faq/add", {
-  //       courseId: selectedCourseId,
-  //       faq: faqList,
-  //     });
-  //     toast.success("All FAQ added successfully!");
-  //     setFaqList([{ question: "", answer: "" }]);
-  //     setSelectedCourseId("");
-  //   } catch (err) {
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
   const handleAddFaq = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       await axios.post("https://api.learnitfy.com/api/faq/add", {
-        courseId: selectedCourseId,
+        courseId: selectedCourse,
         faq: faqList,
       });
       console.log("faq add successfully ");
@@ -151,7 +136,7 @@ const FAQPage = () => {
 
       // Reset form
       setFaqList([{ question: "", answer: "" }]);
-      setSelectedCourseId("");
+      setSelectedCourse("");
       setTimeout(() => {
         window.location.reload();
         console.log("faq add successfully ------");
@@ -255,22 +240,41 @@ const FAQPage = () => {
           onSubmit={handleAddFaq}
           className="bg-gray-800 p-6 rounded-lg shadow-md mb-8 mt-8"
         >
-          <div className="mb-4 pt-1 ">
-            <label className="block text-gray-300 mb-2">Select Course</label>
-            <select
-              value={selectedCourseId}
-              onChange={e => setSelectedCourseId(e.target.value)}
-              className="w-full p-2 rounded bg-gray-700 text-white"
-              required
-            >
-              <option value="">Select a course</option>
-              {/* Replace with your actual course list */}
-              {courseData.map(course => (
-                <option key={course.courseId} value={course.courseId}>
-                  {course.courseName}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-row gap-4">
+            <div className="mb-4 pt-1 ">
+              <label className="block text-gray-300 mb-2">Select Category</label>
+              <select
+                value={selectCategory}
+                onChange={e => setSelectCategory(e.target.value)}
+                className="w-full p-2 rounded bg-gray-700 text-white"
+                required
+              >
+                <option value="">Select a category</option>
+                {categoryData.map(category => (
+                  <option key={category.courseId} value={category.courseId}>
+                    {category.categoryName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4 pt-1 ">
+              <label className="block text-gray-300 mb-2">Select course</label>
+              <select
+                value={selectedCourse}
+                onChange={e => setSelectedCourse(e.target.value)}
+                className="w-full p-2 rounded bg-gray-700 text-white"
+                required
+              >
+                <option value="">Select a course</option>
+                {courseData
+                  .filter(c => c.categoryName === selectCategory)
+                  .map((course, idx) => (
+                    <option key={idx} value={course.courseId}>
+                      {course.courseName}
+                    </option>
+                  ))}
+              </select>
+            </div>
           </div>
           {faqList.map((faq, idx) => (
             <div key={idx} className="mb-4">

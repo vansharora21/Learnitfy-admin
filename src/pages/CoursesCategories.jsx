@@ -273,7 +273,10 @@ const CourseCategories = () => {
     setFormData({
       categoryName: course.categoryName || "",
       name: course.courseName || "",
-      image: null,
+      metaTag: course.metaTag || "",
+      metaDescription: course.metaDescription || "",
+      url: course.url || "",
+      image: course.image || "",
       description: course.description || "",
       price: course.price || "",
     });
