@@ -44,13 +44,11 @@ const CourseCategories = () => {
   const API = import.meta.env.VITE_BASE_URL_API;
   console.log(broturePdf, "plokijuhyg")
 
-
   useEffect(() => {
     const responseGetCourse = async () => {
       const response = await axios.get(`${API}${ADMIN_GET_COURSES}`);
       const course_data = response.data.data.coursesList;
       setGetCourseData(course_data);
-      // console.log("getCourseDatagetCourseDatagetCourseDatagetCourseDatav", getCourseData)
     };
     responseGetCourse();
   }, [])
@@ -69,7 +67,6 @@ const CourseCategories = () => {
 
     setBrochurePdf(e.target.files[0]);
   };
-
 
   const handleAddBrochurePdf = async (e) => {
     e.preventDefault();
@@ -98,8 +95,6 @@ const CourseCategories = () => {
     }
   };
 
-
-
   const DeleteCourse = async (courseId) => {
     try {
       await axios.delete(`${API}${DELETE_COURSES}`, {
@@ -111,13 +106,11 @@ const CourseCategories = () => {
       });
       const updatedCourseData = getCourseData.filter(course => course.courseId !== courseId);
       setGetCourseData(updatedCourseData);
-      console.log("Course deleted successfully:", deleteResponse);
+      console.log("Course deleted successfully");
     } catch (error) {
       console.error("Error deleting course:", error.message);
     }
   };
-
-
 
   const AddCoursesAPI = async () => {
     const data = new FormData();
@@ -161,12 +154,11 @@ const CourseCategories = () => {
     const { name, value, files } = e.target;
     if (name === "image" && files.length > 0) {
       const file = files[0];
-      setFormData((prev) => ({ ...prev, image: file })); // Store the File object
+      setFormData((prev) => ({ ...prev, image: file }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
-
 
   const handleAddCourse = async (e) => {
     e.preventDefault();
@@ -182,15 +174,15 @@ const CourseCategories = () => {
     data.append("metaDescription", formData.metaDescription);
     data.append("url", formData.url);
 
-
     if (formData.image) {
       data.append("image", formData.image);
     }
 
     try {
-      if (editIndex !== null) {
+      // Store the current editIndex value before making API calls
+      const isEditing = editIndex !== null;
 
-
+      if (isEditing) {
         // Editing existing course
         data.append("courseId", courseID);
 
@@ -205,14 +197,16 @@ const CourseCategories = () => {
         updatedCourses[editIndex] = { ...updatedCourses[editIndex], ...updatedCourse };
         setGetCourseData(updatedCourses);
       } else {
-
         // Adding new course
         const response = await axios.post(`${API}${ADD_COURSES}`, data, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-        toast.success(`${formData.name} Course added successfully!`);
+        
+        // Remove or comment out this line if toast is not imported
+        // toast.success(`${formData.name} Course added successfully!`);
+        
         const newCourse = response.data.data;
         setCourseData(newCourse);
         setCourseID(newCourse.courseId);
@@ -225,7 +219,8 @@ const CourseCategories = () => {
       setEditIndex(null);
       setSentPdf(true);
 
-      if (editIndex === null) {
+      // Show module form only for new courses (not when editing)
+      if (!isEditing) {
         setCourses(prev => [...prev, { ...formData, modules: [] }]);
         setCurrentCourseIndex(courses.length);
         setShowModuleForm(true);
@@ -261,7 +256,6 @@ const CourseCategories = () => {
 
   const handleFinishModules = async () => {
     setCount(0);
-    // setSentPdf(true);
     setShowPdfForm(prev => !prev);
   };
 
@@ -325,7 +319,6 @@ const CourseCategories = () => {
     } catch (error) {
       console.error("Error adding course:", error.message);
     }
-
   };
 
   return (
@@ -406,8 +399,6 @@ const CourseCategories = () => {
               />
             )}
 
-
-
             <input
               type="text"
               name="metaTag"
@@ -442,7 +433,6 @@ const CourseCategories = () => {
               required
             />
             <button
-              //onClick={AddCoursesAPI}
               type="submit"
               className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
             >
@@ -571,7 +561,6 @@ const CourseCategories = () => {
                         className="w-12 h-12 object-cover rounded-md"
                       />
                     </td>
-                    {/* <td className="px-6 py-4 text-sm text-gray-100 font-semibold">{course.name}</td> */}
                     <td className="px-6 py-4 text-sm text-gray-300">{course.categoryName}</td>
                     <td className="px-6 py-4 text-sm text-gray-300">{course.courseName}</td>
                     <td className="px-6 py-4 text-sm text-gray-300">{course.description}</td>
@@ -597,7 +586,6 @@ const CourseCategories = () => {
             </table>
           </div>
         </motion.div>
-
 
       </main>
     </div >
