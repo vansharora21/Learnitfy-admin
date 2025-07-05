@@ -84,8 +84,9 @@ const FAQPage = () => {
     }));
   };
 
-  const selectedCourseId = getFaq.find(course => course.courseId === selectedCourse);
-  const filteredFAQs = selectedCourse?.faq || [];
+  const selectedCourseData = getFaq.find(course => course.courseId === selectedCourse);
+  const filteredFAQs = selectedCourseData?.faq || [];
+  
 
   const toggleFAQ = (index) => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
@@ -94,21 +95,37 @@ const FAQPage = () => {
   const handleUpdateFAQ = async (faq) => {
     try {
       const payload = {
-        courseId: selectedCourseId,
+        courseId: selectedCourse,
         _id: faq._id,
         question: faq.question,
         answer: faq.answer
       };
-
-      await axios.patch("https://api.learnItfy.com/api/faq/update", payload);
+  
+      await axios.patch(`${API}faq/update`, payload);
       toast.success("FAQ updated successfully!");
     } catch (error) {
       toast.error("Failed to update FAQ");
       console.error("Error updating FAQ:", error);
     }
   };
+  
 
+// const handleUpdateFAQ = async (faq) => {
+//     try {
+//       const payload = {
+//         courseId: selectedCourseId,
+//         _id: faq._id,
+//         question: faq.question,
+//         answer: faq.answer
+//       };
 
+//       await axios.patch("https://api.learnItfy.com/api/faq/update", payload);
+//       toast.success("FAQ updated successfully!");
+//     } catch (error) {
+//       toast.error("Failed to update FAQ");
+//       console.error("Error updating FAQ:", error);
+//     }
+//   };
 
   const handleFaqChange = (idx, field, value) => {
     setFaqList(prev =>
@@ -195,38 +212,45 @@ const FAQPage = () => {
                       className="mt-3 pt-3 border-t border-gray-600 space-y-2"
                     >
                       {isEditMode ? (
-                        <>
-                          <input
-                            type="text"
-                            className="w-full p-2 rounded bg-gray-700 text-white"
-                            value={faq.question}
-                            onChange={(e) => {
-                              const updated = [...filteredFAQs];
-                              updated[index].question = e.target.value;
-                              selectedCourse.faq = updated;
-                              setGetFaq([...getFaq]);
-                            }}
-                          />
-                          <textarea
-                            className="w-full p-2 rounded bg-gray-700 text-white"
-                            value={faq.answer}
-                            onChange={(e) => {
-                              const updated = [...filteredFAQs];
-                              updated[index].answer = e.target.value;
-                              selectedCourse.faq = updated;
-                              setGetFaq([...getFaq]);
-                            }}
-                          />
-                          <button
-                            onClick={() => handleUpdateFAQ(faq)}
-                            className="mt-2 px-4 py-2 bg-green-600 text-white rounded"
-                          >
-                            Save FAQ
-                          </button>
-                        </>
-                      ) : (
-                        <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
-                      )}
+  <>
+    <input
+      type="text"
+      className="w-full p-2 rounded bg-gray-700 text-white"
+      value={faq.question}
+      onChange={(e) => {
+        const updatedFAQs = [...(selectedCourseData?.faq || [])];
+        updatedFAQs[index].question = e.target.value;
+
+        const updatedGetFaq = getFaq.map(c =>
+          c.courseId === selectedCourse ? { ...c, faq: updatedFAQs } : c
+        );
+        setGetFaq(updatedGetFaq);
+      }}
+    />
+    <textarea
+      className="w-full p-2 rounded bg-gray-700 text-white"
+      value={faq.answer}
+      onChange={(e) => {
+        const updatedFAQs = [...(selectedCourseData?.faq || [])];
+        updatedFAQs[index].answer = e.target.value;
+
+        const updatedGetFaq = getFaq.map(c =>
+          c.courseId === selectedCourse ? { ...c, faq: updatedFAQs } : c
+        );
+        setGetFaq(updatedGetFaq);
+      }}
+    />
+    <button
+      onClick={() => handleUpdateFAQ(faq)}
+      className="mt-2 px-4 py-2 bg-green-600 text-white rounded"
+    >
+      Save FAQ
+    </button>
+  </>
+) : (
+  <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
+)}
+
                     </motion.div>
                   )}
                 </div>

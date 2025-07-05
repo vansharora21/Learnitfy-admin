@@ -1030,162 +1030,162 @@ const CourseDetails = () => {
             {/* Heading, Subheading, About Course */}
 
             {/* Heading, Subheading, About */}
-<div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 mb-6 shadow-lg">
-  <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">📚 Course Introduction</h4>
-  <div className="space-y-4">
-    <input
-      type="text"
-      className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={editSelectedForm.heading}
-      onChange={e => setEditSelectedForm(f => ({ ...f, heading: e.target.value }))}
-      placeholder="Course Heading"
-      required
-    />
-    <input
-      type="text"
-      className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={editSelectedForm.subHeading}
-      onChange={e => setEditSelectedForm(f => ({ ...f, subHeading: e.target.value }))}
-      placeholder="Subheading"
-      required
-    />
-    <textarea
-      rows={4}
-      className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={editSelectedForm.aboutCourse}
-      onChange={e => setEditSelectedForm(f => ({ ...f, aboutCourse: e.target.value }))}
-      placeholder="About Course"
-      required
-    />
-  </div>
-</div>
+            <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 mb-6 shadow-lg">
+              <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">📚 Course Introduction</h4>
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={editSelectedForm.heading}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, heading: e.target.value }))}
+                  placeholder="Course Heading"
+                  required
+                />
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={editSelectedForm.subHeading}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, subHeading: e.target.value }))}
+                  placeholder="Subheading"
+                  required
+                />
+                <textarea
+                  rows={4}
+                  className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={editSelectedForm.aboutCourse}
+                  onChange={e => setEditSelectedForm(f => ({ ...f, aboutCourse: e.target.value }))}
+                  placeholder="About Course"
+                  required
+                />
+              </div>
+            </div>
 
-{/* More About Course & Notes */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-  <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 shadow-lg">
-    <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">📘 More About Course</h4>
-    <div className="space-y-3">
-      <input
-        type="text"
-        placeholder="Duration"
-        className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
-        value={editSelectedForm.duration}
-        onChange={e => setEditSelectedForm(f => ({ ...f, duration: e.target.value }))}
-      />
-      <input
-        type="number"
-        placeholder="Number of Modules"
-        min={1}
-        className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
-        value={editSelectedForm.noOfModules}
-        onChange={e => setEditSelectedForm(f => ({ ...f, noOfModules: e.target.value }))}
-      />
-      <input
-        type="number"
-        placeholder="Number of Activities"
-        min={1}
-        className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
-        value={editSelectedForm.Activities}
-        onChange={e => setEditSelectedForm(f => ({ ...f, Activities: e.target.value }))}
-      />
-    </div>
-  </div>
+            {/* More About Course & Notes */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 shadow-lg">
+                <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">📘 More About Course</h4>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Duration"
+                    className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
+                    value={editSelectedForm.duration}
+                    onChange={e => setEditSelectedForm(f => ({ ...f, duration: e.target.value }))}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Number of Modules"
+                    min={1}
+                    className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
+                    value={editSelectedForm.noOfModules}
+                    onChange={e => setEditSelectedForm(f => ({ ...f, noOfModules: e.target.value }))}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Number of Activities"
+                    min={1}
+                    className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
+                    value={editSelectedForm.Activities}
+                    onChange={e => setEditSelectedForm(f => ({ ...f, Activities: e.target.value }))}
+                  />
+                </div>
+              </div>
 
-  <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 shadow-lg">
-    <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">📝 Notes</h4>
-    <div className="space-y-3">
-      {[1, 2, 3, 4].map(num => (
-        <input
-          key={num}
-          type="text"
-          placeholder={`Note ${num}`}
-          className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
-          value={editSelectedForm[`notes${num}`]}
-          onChange={e => setEditSelectedForm(f => ({ ...f, [`notes${num}`]: e.target.value }))}
-        />
-      ))}
-    </div>
-  </div>
-</div>
+              <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 shadow-lg">
+                <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">📝 Notes</h4>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map(num => (
+                    <input
+                      key={num}
+                      type="text"
+                      placeholder={`Note ${num}`}
+                      className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
+                      value={editSelectedForm[`notes${num}`]}
+                      onChange={e => setEditSelectedForm(f => ({ ...f, [`notes${num}`]: e.target.value }))}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
 
-{/* Main Points */}
-<div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 mb-6 shadow-lg">
-  <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">📌 Main Points</h4>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    {[...Array(12)].map((_, i) => (
-      <input
-        key={i}
-        type="text"
-        placeholder={`Point ${i + 1}`}
-        className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
-        value={editSelectedForm[`point${i + 1}`] || ""}
-        onChange={e => setEditSelectedForm(f => ({ ...f, [`point${i + 1}`]: e.target.value }))}
-      />
-    ))}
-  </div>
-</div>
+            {/* Main Points */}
+            <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 mb-6 shadow-lg">
+              <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">📌 Main Points</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[...Array(12)].map((_, i) => (
+                  <input
+                    key={i}
+                    type="text"
+                    placeholder={`Point ${i + 1}`}
+                    className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
+                    value={editSelectedForm[`point${i + 1}`] || ""}
+                    onChange={e => setEditSelectedForm(f => ({ ...f, [`point${i + 1}`]: e.target.value }))}
+                  />
+                ))}
+              </div>
+            </div>
 
-{/* Who Should Enroll & Prerequisites */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 shadow-lg">
-    <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">👥 Who Should Enroll</h4>
-    <div className="space-y-3">
-      {[1, 2, 3, 4].map(num => (
-        <input
-          key={num}
-          type="text"
-          placeholder={`Enroll Point ${num}`}
-          className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
-          value={editSelectedForm.whoShouldEnroll?.[`point${num}`] || ""}
-          onChange={e =>
-            setEditSelectedForm(f => ({
-              ...f,
-              whoShouldEnroll: { ...f.whoShouldEnroll, [`point${num}`]: e.target.value },
-            }))
-          }
-        />
-      ))}
-    </div>
-  </div>
+            {/* Who Should Enroll & Prerequisites */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 shadow-lg">
+                <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">👥 Who Should Enroll</h4>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map(num => (
+                    <input
+                      key={num}
+                      type="text"
+                      placeholder={`Enroll Point ${num}`}
+                      className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
+                      value={editSelectedForm.whoShouldEnroll?.[`point${num}`] || ""}
+                      onChange={e =>
+                        setEditSelectedForm(f => ({
+                          ...f,
+                          whoShouldEnroll: { ...f.whoShouldEnroll, [`point${num}`]: e.target.value },
+                        }))
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
 
-  <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 shadow-lg">
-    <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">🧠 Prerequisites</h4>
-    <div className="space-y-3">
-      {[1, 2, 3, 4].map(num => (
-        <input
-          key={num}
-          type="text"
-          placeholder={`Prerequisite ${num}`}
-          className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
-          value={editSelectedForm.prerequisites?.[`point${num}`] || ""}
-          onChange={e =>
-            setEditSelectedForm(f => ({
-              ...f,
-              prerequisites: { ...f.prerequisites, [`point${num}`]: e.target.value },
-            }))
-          }
-        />
-      ))}
-    </div>
-  </div>
-</div>
+              <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-6 shadow-lg">
+                <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">🧠 Prerequisites</h4>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map(num => (
+                    <input
+                      key={num}
+                      type="text"
+                      placeholder={`Prerequisite ${num}`}
+                      className="w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none"
+                      value={editSelectedForm.prerequisites?.[`point${num}`] || ""}
+                      onChange={e =>
+                        setEditSelectedForm(f => ({
+                          ...f,
+                          prerequisites: { ...f.prerequisites, [`point${num}`]: e.target.value },
+                        }))
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
 
-{/* Action Buttons */}
-<div className="flex justify-end gap-4 mt-8">
-  <button
-    type="submit"
-    className="px-6 py-2 bg-green-600 hover:bg-green-700 transition rounded-lg text-white font-semibold"
-  >
-    💾 Save Changes
-  </button>
-  <button
-    type="button"
-    onClick={() => setIsEditingSelected(false)}
-    className="px-6 py-2 bg-gray-600 hover:bg-gray-700 transition rounded-lg text-white font-semibold"
-  >
-    ❌ Cancel
-  </button>
-</div>
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4 mt-8">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 transition rounded-lg text-white font-semibold"
+              >
+                💾 Save Changes
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditingSelected(false)}
+                className="px-6 py-2 bg-gray-600 hover:bg-gray-700 transition rounded-lg text-white font-semibold"
+              >
+                ❌ Cancel
+              </button>
+            </div>
 
           </form>
         )}
