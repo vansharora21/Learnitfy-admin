@@ -423,7 +423,7 @@ const CourseDetails = () => {
       <Header title="Course Details Management" />
       <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
 
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6 flex flex-col justify-cennter items-left gap-6">
           {courseData.length > 0 && (
             <div className="ml-4">
               <select
@@ -452,8 +452,7 @@ const CourseDetails = () => {
               </select>
             </div>
           )}
-          <div className="flex gap-3">
-            {/* Add Multiple Course Details Stepper */}
+          <div className="flex gap-2">
             {addStep === 0 && (
               <button
                 onClick={() => setAddStep(1)}
