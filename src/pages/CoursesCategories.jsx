@@ -215,6 +215,7 @@ const CourseCategories = () => {
     const data = new FormData();
     data.append("categoryName", formData.categoryName);
     data.append("courseName", formData.name);
+    data.append("image", formData.image);
     data.append("description", formData.description);
     data.append("price", formData.price || "1000");
     data.append("metaTag", formData.metaTag);
