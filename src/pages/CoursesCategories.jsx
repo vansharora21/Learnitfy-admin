@@ -40,12 +40,12 @@ const CourseCategories = () => {
     point6: "",
     pdf: null
   });
-  
+
   // New state variables for enhanced module editing
   const [allModulesData, setAllModulesData] = useState([]);
   const [currentEditingModuleIndex, setCurrentEditingModuleIndex] = useState(null);
   const [existingModules, setExistingModules] = useState([]);
-  
+
   const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
   const [error, setError] = useState("");
@@ -395,10 +395,10 @@ const CourseCategories = () => {
           point6: updateModuleData.point6
         }]
       });
-      
+
       console.log("Module updated successfully");
       setCurrentEditingModuleIndex(null);
-      
+
       setUpdateModuleData({
         name: "",
         point1: "",
@@ -526,7 +526,6 @@ const CourseCategories = () => {
               accept="image/*"
               onChange={handleChange}
               className="bg-gray-700 border px-4 py-2 rounded-md text-white"
-              required
             />
             {formData.image instanceof File && (
               <img
@@ -676,7 +675,7 @@ const CourseCategories = () => {
         {showModuleUpdateForm && (
           <div className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700">
             <h3 className="text-lg font-semibold mb-2">Update Modules for this Course</h3>
-            
+
             {/* Display all existing modules */}
             <div className="mb-4">
               <h4 className="text-md font-medium mb-2">Existing Modules:</h4>
@@ -760,7 +759,7 @@ const CourseCategories = () => {
                 onChange={e => setUpdateModuleData({ ...updateModuleData, point6: e.target.value })}
                 className="bg-gray-700 border px-4 py-2 rounded-md"
               />
-              
+
               <div className="flex gap-2">
                 {currentEditingModuleIndex !== null ? (
                   <button
@@ -779,7 +778,7 @@ const CourseCategories = () => {
                     Add New Module
                   </button>
                 )}
-                
+
                 <button
                   type="button"
                   onClick={() => {
@@ -809,7 +808,7 @@ const CourseCategories = () => {
             >
               Finish & Update Course
             </button>
-            
+
             {showUpdatePdfForm && (
               <div className="mt-4">
                 <input
