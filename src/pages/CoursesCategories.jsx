@@ -20,28 +20,21 @@ const CourseCategories = () => {
   const [showModuleForm, setShowModuleForm] = useState(false);
   const [showModuleUpdateForm, setShowModuleUpdateForm] = useState(false);
   const [modules, setModules] = useState([]);
+  
+  // Updated module data structure with points array
   const [moduleData, setModuleData] = useState({
     name: "",
-    point1: "",
-    point2: "",
-    point3: "",
-    point4: "",
-    point5: "",
-    point6: "",
+    points: [""],
     pdf: null
   });
+  
   const [updateModuleData, setUpdateModuleData] = useState({
     name: "",
-    point1: "",
-    point2: "",
-    point3: "",
-    point4: "",
-    point5: "",
-    point6: "",
+    points: [""],
     pdf: null
   });
 
-  // New state variables for enhanced module editing
+  // Enhanced module editing state variables
   const [allModulesData, setAllModulesData] = useState([]);
   const [currentEditingModuleIndex, setCurrentEditingModuleIndex] = useState(null);
   const [existingModules, setExistingModules] = useState([]);
@@ -61,6 +54,49 @@ const CourseCategories = () => {
   const [updateBrochurePdf, setUpdateBrochurePdf] = useState(null);
 
   const API = import.meta.env.VITE_BASE_URL_API;
+
+  // Helper functions for dynamic points management
+  const addPoint = (isUpdate = false) => {
+    if (isUpdate) {
+      setUpdateModuleData(prev => ({
+        ...prev,
+        points: [...prev.points, ""]
+      }));
+    } else {
+      setModuleData(prev => ({
+        ...prev,
+        points: [...prev.points, ""]
+      }));
+    }
+  };
+
+  const removePoint = (index, isUpdate = false) => {
+    if (isUpdate) {
+      setUpdateModuleData(prev => ({
+        ...prev,
+        points: prev.points.filter((_, i) => i !== index)
+      }));
+    } else {
+      setModuleData(prev => ({
+        ...prev,
+        points: prev.points.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const updatePoint = (index, value, isUpdate = false) => {
+    if (isUpdate) {
+      setUpdateModuleData(prev => ({
+        ...prev,
+        points: prev.points.map((point, i) => i === index ? value : point)
+      }));
+    } else {
+      setModuleData(prev => ({
+        ...prev,
+        points: prev.points.map((point, i) => i === index ? value : point)
+      }));
+    }
+  };
 
   useEffect(() => {
     const responseGetCourse = async () => {
@@ -235,36 +271,14 @@ const CourseCategories = () => {
     }
   };
 
-  const handleModuleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "pdf" && files.length > 0) {
-      setModuleData((prev) => ({ ...prev, pdf: files[0] }));
-    } else {
-      setModuleData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleUpdateModuleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "pdf" && files.length > 0) {
-      setUpdateModuleData((prev) => ({ ...prev, pdf: files[0] }));
-    } else {
-      setUpdateModuleData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
   const handleAddModule = (e) => {
     e.preventDefault();
-    if (!moduleData.name || !moduleData.description || !moduleData.pdf) return;
+    if (!moduleData.name || moduleData.points.filter(p => p.trim()).length === 0) return;
     setModules((prev) => [...prev, moduleData]);
     setModuleData({
-      pdf: null, name: "",
-      point1: "",
-      point2: "",
-      point3: "",
-      point4: "",
-      point5: "",
-      point6: "",
+      name: "",
+      points: [""],
+      pdf: null
     });
   };
 
@@ -277,7 +291,7 @@ const CourseCategories = () => {
     setShowUpdatePdfForm(prev => !prev);
   };
 
-  // Enhanced handleEdit function to load all modules
+  // Updated handleEdit function to load modules with points arrays
   const handleEdit = (courseId) => {
     const course = getCourseData.find((c) => c.courseId === courseId);
     const index = getCourseData.findIndex((c) => c.courseId === courseId);
@@ -294,17 +308,12 @@ const CourseCategories = () => {
       price: course.price || "",
     });
 
-    // Load all existing modules
+    // Load all existing modules with points array
     if (course.courseContent && course.courseContent.length > 0) {
       setExistingModules(course.courseContent);
       setAllModulesData(course.courseContent.map(module => ({
         name: module.moduleTitle || "",
-        point1: module.point1 || "",
-        point2: module.point2 || "",
-        point3: module.point3 || "",
-        point4: module.point4 || "",
-        point5: module.point5 || "",
-        point6: module.point6 || "",
+        points: module.points || [""],
         pdf: null
       })));
     }
@@ -314,18 +323,13 @@ const CourseCategories = () => {
     setShowForm(true);
   };
 
-  // New function to handle editing specific module
+  // Updated function to handle editing specific module
   const handleEditModule = (moduleIndex) => {
     setCurrentEditingModuleIndex(moduleIndex);
     const moduleToEdit = allModulesData[moduleIndex];
     setUpdateModuleData({
       name: moduleToEdit.name,
-      point1: moduleToEdit.point1,
-      point2: moduleToEdit.point2,
-      point3: moduleToEdit.point3,
-      point4: moduleToEdit.point4,
-      point5: moduleToEdit.point5,
-      point6: moduleToEdit.point6,
+      points: moduleToEdit.points || [""],
       pdf: null
     });
   };
@@ -344,40 +348,36 @@ const CourseCategories = () => {
     course.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Updated API function for adding modules
   const hadleAddModule = async () => {
     try {
       const response = await axios.post(`${API}${ADD_CONTENT}`, {
         courseId: courseID,
         courseContent: [{
           moduleTitle: moduleData.name,
-          point1: moduleData.point1,
-          point2: moduleData.point2,
-          point3: moduleData.point3,
-          point4: moduleData.point4,
-          point5: moduleData.point5,
-          point6: moduleData.point6
+          points: moduleData.points.filter(point => point.trim() !== '')
         }]
       });
-      setModuleData({ name: "", point1: "", point2: "", point3: "", point4: "", point5: "", point6: "", });
+      
+      setModuleData({ 
+        name: "", 
+        points: [""],
+        pdf: null
+      });
       setCount(count + 1);
     } catch (error) {
-      console.error("Error adding course:", error.message);
+      console.error("Error adding module:", error.message);
     }
   };
 
-  // Enhanced handleUpdateModule function
+  // Updated handleUpdateModule function
   const handleUpdateModule = async () => {
     try {
       if (currentEditingModuleIndex !== null) {
         const updatedModules = [...allModulesData];
         updatedModules[currentEditingModuleIndex] = {
           name: updateModuleData.name,
-          point1: updateModuleData.point1,
-          point2: updateModuleData.point2,
-          point3: updateModuleData.point3,
-          point4: updateModuleData.point4,
-          point5: updateModuleData.point5,
-          point6: updateModuleData.point6,
+          points: updateModuleData.points.filter(point => point.trim() !== ''),
           pdf: updateModuleData.pdf
         };
         setAllModulesData(updatedModules);
@@ -387,12 +387,7 @@ const CourseCategories = () => {
         courseId: courseID,
         courseContent: [{
           moduleTitle: updateModuleData.name,
-          point1: updateModuleData.point1,
-          point2: updateModuleData.point2,
-          point3: updateModuleData.point3,
-          point4: updateModuleData.point4,
-          point5: updateModuleData.point5,
-          point6: updateModuleData.point6
+          points: updateModuleData.points.filter(point => point.trim() !== '')
         }]
       });
 
@@ -401,12 +396,7 @@ const CourseCategories = () => {
 
       setUpdateModuleData({
         name: "",
-        point1: "",
-        point2: "",
-        point3: "",
-        point4: "",
-        point5: "",
-        point6: "",
+        points: [""],
         pdf: null
       });
     } catch (error) {
@@ -414,41 +404,26 @@ const CourseCategories = () => {
     }
   };
 
-  // New function to add more modules during editing
+  // Updated function to add more modules during editing
   const handleAddNewModuleToExisting = async () => {
     try {
       const response = await axios.post(`${API}${ADD_CONTENT}`, {
         courseId: courseID,
         courseContent: [{
           moduleTitle: updateModuleData.name,
-          point1: updateModuleData.point1,
-          point2: updateModuleData.point2,
-          point3: updateModuleData.point3,
-          point4: updateModuleData.point4,
-          point5: updateModuleData.point5,
-          point6: updateModuleData.point6
+          points: updateModuleData.points.filter(point => point.trim() !== '')
         }]
       });
 
       setAllModulesData(prev => [...prev, {
         name: updateModuleData.name,
-        point1: updateModuleData.point1,
-        point2: updateModuleData.point2,
-        point3: updateModuleData.point3,
-        point4: updateModuleData.point4,
-        point5: updateModuleData.point5,
-        point6: updateModuleData.point6,
+        points: updateModuleData.points.filter(point => point.trim() !== ''),
         pdf: updateModuleData.pdf
       }]);
 
       setUpdateModuleData({
         name: "",
-        point1: "",
-        point2: "",
-        point3: "",
-        point4: "",
-        point5: "",
-        point6: "",
+        points: [""],
         pdf: null
       });
 
@@ -583,6 +558,7 @@ const CourseCategories = () => {
             className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
           >
             <h3 className="text-lg font-semibold mb-2">Add Modules for this Course</h3>
+            
             <input
               type="text"
               name="name"
@@ -592,59 +568,60 @@ const CourseCategories = () => {
               className="bg-gray-700 border px-4 py-2 rounded-md"
               required
             />
-            <input
-              type="text"
-              name="point1"
-              placeholder="point1"
-              value={moduleData.point1}
-              onChange={e => setModuleData({ ...moduleData, point1: e.target.value })}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-              required
-            />
-            <input
-              type="text"
-              name="point2"
-              placeholder="point2"
-              value={moduleData.point2}
-              onChange={e => setModuleData({ ...moduleData, point2: e.target.value })}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-            />
-            <input
-              type="text"
-              name="point3"
-              placeholder="point3"
-              value={moduleData.point3}
-              onChange={e => setModuleData({ ...moduleData, point3: e.target.value })}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-            />
-            <input
-              type="text"
-              name="point4"
-              placeholder="point4"
-              value={moduleData.point4}
-              onChange={e => setModuleData({ ...moduleData, point4: e.target.value })}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-            />
-            <input
-              type="text"
-              name="point5"
-              placeholder="point5"
-              value={moduleData.point5}
-              onChange={e => setModuleData({ ...moduleData, point5: e.target.value })}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-            />
-            <input
-              type="text"
-              name="point6"
-              placeholder="point6"
-              value={moduleData.point6}
-              onChange={e => setModuleData({ ...moduleData, point6: e.target.value })}
-              className="bg-gray-700 border px-4 py-2 rounded-md"
-            />
-            <button onClick={hadleAddModule} className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Add Module {count}</button>
-            <button type="button" onClick={handleFinishModules} className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2">
+
+            {/* Dynamic Points Section */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-medium text-gray-300">Module Points</label>
+                <button
+                  type="button"
+                  onClick={() => addPoint(false)}
+                  className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add Point
+                </button>
+              </div>
+              
+              {moduleData.points.map((point, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    placeholder={`Point ${index + 1}`}
+                    value={point}
+                    onChange={e => updatePoint(index, e.target.value, false)}
+                    className="bg-gray-700 border px-4 py-2 rounded-md flex-1"
+                    required={index === 0}
+                  />
+                  {/* {moduleData.points.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removePoint(index, false)}
+                      className="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )} */}
+                </div>
+              ))}
+            </div>
+
+            <button 
+              type="button"
+              onClick={hadleAddModule} 
+              className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+            >
+              Add Module {count}
+            </button>
+            
+            <button 
+              type="button" 
+              onClick={handleFinishModules} 
+              className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2"
+            >
               Finish & Save Course
             </button>
+
             {showPdfForm && (
               <div className="mt-4">
                 <input
@@ -666,7 +643,9 @@ const CourseCategories = () => {
 
             <ul className="mt-2">
               {modules.map((mod, idx) => (
-                <li key={idx} className="text-sm text-gray-300">{mod.name} - {mod.description} ({mod.pdf && mod.pdf.name})</li>
+                <li key={idx} className="text-sm text-gray-300">
+                  {mod.name} - Points: {mod.points?.join(', ')} ({mod.pdf && mod.pdf.name})
+                </li>
               ))}
             </ul>
           </form>
@@ -684,9 +663,7 @@ const CourseCategories = () => {
                   <div>
                     <p className="font-medium">{module.name}</p>
                     <p className="text-sm text-gray-300">
-                      Points: {[module.point1, module.point2, module.point3, module.point4, module.point5, module.point6]
-                        .filter(point => point && point.trim() !== '')
-                        .join(', ')}
+                      Points: {module.points?.join(', ') || 'No points'}
                     </p>
                   </div>
                   <button
@@ -710,55 +687,43 @@ const CourseCategories = () => {
                 className="bg-gray-700 border px-4 py-2 rounded-md"
                 required
               />
-              <input
-                type="text"
-                name="point1"
-                placeholder="point1"
-                value={updateModuleData.point1}
-                onChange={e => setUpdateModuleData({ ...updateModuleData, point1: e.target.value })}
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-                required
-              />
-              <input
-                type="text"
-                name="point2"
-                placeholder="point2"
-                value={updateModuleData.point2}
-                onChange={e => setUpdateModuleData({ ...updateModuleData, point2: e.target.value })}
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-              <input
-                type="text"
-                name="point3"
-                placeholder="point3"
-                value={updateModuleData.point3}
-                onChange={e => setUpdateModuleData({ ...updateModuleData, point3: e.target.value })}
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-              <input
-                type="text"
-                name="point4"
-                placeholder="point4"
-                value={updateModuleData.point4}
-                onChange={e => setUpdateModuleData({ ...updateModuleData, point4: e.target.value })}
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-              <input
-                type="text"
-                name="point5"
-                placeholder="point5"
-                value={updateModuleData.point5}
-                onChange={e => setUpdateModuleData({ ...updateModuleData, point5: e.target.value })}
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
-              <input
-                type="text"
-                name="point6"
-                placeholder="point6"
-                value={updateModuleData.point6}
-                onChange={e => setUpdateModuleData({ ...updateModuleData, point6: e.target.value })}
-                className="bg-gray-700 border px-4 py-2 rounded-md"
-              />
+
+              {/* Dynamic Points Section for Update */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-medium text-gray-300">Module Points</label>
+                  <button
+                    type="button"
+                    onClick={() => addPoint(true)}
+                    className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add Point
+                  </button>
+                </div>
+                
+                {updateModuleData.points.map((point, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      placeholder={`Point ${index + 1}`}
+                      value={point}
+                      onChange={e => updatePoint(index, e.target.value, true)}
+                      className="bg-gray-700 border px-4 py-2 rounded-md flex-1"
+                      required={index === 0}
+                    />
+                    {updateModuleData.points.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removePoint(index, true)}
+                        className="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
 
               <div className="flex gap-2">
                 {currentEditingModuleIndex !== null ? (
@@ -785,12 +750,7 @@ const CourseCategories = () => {
                     setCurrentEditingModuleIndex(null);
                     setUpdateModuleData({
                       name: "",
-                      point1: "",
-                      point2: "",
-                      point3: "",
-                      point4: "",
-                      point5: "",
-                      point6: "",
+                      points: [""],
                       pdf: null
                     });
                   }}
