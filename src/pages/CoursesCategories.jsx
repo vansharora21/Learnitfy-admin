@@ -215,7 +215,6 @@ const CourseCategories = () => {
     const data = new FormData();
     data.append("categoryName", formData.categoryName);
     data.append("courseName", formData.name);
-    data.append("image", formData.image);
     data.append("description", formData.description);
     data.append("price", formData.price || "1000");
     data.append("metaTag", formData.metaTag);
@@ -573,28 +572,37 @@ const CourseCategories = () => {
             {/* Dynamic Points Section */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-medium text-gray-300">Module Points</label> 
-              </div>
-              
-              {moduleData.points.map((point, index) => (
-                <div key={index} className="flex flex-col gap-2 items-start">
-                <input
-                  type="text"
-                  placeholder={`Point ${index + 1}`}
-                  value={point}
-                  onChange={e => updatePoint(index, e.target.value, false)}
-                  className="bg-gray-700 border px-4 py-2 rounded-md"required={index === 0}
-                />
+                <label className="text-sm font-medium text-gray-300">Module Points</label>
                 <button
                   type="button"
                   onClick={() => addPoint(false)}
-                  className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm w-fit"
+                  className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
                 >
                   <Plus className="w-3 h-3" />
                   Add Point
                 </button>
               </div>
               
+              {moduleData.points.map((point, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    placeholder={`Point ${index + 1}`}
+                    value={point}
+                    onChange={e => updatePoint(index, e.target.value, false)}
+                    className="bg-gray-700 border px-4 py-2 rounded-md flex-1"
+                    required={index === 0}
+                  />
+                  {/* {moduleData.points.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removePoint(index, false)}
+                      className="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )} */}
+                </div>
               ))}
             </div>
 
@@ -622,6 +630,7 @@ const CourseCategories = () => {
                   accept="application/pdf"
                   className="bg-gray-700 border px-4 py-2 rounded-md text-white"
                   onChange={handlebroturePDF}
+                  required
                 />
                 <button
                   onClick={handleAddBrochurePdf}
