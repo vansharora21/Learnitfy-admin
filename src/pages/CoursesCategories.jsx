@@ -151,6 +151,7 @@ const CourseCategories = () => {
       console.log('No new PDF selected, keeping existing PDF');
       setShowModuleUpdateForm(false);
       setShowUpdatePdfForm(false);
+      setUpdateBrochurePdf(null);
       return;
     }
     
