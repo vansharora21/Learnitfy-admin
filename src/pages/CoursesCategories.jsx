@@ -137,6 +137,7 @@ const CourseCategories = () => {
       setSentPdf(false);
       setShowModuleForm(false);
       setShowPdfForm(false);
+      setBrochurePdf(null);
     } catch (error) {
       console.error('Upload error:', error.response || error.message);
     }
@@ -144,7 +145,15 @@ const CourseCategories = () => {
 
   const handleUpdateBrochurePdf = async (e) => {
     e.preventDefault();
-    if (!updateBrochurePdf) return console.warn('No PDF selected');
+    
+    // Only update PDF if a new file is selected
+    if (!updateBrochurePdf) {
+      console.log('No new PDF selected, keeping existing PDF');
+      setShowModuleUpdateForm(false);
+      setShowUpdatePdfForm(false);
+      return;
+    }
+    
     if (!courseID) return console.warn('No course ID');
 
     const formData = new FormData();
@@ -161,6 +170,7 @@ const CourseCategories = () => {
       console.log('Brochure update response:', response.data);
       setShowModuleUpdateForm(false);
       setShowUpdatePdfForm(false);
+      setUpdateBrochurePdf(null);
     } catch (error) {
       console.error('Update error:', error.response || error.message);
     }
@@ -288,7 +298,9 @@ const CourseCategories = () => {
   };
 
   const handleFinishUpdateModules = async () => {
-    setShowUpdatePdfForm(prev => !prev);
+    // Skip PDF form and directly complete the update
+    setShowModuleUpdateForm(false);
+    console.log("Course updated successfully without PDF change");
   };
 
   // Updated handleEdit function to load modules with points arrays
@@ -593,7 +605,7 @@ const CourseCategories = () => {
                     className="bg-gray-700 border px-4 py-2 rounded-md flex-1"
                     required={index === 0}
                   />
-                  {/* {moduleData.points.length > 1 && (
+                  {moduleData.points.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removePoint(index, false)}
@@ -601,7 +613,7 @@ const CourseCategories = () => {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                  )} */}
+                  )}
                 </div>
               ))}
             </div>
@@ -761,31 +773,45 @@ const CourseCategories = () => {
               </div>
             </form>
 
-            <button
-              type="button"
-              onClick={handleFinishUpdateModules}
-              className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2"
-            >
-              Finish & Update Course
-            </button>
-
-            {showUpdatePdfForm && (
-              <div className="mt-4">
-                <input
-                  type="file"
-                  name="pdf"
-                  accept="application/pdf"
-                  className="bg-gray-700 border px-4 py-2 rounded-md text-white"
-                  onChange={handleUpdateBrochurePDF}
-                />
+            {/* Updated finish section with optional PDF */}
+            <div className="border-t border-gray-600 pt-4 mt-4">
+              <div className="flex gap-2 items-center mb-4">
                 <button
-                  onClick={handleUpdateBrochurePdf}
-                  className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition mt-2"
+                  type="button"
+                  onClick={handleFinishUpdateModules}
+                  className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                 >
-                  Update PDF
+                  Finish Update (Keep Current PDF)
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => setShowUpdatePdfForm(!showUpdatePdfForm)}
+                  className="px-5 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition"
+                >
+                  {showUpdatePdfForm ? 'Cancel PDF Update' : 'Update PDF'}
                 </button>
               </div>
-            )}
+
+              {showUpdatePdfForm && (
+                <div className="bg-gray-700 p-4 rounded-md">
+                  <p className="text-sm text-gray-300 mb-2">Upload a new PDF to replace the current one:</p>
+                  <input
+                    type="file"
+                    name="pdf"
+                    accept="application/pdf"
+                    className="bg-gray-600 border px-4 py-2 rounded-md text-white mb-2 w-full"
+                    onChange={handleUpdateBrochurePDF}
+                  />
+                  <button
+                    onClick={handleUpdateBrochurePdf}
+                    className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                  >
+                    Update PDF
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
