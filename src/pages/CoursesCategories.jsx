@@ -777,7 +777,6 @@ const CourseCategories = () => {
                   accept="application/pdf"
                   className="bg-gray-700 border px-4 py-2 rounded-md text-white"
                   onChange={handleUpdateBrochurePDF}
-                  required
                 />
                 <button
                   onClick={handleUpdateBrochurePdf}
