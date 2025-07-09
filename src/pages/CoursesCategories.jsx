@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Edit, Trash2, Search, Flag, Edit2 } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Flag, Edit2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
@@ -37,13 +37,13 @@ const CourseCategories = () => {
 
   // Enhanced module editing state variables
   const [allModulesData, setAllModulesData] = useState([]);
-  console.log("allModulesData------", allModulesData);
   const [currentEditingModuleIndex, setCurrentEditingModuleIndex] = useState(null);
   const [existingModules, setExistingModules] = useState([]);
+  const [selectedModuleForEdit, setSelectedModuleForEdit] = useState(null);
+  const [isEditingExistingModule, setIsEditingExistingModule] = useState(false);
 
   const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
-  // console.log("categoryData------", categoryData);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -142,15 +142,16 @@ const CourseCategories = () => {
       setShowModuleForm(false);
       setShowPdfForm(false);
       setBrochurePdf(null);
+      toast.success('PDF uploaded successfully');
     } catch (error) {
       console.error('Upload error:', error.response || error.message);
+      toast.error('Failed to upload PDF');
     }
   };
 
   const handleUpdateBrochurePdf = async (e) => {
     e.preventDefault();
 
-    // Only update PDF if a new file is selected
     if (!updateBrochurePdf) {
       console.log('No new PDF selected, keeping existing PDF');
       setShowModuleUpdateForm(false);
@@ -176,8 +177,10 @@ const CourseCategories = () => {
       setShowModuleUpdateForm(false);
       setShowUpdatePdfForm(false);
       setUpdateBrochurePdf(null);
+      toast.success('PDF updated successfully');
     } catch (error) {
       console.error('Update error:', error.response || error.message);
+      toast.error('Failed to update PDF');
     }
   };
 
@@ -192,9 +195,10 @@ const CourseCategories = () => {
       });
       const updatedCourseData = getCourseData.filter(course => course.courseId !== courseId);
       setGetCourseData(updatedCourseData);
-      console.log("Course deleted successfully");
+      toast.success("Course deleted successfully");
     } catch (error) {
       console.error("Error deleting course:", error.message);
+      toast.error("Failed to delete course");
     }
   };
 
@@ -258,6 +262,7 @@ const CourseCategories = () => {
         setGetCourseData(updatedCourses);
 
         setShowModuleUpdateForm(true);
+        toast.success("Course updated successfully");
       } else {
         const response = await axios.post(`${API}${ADD_COURSES}`, data, {
           headers: {
@@ -274,6 +279,7 @@ const CourseCategories = () => {
         setCourses(prev => [...prev, { ...formData, modules: [] }]);
         setCurrentCourseIndex(courses.length);
         setShowModuleForm(true);
+        toast.success("Course added successfully");
       }
 
       setFormData({ categoryName: "", name: "", image: "", description: "", price: "" });
@@ -283,6 +289,7 @@ const CourseCategories = () => {
     } catch (error) {
       console.error("Error adding/updating course:", error.message);
       setError("Failed to save course");
+      toast.error("Failed to save course");
     }
   };
 
@@ -303,12 +310,12 @@ const CourseCategories = () => {
   };
 
   const handleFinishUpdateModules = async () => {
-    // Skip PDF form and directly complete the update
     setShowModuleUpdateForm(false);
     console.log("Course updated successfully without PDF change");
+    toast.success("Course updated successfully");
   };
 
-  // Updated handleEdit function to load modules with points arrays
+  // Enhanced handleEdit function to load modules with points arrays
   const handleEdit = (courseId) => {
     const course = getCourseData.find((c) => c.courseId === courseId);
     const index = getCourseData.findIndex((c) => c.courseId === courseId);
@@ -342,53 +349,46 @@ const CourseCategories = () => {
     setShowForm(true);
   };
 
-  // Updated function to handle editing specific module
-
-  const handleEditModule = async (moduleId, courseID) => {
-
-
-    console.log("courseid is here ", courseID, moduleId)
-    const modelEditPayload = {
-      "courseId": courseID,
-      "courseContent": [
-        {
-          "_id": moduleId,
-          "moduleTitle": "Updated Website Structure",
-          "points": [
-            "Updated: Pages, Sections",
-            "Updated: Layouts & Positioning",
-            "Updated: Box model and Flexbox"
-          ]
-        }
-      ]
-    }
-
-    try {
-      const response = await axios.patch(`${API}admin/update/course`, modelEditPayload, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+  // Enhanced handleEditModule function that populates the form
+  const handleEditModule = (moduleId, courseID) => {
+    const moduleToEdit = existingModules.find(module => module._id === moduleId);
+    
+    if (moduleToEdit) {
+      setUpdateModuleData({
+        name: moduleToEdit.moduleTitle || "",
+        points: moduleToEdit.points && moduleToEdit.points.length > 0 ? [...moduleToEdit.points] : [""],
+        pdf: null
       });
-      toast.success('Modules updated successfully');
-    } catch (error) {
-      toast.error('Failed to update modules');
-      console.error('Error updating modules:', error);
+      
+      setSelectedModuleForEdit(moduleId);
+      setIsEditingExistingModule(true);
+      
+      // Scroll to the form
+      setTimeout(() => {
+        const formElement = document.getElementById('module-update-form');
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
     }
   };
-
 
   const handleDeleteModule = async (moduleId, courseID) => {
     const data = {
       "_id": moduleId,
       "courseId": courseID
     }
-    console.log("data------", data);
     try {
-      const response = axios.delete(`${API}admin/delete/course/module`, { data });
+      await axios.delete(`${API}admin/delete/course/module`, { data });
+      
+      // Update local state
+      setExistingModules(prev => prev.filter(module => module._id !== moduleId));
+      setAllModulesData(prev => prev.filter(module => module._id !== moduleId));
+      
       toast.success("Module deleted successfully");
-      console.log("response------", response);
     } catch (error) {
-      console.log("error------", error);
+      console.error("Error deleting module:", error);
+      toast.error("Failed to delete module");
     }
   };
 
@@ -423,72 +423,112 @@ const CourseCategories = () => {
         pdf: null
       });
       setCount(count + 1);
+      toast.success("Module added successfully");
     } catch (error) {
       console.error("Error adding module:", error.message);
+      toast.error("Failed to add module");
     }
   };
 
-  // Updated handleUpdateModule function
+  // Enhanced handleUpdateModule function
   const handleUpdateModule = async () => {
     try {
-      if (currentEditingModuleIndex !== null) {
-        const updatedModules = [...allModulesData];
-        updatedModules[currentEditingModuleIndex] = {
-          name: updateModuleData.name,
-          points: updateModuleData.points.filter(point => point.trim() !== ''),
-          pdf: updateModuleData.pdf
+      if (isEditingExistingModule && selectedModuleForEdit) {
+        // Update existing module
+        const payload = {
+          courseId: courseID,
+          courseContent: [{
+            _id: selectedModuleForEdit,
+            moduleTitle: updateModuleData.name,
+            points: updateModuleData.points.filter(point => point.trim() !== '')
+          }]
         };
-        setAllModulesData(updatedModules);
-      }
 
-      const response = await axios.post(`${API}${ADD_CONTENT}`, {
-        courseId: courseID,
-        courseContent: [{
+        const response = await axios.patch(`${API}admin/update/course`, payload, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        // Update local state
+        setExistingModules(prev => 
+          prev.map(module => 
+            module._id === selectedModuleForEdit 
+              ? { 
+                  ...module, 
+                  moduleTitle: updateModuleData.name, 
+                  points: updateModuleData.points.filter(point => point.trim() !== '') 
+                }
+              : module
+          )
+        );
+
+        setAllModulesData(prev => 
+          prev.map(module => 
+            module._id === selectedModuleForEdit 
+              ? { 
+                  ...module, 
+                  name: updateModuleData.name, 
+                  points: updateModuleData.points.filter(point => point.trim() !== '') 
+                }
+              : module
+          )
+        );
+
+        toast.success('Module updated successfully');
+        
+        // Reset editing state
+        setSelectedModuleForEdit(null);
+        setIsEditingExistingModule(false);
+      } else {
+        // Add new module
+        const response = await axios.post(`${API}${ADD_CONTENT}`, {
+          courseId: courseID,
+          courseContent: [{
+            moduleTitle: updateModuleData.name,
+            points: updateModuleData.points.filter(point => point.trim() !== '')
+          }]
+        });
+
+        // Add to existing modules
+        const newModule = {
+          _id: response.data.data?._id || Date.now().toString(),
           moduleTitle: updateModuleData.name,
           points: updateModuleData.points.filter(point => point.trim() !== '')
-        }]
-      });
+        };
 
-      console.log("Module updated successfully");
-      setCurrentEditingModuleIndex(null);
+        setExistingModules(prev => [...prev, newModule]);
+        setAllModulesData(prev => [...prev, {
+          _id: newModule._id,
+          name: updateModuleData.name,
+          points: updateModuleData.points.filter(point => point.trim() !== ''),
+          pdf: null
+        }]);
 
+        toast.success('New module added successfully');
+      }
+
+      // Reset form
       setUpdateModuleData({
         name: "",
         points: [""],
         pdf: null
       });
+
     } catch (error) {
-      console.error("Error updating module:", error.message);
+      console.error("Error updating/adding module:", error.message);
+      toast.error("Failed to update module");
     }
   };
 
-  // Updated function to add more modules during editing
-  const handleAddNewModuleToExisting = async () => {
-    try {
-      const response = await axios.post(`${API}${ADD_CONTENT}`, {
-        courseId: courseID,
-        courseContent: [{
-          moduleTitle: updateModuleData.name,
-          points: updateModuleData.points.filter(point => point.trim() !== '')
-        }]
-      });
-
-      setAllModulesData(prev => [...prev, {
-        name: updateModuleData.name,
-        points: updateModuleData.points.filter(point => point.trim() !== ''),
-        pdf: updateModuleData.pdf
-      }]);
-
-      setUpdateModuleData({
-        name: "",
-        points: [""],
-        pdf: null
-      });
-
-      console.log("New module added successfully");
-    } catch (error) {
-      console.error("Error adding new module:", error.message);
-    }
+  const handleClearForm = () => {
+    setSelectedModuleForEdit(null);
+    setIsEditingExistingModule(false);
+    setUpdateModuleData({
+      name: "",
+      points: [""],
+      pdf: null
+    });
   };
 
   return (
@@ -710,19 +750,22 @@ const CourseCategories = () => {
         )}
 
         {showModuleUpdateForm && (
-          <div className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700">
+          <div 
+            id="module-update-form"
+            className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
+          >
             <h3 className="text-lg font-semibold mb-2">Update Modules for this Course</h3>
 
             {/* Display all existing modules */}
             <div className="mb-4">
               <h4 className="text-md font-medium mb-2">Existing Modules:</h4>
-              {allModulesData.map((module, index) => (
+              {existingModules.map((module, index) => (
                 <div
                   key={index}
                   className="bg-gray-700 p-3 rounded-md mb-2 flex justify-between items-center"
                 >
                   <div>
-                    <p className="font-medium">{module.name}</p>
+                    <p className="font-medium">{module.moduleTitle}</p>
                     <p className="text-sm text-gray-300">
                       Points: {module.points?.join(', ') || 'No points'}
                     </p>
@@ -730,13 +773,13 @@ const CourseCategories = () => {
 
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleDeleteModule(module._id, module.courseId)}
+                      onClick={() => handleDeleteModule(module._id, courseID)}
                       className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm"
                     >
                       <Trash2 size={18} />
                     </button>
                     <button
-                      onClick={() => handleEditModule(module._id, module.courseId)}
+                      onClick={() => handleEditModule(module._id, courseID)}
                       className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
                     >
                       <Edit2 size={18} />
@@ -748,6 +791,17 @@ const CourseCategories = () => {
               
             {/* Module editing form */}
             <form className="grid gap-4">
+              <div className="flex justify-between items-center">
+                <h4 className="text-md font-medium">
+                  {isEditingExistingModule ? 'Edit Module' : 'Add New Module'}
+                </h4>
+                {isEditingExistingModule && (
+                  <span className="text-sm text-blue-400 bg-blue-900 px-2 py-1 rounded">
+                    Editing Mode
+                  </span>
+                )}
+              </div>
+
               <input
                 type="text"
                 name="name"
@@ -796,34 +850,17 @@ const CourseCategories = () => {
               </div>
 
               <div className="flex gap-2">
-                {currentEditingModuleIndex !== null ? (
-                  <button
-                    type="button"
-                    onClick={handleUpdateModule}
-                    className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                  >
-                    Update Module
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleAddNewModuleToExisting}
-                    className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                  >
-                    Add New Module
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={handleUpdateModule}
+                  className="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                >
+                  {isEditingExistingModule ? 'Update Module' : 'Add New Module'}
+                </button>
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setCurrentEditingModuleIndex(null);
-                    setUpdateModuleData({
-                      name: "",
-                      points: [""],
-                      pdf: null
-                    });
-                  }}
+                  onClick={handleClearForm}
                   className="px-5 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
                 >
                   Clear Form
