@@ -343,9 +343,38 @@ const CourseCategories = () => {
   };
 
   // Updated function to handle editing specific module
-  // const handleEditModule = () =>{
-  //   axios.patch(http://localhost:4000/api/admin/update/course)
-  // };
+
+  const handleEditModule = async (moduleId, courseID) => {
+
+
+    console.log("courseid is here ", courseID, moduleId)
+    const modelEditPayload = {
+      "courseId": courseID,
+      "courseContent": [
+        {
+          "_id": moduleId,
+          "moduleTitle": "Updated Website Structure",
+          "points": [
+            "Updated: Pages, Sections",
+            "Updated: Layouts & Positioning",
+            "Updated: Box model and Flexbox"
+          ]
+        }
+      ]
+    }
+
+    try {
+      const response = await axios.patch(`${API}admin/update/course`, modelEditPayload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      toast.success('Modules updated successfully');
+    } catch (error) {
+      toast.error('Failed to update modules');
+      console.error('Error updating modules:', error);
+    }
+  };
 
 
   const handleDeleteModule = async (moduleId, courseID) => {
@@ -707,7 +736,7 @@ const CourseCategories = () => {
                       <Trash2 size={18} />
                     </button>
                     <button
-                      onClick={() => handleEditModule(index)}
+                      onClick={() => handleEditModule(module._id, module.courseId)}
                       className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
                     >
                       <Edit2 size={18} />
@@ -716,8 +745,7 @@ const CourseCategories = () => {
                 </div>
               ))}
             </div>
-
-
+              
             {/* Module editing form */}
             <form className="grid gap-4">
               <input
