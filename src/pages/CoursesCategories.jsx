@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Edit, Trash2, Search, Flag } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Flag, Edit2 } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
@@ -21,14 +21,14 @@ const CourseCategories = () => {
   const [showModuleForm, setShowModuleForm] = useState(false);
   const [showModuleUpdateForm, setShowModuleUpdateForm] = useState(false);
   const [modules, setModules] = useState([]);
-  
+
   // Updated module data structure with points array
   const [moduleData, setModuleData] = useState({
     name: "",
     points: [""],
     pdf: null
   });
-  
+
   const [updateModuleData, setUpdateModuleData] = useState({
     name: "",
     points: [""],
@@ -149,7 +149,7 @@ const CourseCategories = () => {
 
   const handleUpdateBrochurePdf = async (e) => {
     e.preventDefault();
-    
+
     // Only update PDF if a new file is selected
     if (!updateBrochurePdf) {
       console.log('No new PDF selected, keeping existing PDF');
@@ -158,7 +158,7 @@ const CourseCategories = () => {
       setUpdateBrochurePdf(null);
       return;
     }
-    
+
     if (!courseID) return console.warn('No course ID');
 
     const formData = new FormData();
@@ -330,7 +330,7 @@ const CourseCategories = () => {
       setExistingModules(course.courseContent);
       setAllModulesData(course.courseContent.map(module => ({
         courseId: course.courseId,
-        _id: module._id,  
+        _id: module._id,
         name: module.moduleTitle || "",
         points: module.points || [""],
         pdf: null
@@ -348,14 +348,14 @@ const CourseCategories = () => {
   // };
 
 
-  const handleDeleteModule = async (moduleId, courseID) =>{
-    const data={
-      "_id":moduleId,
-      "courseId":courseID
-  }
-  console.log("data------", data);
+  const handleDeleteModule = async (moduleId, courseID) => {
+    const data = {
+      "_id": moduleId,
+      "courseId": courseID
+    }
+    console.log("data------", data);
     try {
-      const response = axios.delete(`${API}admin/delete/course/module`, {data});
+      const response = axios.delete(`${API}admin/delete/course/module`, { data });
       toast.success("Module deleted successfully");
       console.log("response------", response);
     } catch (error) {
@@ -387,9 +387,9 @@ const CourseCategories = () => {
           points: moduleData.points.filter(point => point.trim() !== '')
         }]
       });
-      
-      setModuleData({ 
-        name: "", 
+
+      setModuleData({
+        name: "",
         points: [""],
         pdf: null
       });
@@ -587,7 +587,7 @@ const CourseCategories = () => {
             className="grid gap-4 mb-8 bg-gray-800 bg-opacity-60 backdrop-blur-md text-white rounded-xl p-6 border border-gray-700"
           >
             <h3 className="text-lg font-semibold mb-2">Add Modules for this Course</h3>
-            
+
             <input
               type="text"
               name="name"
@@ -611,7 +611,7 @@ const CourseCategories = () => {
                   Add Point
                 </button>
               </div>
-              
+
               {moduleData.points.map((point, index) => (
                 <div key={index} className="flex gap-2 items-center">
                   <input
@@ -635,17 +635,17 @@ const CourseCategories = () => {
               ))}
             </div>
 
-            <button 
+            <button
               type="button"
-              onClick={hadleAddModule} 
+              onClick={hadleAddModule}
               className="self-start px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
             >
               Add Module {count}
             </button>
-            
-            <button 
-              type="button" 
-              onClick={handleFinishModules} 
+
+            <button
+              type="button"
+              onClick={handleFinishModules}
               className="self-start px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition mt-2"
             >
               Finish & Save Course
@@ -688,28 +688,35 @@ const CourseCategories = () => {
             <div className="mb-4">
               <h4 className="text-md font-medium mb-2">Existing Modules:</h4>
               {allModulesData.map((module, index) => (
-                <div key={index} className="bg-gray-700 p-3 rounded-md mb-2 flex justify-between items-center">
+                <div
+                  key={index}
+                  className="bg-gray-700 p-3 rounded-md mb-2 flex justify-between items-center"
+                >
                   <div>
                     <p className="font-medium">{module.name}</p>
                     <p className="text-sm text-gray-300">
                       Points: {module.points?.join(', ') || 'No points'}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleDeleteModule(module._id, module.courseId)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
-                  >
-                    delete
-                  </button>
-                  <button
-                    onClick={() => handleEditModule(index)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
-                  >
-                    Edit
-                  </button>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleDeleteModule(module._id, module.courseId)}
+                      className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleEditModule(index)}
+                      className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
+
 
             {/* Module editing form */}
             <form className="grid gap-4">
@@ -736,7 +743,7 @@ const CourseCategories = () => {
                     Add Point
                   </button>
                 </div>
-                
+
                 {updateModuleData.points.map((point, index) => (
                   <div key={index} className="flex gap-2 items-center">
                     <input
@@ -806,7 +813,7 @@ const CourseCategories = () => {
                 >
                   Finish Update (Keep Current PDF)
                 </button>
-                
+
                 <button
                   type="button"
                   onClick={() => setShowUpdatePdfForm(!showUpdatePdfForm)}
