@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import axios from "axios";
 import { ADD_CONTENT, ADD_COURSES, ADMIN_GET_CATEGORY, ADMIN_GET_COURSES, DELETE_COURSES, UPDATE_COURSES, UPLOAD_PDF } from "../constants";
+import { toast } from "react-toastify";
 
 const CourseCategories = () => {
   const [showForm, setShowForm] = useState(false);
@@ -36,11 +37,14 @@ const CourseCategories = () => {
 
   // Enhanced module editing state variables
   const [allModulesData, setAllModulesData] = useState([]);
+  console.log("allModulesData------", allModulesData);
   const [currentEditingModuleIndex, setCurrentEditingModuleIndex] = useState(null);
   const [existingModules, setExistingModules] = useState([]);
 
   const [currentCourseIndex, setCurrentCourseIndex] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
+  // console.log("categoryData------", categoryData);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [courseData, setCourseData] = useState([]);
@@ -325,6 +329,8 @@ const CourseCategories = () => {
     if (course.courseContent && course.courseContent.length > 0) {
       setExistingModules(course.courseContent);
       setAllModulesData(course.courseContent.map(module => ({
+        courseId: course.courseId,
+        _id: module._id,  
         name: module.moduleTitle || "",
         points: module.points || [""],
         pdf: null
@@ -337,14 +343,24 @@ const CourseCategories = () => {
   };
 
   // Updated function to handle editing specific module
-  const handleEditModule = (moduleIndex) => {
-    setCurrentEditingModuleIndex(moduleIndex);
-    const moduleToEdit = allModulesData[moduleIndex];
-    setUpdateModuleData({
-      name: moduleToEdit.name,
-      points: moduleToEdit.points || [""],
-      pdf: null
-    });
+  // const handleEditModule = () =>{
+  //   axios.patch(http://localhost:4000/api/admin/update/course)
+  // };
+
+
+  const handleDeleteModule = async (moduleId, courseID) =>{
+    const data={
+      "_id":moduleId,
+      "courseId":courseID
+  }
+  console.log("data------", data);
+    try {
+      const response = axios.delete(`${API}admin/delete/course/module`, {data});
+      toast.success("Module deleted successfully");
+      console.log("response------", response);
+    } catch (error) {
+      console.log("error------", error);
+    }
   };
 
   const handleDelete = (index) => {
@@ -679,6 +695,12 @@ const CourseCategories = () => {
                       Points: {module.points?.join(', ') || 'No points'}
                     </p>
                   </div>
+                  <button
+                    onClick={() => handleDeleteModule(module._id, module.courseId)}
+                    className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+                  >
+                    delete
+                  </button>
                   <button
                     onClick={() => handleEditModule(index)}
                     className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
